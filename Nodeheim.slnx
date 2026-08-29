@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/Nodeheim.Domain/Nodeheim.Domain.csproj" />
+    <Project Path="src/Nodeheim.Editor/Nodeheim.Editor.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Nodeheim.Domain.Tests/Nodeheim.Domain.Tests.csproj" />

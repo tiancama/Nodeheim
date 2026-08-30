@@ -4,6 +4,8 @@ public class Graph
 {
     public void Connect(Node a, Node b)
     {
+        if (a.Equals(b)) return;
+        
         a.AddNeighbor(b);
         b.AddNeighbor(a);
     }

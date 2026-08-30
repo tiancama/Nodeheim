@@ -4,6 +4,14 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="Nodeheim.Editor.MainWindow"
+        xmlns:vm="clr-namespace:Nodeheim.Editor"
+        x:DataType="vm:NodeViewModel"
         Title="Nodeheim.Editor">
-    Welcome to Avalonia!
+        <Canvas Background="#FF9DC782">
+                <TextBlock Text="{Binding Id}" Margin="10" />
+                <Ellipse Width="30" Height="30"
+                         Fill="LightGray" Stroke="CadetBlue" StrokeThickness="2"
+                         Canvas.Left="{Binding X}"
+                         Canvas.Top="{Binding Y}"/>
+        </Canvas>
 </Window>

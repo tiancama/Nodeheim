@@ -7,11 +7,17 @@
         xmlns:vm="clr-namespace:Nodeheim.Editor"
         x:DataType="vm:NodeViewModel"
         Title="Nodeheim.Editor">
-        <Canvas Background="#FF9DC782">
+        <Canvas x:Name="MainCanvas" Background="#FF9DC782" Focusable="True">
                 <TextBlock Text="{Binding Id}" Margin="10" />
                 <Ellipse Width="30" Height="30"
                          Fill="LightGray" Stroke="CadetBlue" StrokeThickness="2"
                          Canvas.Left="{Binding X}"
                          Canvas.Top="{Binding Y}"/>
+                <TextBox Text="{Binding X, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                         Width="60" Canvas.Left="10" Canvas.Top="40"
+                         KeyDown="OnCoordKeyDown"/>
+                <TextBox Text="{Binding Y, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                         Width="60" Canvas.Left="10" Canvas.Top="70"
+                         KeyDown="OnCoordKeyDown"/>
         </Canvas>
 </Window>

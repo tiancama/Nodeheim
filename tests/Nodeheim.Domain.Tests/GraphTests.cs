@@ -9,6 +9,8 @@ public class GraphTests
         var a = new Node();
         var b = new Node();
         
+        graph.AddNode(a);
+        graph.AddNode(b);
         graph.Connect(a, b);
         
         Assert.Contains(b, a.Neighbors);
@@ -33,10 +35,24 @@ public class GraphTests
         var a = new Node();
         var b = new Node();
         
+        graph.AddNode(a);
+        graph.AddNode(b);
         graph.Connect(a, b);
         graph.Connect(a, b);
         
         Assert.Single(a.Neighbors);
         Assert.Single(b.Neighbors);
+    }
+
+    [Fact]
+    public void ConnectOnlyWithNodesInGraph()
+    {
+        var graph = new Graph();
+        var a = new Node();
+        var b = new Node();
+
+        graph.AddNode(a);
+        
+        Assert.Throws<ArgumentException>(() => graph.Connect(a, b));
     }
 }

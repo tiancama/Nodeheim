@@ -18,4 +18,13 @@ public class Graph
         a.AddNeighbor(b);
         b.AddNeighbor(a);
     }
+    
+    public void Disconnect(Node a, Node b)
+    {
+        if (!_graph.Contains(a) || !_graph.Contains(b))
+            throw new ArgumentException("Only registered nodes can be disconnected");
+        
+        a.RemoveNeighbor(b);
+        b.RemoveNeighbor(a);
+    }
 }

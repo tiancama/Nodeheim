@@ -45,7 +45,7 @@ public class GraphTests
     }
 
     [Fact]
-    public void ConnectOnlyWithNodesInGraph()
+    public void ConnectNodeNotInGraphThrowsException()
     {
         var graph = new Graph();
         var a = new Node();
@@ -54,5 +54,48 @@ public class GraphTests
         graph.AddNode(a);
         
         Assert.Throws<ArgumentException>(() => graph.Connect(a, b));
+    }
+
+    [Fact]
+    public void DisconnectRemovesNeighbors()
+    {
+        var graph = new Graph();
+        var a = new Node();
+        var b = new Node();
+        
+        graph.AddNode(a);
+        graph.AddNode(b);
+        graph.Connect(a, b);
+        graph.Disconnect(a, b);
+        
+        Assert.DoesNotContain(b, a.Neighbors);
+        Assert.DoesNotContain(a, b.Neighbors);
+    }
+    
+    [Fact]
+    public void DisconnectWhenNotConnectedDoesNothing()
+    {
+        var graph = new Graph();
+        var a = new Node();
+        var b = new Node();
+        
+        graph.AddNode(a);
+        graph.AddNode(b);
+        //graph.Connect(a, b);
+        graph.Disconnect(a, b);
+        
+        Assert.Empty(a.Neighbors);
+        Assert.Empty(b.Neighbors);
+    }
+    
+    [Fact]
+    public void DisconnectReceivingNodeNotInGraphThrowsException()
+    {
+        var graph = new Graph();
+        var a = new Node();
+        var b = new Node();
+        graph.AddNode(a);
+        //graph.AddNode(b);
+        Assert.Throws<ArgumentException>(() => graph.Disconnect(a, b));
     }
 }

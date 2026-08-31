@@ -98,4 +98,26 @@ public class GraphTests
         //graph.AddNode(b);
         Assert.Throws<ArgumentException>(() => graph.Disconnect(a, b));
     }
+    
+    [Fact]
+    public void RemoveNodeClearsAllNeighbors()
+    {
+        var graph = new Graph();
+        var a = new Node();
+        var b = new Node();
+        var c = new Node();
+        
+        graph.AddNode(a);
+        graph.AddNode(b);
+        graph.AddNode(c);
+        graph.Connect(a, b);
+        graph.Connect(a, c);
+        graph.Connect(b, c);
+        
+        graph.RemoveNode(a);
+        
+        Assert.Empty(a.Neighbors);
+        Assert.DoesNotContain(a, b.Neighbors);
+        Assert.DoesNotContain(a, c.Neighbors);
+    }
 }

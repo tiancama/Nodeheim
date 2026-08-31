@@ -8,6 +8,14 @@ public class Graph
     {
         _graph.Add(node);
     }
+
+    public void RemoveNode(Node node)
+    {
+        foreach (var n in node.Neighbors.ToList())
+            Disconnect(node, n);
+        
+        _graph.Remove(node);
+    }
     
     public void Connect(Node a, Node b)
     {

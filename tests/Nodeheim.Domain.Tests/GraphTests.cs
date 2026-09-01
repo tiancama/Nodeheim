@@ -3,7 +3,7 @@
 public class GraphTests
 {
     [Fact]
-    public void ConnectMakesNodesNeighbors()
+    public void Connect_WithRegisteredNodes_MakesNodesNeighbors()
     {
         var graph = new Graph();
         var a = new Node();
@@ -18,7 +18,7 @@ public class GraphTests
     }
     
     [Fact]
-    public void ConnectNodeWithItselfMakesNoNeighbor()
+    public void Connect_WithNodeItself_MakesNoNeighbor()
     {
         var graph = new Graph();
         var a = new Node();
@@ -29,7 +29,7 @@ public class GraphTests
     }
 
     [Fact]
-    public void ConnectAgainWithSameNodeDoesNotDuplicate()
+    public void Connect_WithSameNodesAgain_DoesNotDuplicateNeighbors()
     {
         var graph = new Graph();
         var a = new Node();
@@ -45,7 +45,7 @@ public class GraphTests
     }
 
     [Fact]
-    public void ConnectNodeNotInGraphThrowsException()
+    public void Connect_WithUnregisteredNode_ThrowsArgumentException()
     {
         var graph = new Graph();
         var a = new Node();
@@ -57,7 +57,7 @@ public class GraphTests
     }
 
     [Fact]
-    public void DisconnectRemovesNeighbors()
+    public void Disconnect_WithConnectedNodes_RemovesNeighborsFromBothNodes()
     {
         var graph = new Graph();
         var a = new Node();
@@ -73,7 +73,7 @@ public class GraphTests
     }
     
     [Fact]
-    public void DisconnectWhenNotConnectedDoesNothing()
+    public void Disconnect_WithNodesNotConnected_DoesNothing()
     {
         var graph = new Graph();
         var a = new Node();
@@ -89,7 +89,7 @@ public class GraphTests
     }
     
     [Fact]
-    public void DisconnectReceivingNodeNotInGraphThrowsException()
+    public void Disconnect_WithUnregisteredNode_ThrowsArgumentException()
     {
         var graph = new Graph();
         var a = new Node();
@@ -100,7 +100,7 @@ public class GraphTests
     }
     
     [Fact]
-    public void RemoveNodeClearsAllNeighbors()
+    public void RemoveNode_WithConnectedNodes_ClearsAllReferencesToAndFromNeighbors()
     {
         var graph = new Graph();
         var a = new Node();
@@ -122,7 +122,7 @@ public class GraphTests
     }
     
     [Fact]
-    public void Nodes_AfterAddNode_ContainsNode()
+    public void Nodes_WithRegisteredNode_ContainsNode()
     {
         var graph = new Graph();
         var node = new Node();

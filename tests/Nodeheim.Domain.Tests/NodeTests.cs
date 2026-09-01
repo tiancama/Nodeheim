@@ -5,7 +5,7 @@ namespace Nodeheim.Domain.Tests;
 public class NodeTests
 {
     [Fact]
-    public void TwoNodesHaveDifferentIds()
+    public void NodeId_WithNewNodes_IsDifferent()
     {
         Node a = new Node();
         Node b = new Node();
@@ -13,7 +13,7 @@ public class NodeTests
     }
     
     [Fact]
-    public void NodeIdIsNotEmpty()
+    public void NodeId_WithNewNode_IsNotEmpty()
     {
         Node a = new Node();
         Assert.NotEqual(a.Id, Guid.Empty);

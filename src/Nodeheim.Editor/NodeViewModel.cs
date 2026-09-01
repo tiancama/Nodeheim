@@ -6,7 +6,15 @@ namespace Nodeheim.Editor;
 
 public class NodeViewModel : INotifyPropertyChanged
 {
+    private readonly Node _node;
+
+    public NodeViewModel(Node node)
+    {
+        _node = node;
+    }
+
     private double _x;
+
     public double X
     {
         get => _x;
@@ -17,6 +25,7 @@ public class NodeViewModel : INotifyPropertyChanged
             OnPropertyChanged();
         }
     }
+
     private double _y;
 
     public double Y
@@ -29,11 +38,11 @@ public class NodeViewModel : INotifyPropertyChanged
             OnPropertyChanged();
         }
     }
-    
-    private readonly Node _node;
-    public NodeViewModel(Node node) => _node = node;
+
     public Guid Id => _node.Id;
-    
+
     public event PropertyChangedEventHandler? PropertyChanged;
-    private void OnPropertyChanged([CallerMemberName] string? name = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+
+    private void OnPropertyChanged([CallerMemberName] string? name = null) =>
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 }

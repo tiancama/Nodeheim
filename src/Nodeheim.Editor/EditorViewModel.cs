@@ -7,8 +7,6 @@ public class EditorViewModel
 {
     private readonly Graph _graph = new();
 
-    public ObservableCollection<NodeViewModel> Nodes { get; } = new();
-
     public EditorViewModel()
     {
         foreach (var node in _graph.Nodes)
@@ -17,4 +15,6 @@ public class EditorViewModel
             Nodes.Add(nodeViewModel);
         }
     }
+
+    public ObservableCollection<NodeViewModel> Nodes { get; } = new();
 }

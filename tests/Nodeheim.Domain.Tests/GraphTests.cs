@@ -120,4 +120,20 @@ public class GraphTests
         Assert.DoesNotContain(a, b.Neighbors);
         Assert.DoesNotContain(a, c.Neighbors);
     }
+    
+    [Fact]
+    public void Nodes_AfterAddNode_ContainsNode()
+    {
+        var graph = new Graph();
+        var node = new Node();
+        graph.AddNode(node);
+        Assert.Contains(node, graph.Nodes);
+    }
+
+    [Fact]
+    public void Nodes_OnNewGraph_IsEmpty()
+    {
+        var graph = new Graph();
+        Assert.Empty(graph.Nodes);
+    }
 }

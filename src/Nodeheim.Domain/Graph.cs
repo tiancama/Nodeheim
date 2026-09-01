@@ -2,7 +2,9 @@
 
 public class Graph
 {
-    private readonly HashSet<Node> _graph = new HashSet<Node>();
+    private readonly HashSet<Node> _graph = new();
+    
+    public IReadOnlySet<Node> Nodes => _graph;
     
     public void AddNode(Node node)
     {

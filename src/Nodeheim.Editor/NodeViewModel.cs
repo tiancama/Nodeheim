@@ -39,6 +39,19 @@ public class NodeViewModel : INotifyPropertyChanged
         }
     }
 
+    private bool _isSelected;
+
+    public bool IsSelected
+    {
+        get => _isSelected;
+        set
+        {
+            if (_isSelected.Equals(value)) return;
+            _isSelected = value;
+            OnPropertyChanged();
+        }
+    }
+
     public Guid Id => _node.Id;
 
     public event PropertyChangedEventHandler? PropertyChanged;

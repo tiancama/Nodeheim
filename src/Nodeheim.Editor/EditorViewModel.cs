@@ -6,6 +6,7 @@ namespace Nodeheim.Editor;
 public class EditorViewModel
 {
     private readonly Graph _graph = new();
+    private readonly HashSet<NodeViewModel> _selectedNodes = new ();
 
     public EditorViewModel()
     {
@@ -22,4 +23,20 @@ public class EditorViewModel
     }
 
     public ObservableCollection<NodeViewModel> Nodes { get; } = new();
+
+    public void ClearSelection()
+    {
+        foreach (var node in _selectedNodes)
+            node.IsSelected = false;
+
+        _selectedNodes.Clear();
+    }
+
+    public void SelectSingleNode(NodeViewModel selectedNode)
+    {
+         ClearSelection();
+
+         selectedNode.IsSelected = true;
+         _selectedNodes.Add(selectedNode);
+    }
 }

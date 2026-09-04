@@ -11,22 +11,32 @@
 
         <ItemsControl.ItemsPanel>
             <ItemsPanelTemplate>
-                <Canvas Background="#FF9DC782" />
+                <Canvas Background="#FF9DC782" PointerPressed="OnCanvasPointerPressed" />
             </ItemsPanelTemplate>
         </ItemsControl.ItemsPanel>
+
+        <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="vm:NodeViewModel">
+                <Ellipse Width="30" Height="30" Fill="LightGray" Classes="node" Classes.selected="{Binding IsSelected}" />
+            </DataTemplate>
+        </ItemsControl.ItemTemplate>
 
         <ItemsControl.Styles>
             <Style Selector="ContentPresenter" x:DataType="vm:NodeViewModel">
                 <Setter Property="Canvas.Left" Value="{Binding X}" />
                 <Setter Property="Canvas.Top" Value="{Binding Y}" />
             </Style>
-        </ItemsControl.Styles>
 
-        <ItemsControl.ItemTemplate>
-            <DataTemplate x:DataType="vm:NodeViewModel">
-                <Ellipse Width="30" Height="30" Fill="LightGray" Stroke="CadetBlue" StrokeThickness="2" />
-            </DataTemplate>
-        </ItemsControl.ItemTemplate>
+            <Style Selector="Ellipse.node">
+                <Setter Property="Stroke" Value="Gray" />
+                <Setter Property="StrokeThickness" Value="1" />
+            </Style>
+
+            <Style Selector="Ellipse.node.selected">
+                <Setter Property="Stroke" Value="CadetBlue" />
+                <Setter Property="StrokeThickness" Value="4" />
+            </Style>
+        </ItemsControl.Styles>
 
     </ItemsControl>
 </Window>

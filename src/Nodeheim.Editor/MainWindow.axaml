@@ -11,7 +11,8 @@
 
         <ItemsControl.ItemsPanel>
             <ItemsPanelTemplate>
-                <Canvas Background="#FF9DC782" PointerPressed="OnCanvasPointerPressed" />
+                <Canvas Background="#FF9DC782" PointerPressed="OnCanvasPointerPressed"
+                        PointerMoved="OnCanvasPointerMoved" PointerReleased="OnCanvasPointerReleased" />
             </ItemsPanelTemplate>
         </ItemsControl.ItemsPanel>
 

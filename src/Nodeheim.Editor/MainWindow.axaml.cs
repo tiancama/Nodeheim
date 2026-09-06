@@ -1,6 +1,8 @@
+using System.Reflection;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 
 namespace Nodeheim.Editor;
 
@@ -34,4 +36,28 @@ public partial class MainWindow : Window
     }
 
     private void OnCanvasPointerReleased(object? sender, PointerReleasedEventArgs e) => _vm.EndDrag();
+
+    private void OnQuitClick(object? sender, RoutedEventArgs e) => Close();
+
+    private void OnAboutClick(object? sender, RoutedEventArgs e)
+    {
+        var version = Assembly.GetEntryAssembly()?
+            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
+            .InformationalVersion.Split('+')[0];
+        var dialog = new Window
+        {
+            Title = "About",
+            Width = 300,
+            Height = 150,
+            WindowStartupLocation = WindowStartupLocation.CenterOwner,
+            Content = new TextBlock
+            {
+                Text = $"Nodeheim Editor\nVersion {version}",
+                Margin = new Thickness(20),
+                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
+                VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center
+            }
+        };
+        dialog.ShowDialog(this);
+    }
 }

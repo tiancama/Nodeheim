@@ -7,37 +7,57 @@
         xmlns:vm="clr-namespace:Nodeheim.Editor"
         x:DataType="vm:EditorViewModel"
         Title="Nodeheim.Editor">
-    <ItemsControl ItemsSource="{Binding Nodes}">
+    <DockPanel>
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="_File">
+                <MenuItem Header="_Quit" Click="OnQuitClick" />
+            </MenuItem>
+            <MenuItem Header="_Help">
+                <MenuItem Header="_About" Click="OnAboutClick" />
+            </MenuItem>
+        </Menu>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <ItemsControl Grid.Column="0" ItemsSource="{Binding Nodes}">
 
-        <ItemsControl.ItemsPanel>
-            <ItemsPanelTemplate>
-                <Canvas Background="#FF9DC782" PointerPressed="OnCanvasPointerPressed"
-                        PointerMoved="OnCanvasPointerMoved" PointerReleased="OnCanvasPointerReleased" />
-            </ItemsPanelTemplate>
-        </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <Canvas Background="#FF9DC782" PointerPressed="OnCanvasPointerPressed"
+                                PointerMoved="OnCanvasPointerMoved" PointerReleased="OnCanvasPointerReleased" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
 
-        <ItemsControl.ItemTemplate>
-            <DataTemplate x:DataType="vm:NodeViewModel">
-                <Ellipse Width="30" Height="30" Fill="LightGray" Classes="node" Classes.selected="{Binding IsSelected}" />
-            </DataTemplate>
-        </ItemsControl.ItemTemplate>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:NodeViewModel">
+                        <Ellipse Width="30" Height="30" Fill="LightGray" Classes="node"
+                                 Classes.selected="{Binding IsSelected}" />
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
 
-        <ItemsControl.Styles>
-            <Style Selector="ContentPresenter" x:DataType="vm:NodeViewModel">
-                <Setter Property="Canvas.Left" Value="{Binding X}" />
-                <Setter Property="Canvas.Top" Value="{Binding Y}" />
-            </Style>
+                <ItemsControl.Styles>
+                    <Style Selector="ContentPresenter" x:DataType="vm:NodeViewModel">
+                        <Setter Property="Canvas.Left" Value="{Binding X}" />
+                        <Setter Property="Canvas.Top" Value="{Binding Y}" />
+                    </Style>
 
-            <Style Selector="Ellipse.node">
-                <Setter Property="Stroke" Value="Gray" />
-                <Setter Property="StrokeThickness" Value="1" />
-            </Style>
+                    <Style Selector="Ellipse.node">
+                        <Setter Property="Stroke" Value="Gray" />
+                        <Setter Property="StrokeThickness" Value="1" />
+                    </Style>
 
-            <Style Selector="Ellipse.node.selected">
-                <Setter Property="Stroke" Value="CadetBlue" />
-                <Setter Property="StrokeThickness" Value="4" />
-            </Style>
-        </ItemsControl.Styles>
+                    <Style Selector="Ellipse.node.selected">
+                        <Setter Property="Stroke" Value="CadetBlue" />
+                        <Setter Property="StrokeThickness" Value="4" />
+                    </Style>
+                </ItemsControl.Styles>
 
-    </ItemsControl>
+            </ItemsControl>
+            <StackPanel Grid.Column="1">
+                <TextBlock>Configure Nodes</TextBlock>
+            </StackPanel>
+        </Grid>
+    </DockPanel>
 </Window>

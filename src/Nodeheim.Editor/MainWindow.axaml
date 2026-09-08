@@ -55,9 +55,32 @@
                 </ItemsControl.Styles>
 
             </ItemsControl>
-            <StackPanel Grid.Column="1">
-                <TextBlock>Configure Nodes</TextBlock>
-            </StackPanel>
+            <ScrollViewer Grid.Column="1">
+                <ItemsControl ItemsSource="{Binding SelectedNodes}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:NodeViewModel">
+                            <Border BorderBrush="Gray" BorderThickness="1" Padding="6" Margin="4">
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="Id: " Width="20" VerticalAlignment="Center" TextAlignment="Right"/>
+                                        <TextBox Text="{Binding Id}" Width="150" IsReadOnly="True" />
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="X: " Width="20" VerticalAlignment="Center" TextAlignment="Right"/>
+                                        <TextBox Text="{Binding X, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                                                 Width="50" HorizontalContentAlignment="Right"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="Y: " Width="20" VerticalAlignment="Center" TextAlignment="Right"/>
+                                        <TextBox Text="{Binding Y, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                                                 Width="50" HorizontalContentAlignment="Right"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
         </Grid>
     </DockPanel>
 </Window>

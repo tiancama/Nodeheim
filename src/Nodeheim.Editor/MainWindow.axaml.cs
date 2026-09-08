@@ -19,9 +19,9 @@ public partial class MainWindow : Window
     private void OnCanvasPointerPressed(object? sender, PointerPressedEventArgs e)
     {
         if (e.Source is StyledElement { DataContext: NodeViewModel node })
-            _vm.SelectSingleNode(node);
+            _vm.SelectOnly(node);
         else
-            _vm.ClearSelection();
+            _vm.DeselectAll();
 
         _vm.BeginDrag(e.GetCurrentPoint((Visual)sender).Position.ToSurfacePosition());
     }

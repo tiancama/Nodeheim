@@ -52,4 +52,44 @@ public class EditorViewModelTests
         Assert.Empty(editor.SelectedNodes);
         Assert.False(node.IsSelected);
     }
+
+    [Fact]
+    public void ToggleSelected_OnUnselectedNode_AddsToSelection()
+    {
+        var editor = new EditorViewModel();
+        var node = new NodeViewModel(new Node());
+
+        editor.ToggleSelected(node);
+
+        Assert.Contains(node, editor.SelectedNodes);
+        Assert.True(node.IsSelected);
+    }
+
+    [Fact]
+    public void ToggleSelected_OnSelectedNode_RemovesFromSelection()
+    {
+        var editor = new EditorViewModel();
+        var node = new NodeViewModel(new Node());
+        editor.ToggleSelected(node);
+
+        editor.ToggleSelected(node);
+
+        Assert.DoesNotContain(node, editor.SelectedNodes);
+        Assert.False(node.IsSelected);
+    }
+
+    [Fact]
+    public void ToggleSelected_WithExistingSelection_KeepsBothWithoutDuplication()
+    {
+        var editor = new EditorViewModel();
+        var first = new NodeViewModel(new Node());
+        var second = new NodeViewModel(new Node());
+
+        editor.ToggleSelected(first);
+        editor.ToggleSelected(second);
+
+        Assert.Equal(2, editor.SelectedNodes.Count);
+        Assert.Contains(first, editor.SelectedNodes);
+        Assert.Contains(second, editor.SelectedNodes);
+    }
 }

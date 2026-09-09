@@ -71,6 +71,12 @@ public class EditorViewModel
         SetSelected(node, true);
     }
 
+    /// <summary>
+    /// Toggles the selection state of a node: selects it if currently unselected, deselects it otherwise.
+    /// </summary>
+    /// <param name="node">The node whose selection state is flipped.</param>
+    public void ToggleSelected(NodeViewModel node) => SetSelected(node, !_selectedNodes.Contains(node));
+
     public void BeginDrag(SurfacePosition position)
     {
         _pointerPressedPosition = position;

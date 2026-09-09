@@ -18,12 +18,26 @@ public partial class MainWindow : Window
 
     private void OnCanvasPointerPressed(object? sender, PointerPressedEventArgs e)
     {
+        bool ctrl = e.KeyModifiers.HasFlag(KeyModifiers.Control);
         if (e.Source is StyledElement { DataContext: NodeViewModel node })
-            _vm.SelectOnly(node);
-        else
-            _vm.DeselectAll();
+        {
+            if (ctrl)
+            {
+                _vm.ToggleSelected(node);
+            }
+            else
+            {
+                if (!node.IsSelected)
+                    _vm.SelectOnly(node);
 
-        _vm.BeginDrag(e.GetCurrentPoint((Visual)sender).Position.ToSurfacePosition());
+                _vm.BeginDrag(e.GetCurrentPoint((Visual)sender).Position.ToSurfacePosition());
+            }
+        }
+        else
+        {
+            if (!ctrl)
+                _vm.DeselectAll();
+        }
     }
 
     private void OnCanvasPointerMoved(object? sender, PointerEventArgs e)

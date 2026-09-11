@@ -30,7 +30,8 @@
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <Canvas Background="#FF9DC782" PointerPressed="OnCanvasPointerPressed"
-                                PointerMoved="OnCanvasPointerMoved" PointerReleased="OnCanvasPointerReleased" />
+                                PointerMoved="OnCanvasPointerMoved" PointerReleased="OnCanvasPointerReleased"
+                                DoubleTapped="OnCanvasDoubleTapped" />
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
 

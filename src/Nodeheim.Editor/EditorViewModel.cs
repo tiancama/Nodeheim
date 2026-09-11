@@ -77,6 +77,15 @@ public class EditorViewModel
     /// <param name="node">The node whose selection state is flipped.</param>
     public void ToggleSelected(NodeViewModel node) => SetSelected(node, !_selectedNodes.Contains(node));
 
+    public void CreateNode(SurfacePosition position)
+    {
+        var node = new Node();
+        _graph.AddNode(node);
+        NodeViewModel nodeViewModel = new(node) { X = position.X, Y = position.Y };
+        Nodes.Add(nodeViewModel);
+        SelectOnly(nodeViewModel);
+    }
+
     public void BeginDrag(SurfacePosition position)
     {
         _pointerPressedPosition = position;

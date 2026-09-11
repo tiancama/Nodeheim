@@ -92,4 +92,18 @@ public class EditorViewModelTests
         Assert.Contains(first, editor.SelectedNodes);
         Assert.Contains(second, editor.SelectedNodes);
     }
+
+    [Fact]
+    public void CreateNode_AtPosition_AddsNodeAndSelectsItExclusively()
+    {
+        var editor = new EditorViewModel();
+        var position = new SurfacePosition(100, 200);
+
+        editor.CreateNode(position);
+
+        NodeViewModel created = editor.SelectedNodes.Single();
+        Assert.Contains(created, editor.Nodes);
+        Assert.Equal(100, created.X);
+        Assert.Equal(200, created.Y);
+    }
 }

@@ -51,6 +51,9 @@ public partial class MainWindow : Window
 
     private void OnCanvasPointerReleased(object? sender, PointerReleasedEventArgs e) => _vm.EndDrag();
 
+    private void OnCanvasDoubleTapped(object? sender, TappedEventArgs e) =>
+        _vm.CreateNode(e.GetPosition((Visual)sender).ToSurfacePosition());
+
     private void OnQuitClick(object? sender, RoutedEventArgs e) => Close();
 
     private void OnAboutClick(object? sender, RoutedEventArgs e)

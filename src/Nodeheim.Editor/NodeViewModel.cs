@@ -7,10 +7,12 @@ namespace Nodeheim.Editor;
 public class NodeViewModel : INotifyPropertyChanged
 {
     private readonly Node _node;
+    private const double DefaultRadius = 13;
 
     public NodeViewModel(Node node)
     {
         _node = node;
+        Radius = DefaultRadius;
     }
 
     private double _x;
@@ -35,6 +37,19 @@ public class NodeViewModel : INotifyPropertyChanged
         {
             if (_y.Equals(value)) return;
             _y = value;
+            OnPropertyChanged();
+        }
+    }
+
+    private double _radius;
+
+    public double Radius
+    {
+        get => _radius;
+        set
+        {
+            if (_radius.Equals(value)) return;
+            _radius = value;
             OnPropertyChanged();
         }
     }

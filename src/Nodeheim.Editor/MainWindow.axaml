@@ -23,6 +23,10 @@
             </Grid.ColumnDefinitions>
             <ItemsControl Grid.Column="0" ItemsSource="{Binding Nodes}">
 
+                <ItemsControl.Resources>
+                    <vm:SubtractConverter x:Key="Subtract" />
+                </ItemsControl.Resources>
+
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <Canvas Background="#FF9DC782" PointerPressed="OnCanvasPointerPressed"
@@ -32,15 +36,31 @@
 
                 <ItemsControl.ItemTemplate>
                     <DataTemplate x:DataType="vm:NodeViewModel">
-                        <Ellipse Width="30" Height="30" Fill="LightGray" Classes="node"
+                        <Ellipse Fill="LightGray" Classes="node"
+                                 Width="{Binding Radius, Converter={x:Static vm:NodeConverters.Diameter}}"
+                                 Height="{Binding Radius, Converter={x:Static vm:NodeConverters.Diameter}}"
                                  Classes.selected="{Binding IsSelected}" />
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
 
                 <ItemsControl.Styles>
                     <Style Selector="ContentPresenter" x:DataType="vm:NodeViewModel">
-                        <Setter Property="Canvas.Left" Value="{Binding X}" />
-                        <Setter Property="Canvas.Top" Value="{Binding Y}" />
+                        <Setter Property="Canvas.Left">
+                            <Setter.Value>
+                                <MultiBinding Converter="{x:Static vm:NodeConverters.Subtract}">
+                                    <Binding Path="X" />
+                                    <Binding Path="Radius" />
+                                </MultiBinding>
+                            </Setter.Value>
+                        </Setter>
+                        <Setter Property="Canvas.Top">
+                            <Setter.Value>
+                                <MultiBinding Converter="{x:Static vm:NodeConverters.Subtract}">
+                                    <Binding Path="Y" />
+                                    <Binding Path="Radius" />
+                                </MultiBinding>
+                            </Setter.Value>
+                        </Setter>
                     </Style>
 
                     <Style Selector="Ellipse.node">

@@ -6,14 +6,15 @@ namespace Nodeheim.Editor;
 
 public class NodeViewModel : INotifyPropertyChanged
 {
-    private readonly Node _node;
     private const double DefaultRadius = 13;
 
-    public NodeViewModel(Node node)
+    public NodeViewModel(Node model)
     {
-        _node = node;
+        Model = model;
         Radius = DefaultRadius;
     }
+
+    internal Node Model { get; }
 
     private double _x;
 
@@ -67,7 +68,7 @@ public class NodeViewModel : INotifyPropertyChanged
         }
     }
 
-    public Guid Id => _node.Id;
+    public Guid Id => Model.Id;
 
     public event PropertyChangedEventHandler? PropertyChanged;
 

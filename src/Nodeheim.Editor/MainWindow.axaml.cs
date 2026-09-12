@@ -54,6 +54,17 @@ public partial class MainWindow : Window
     private void OnCanvasDoubleTapped(object? sender, TappedEventArgs e) =>
         _vm.CreateNode(e.GetPosition((Visual)sender).ToSurfacePosition());
 
+    protected override void OnKeyDown(KeyEventArgs e)
+    {
+        base.OnKeyDown(e);
+
+        if (e.Key == Key.Delete)
+        {
+            _vm.DeleteSelectedNodes();
+            e.Handled = true;
+        }
+    }
+
     private void OnQuitClick(object? sender, RoutedEventArgs e) => Close();
 
     private void OnAboutClick(object? sender, RoutedEventArgs e)

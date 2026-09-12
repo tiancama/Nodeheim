@@ -106,4 +106,21 @@ public class EditorViewModelTests
         Assert.Equal(100, created.X);
         Assert.Equal(200, created.Y);
     }
+
+    [Fact]
+    public void DeleteSelectedNodes_WithSelection_RemovesSelectedAndKeepsOthers()
+    {
+        var editor = new EditorViewModel();
+        var toDelete = new NodeViewModel(new Node());
+        var toKeep = new NodeViewModel(new Node());
+        editor.Nodes.Add(toDelete);
+        editor.Nodes.Add(toKeep);
+        editor.SelectOnly(toDelete);
+
+        editor.DeleteSelectedNodes();
+
+        Assert.DoesNotContain(toDelete, editor.Nodes);
+        Assert.DoesNotContain(toDelete, editor.SelectedNodes);
+        Assert.Contains(toKeep, editor.Nodes);
+    }
 }

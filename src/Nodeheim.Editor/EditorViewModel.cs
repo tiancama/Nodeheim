@@ -77,6 +77,10 @@ public class EditorViewModel
     /// <param name="node">The node whose selection state is flipped.</param>
     public void ToggleSelected(NodeViewModel node) => SetSelected(node, !_selectedNodes.Contains(node));
 
+    /// <summary>
+    /// Creates a node at the given position and selects it as the sole selection.
+    /// </summary>
+    /// <param name="position">The center position of the new node.</param>
     public void CreateNode(SurfacePosition position)
     {
         var node = new Node();
@@ -84,6 +88,20 @@ public class EditorViewModel
         NodeViewModel nodeViewModel = new(node) { X = position.X, Y = position.Y };
         Nodes.Add(nodeViewModel);
         SelectOnly(nodeViewModel);
+    }
+
+    /// <summary>
+    /// Removes every selected node from the graph and the view, clearing the selection.
+    /// </summary>
+    public void DeleteSelectedNodes()
+    {
+        var selectedNodes = _selectedNodes.ToList();
+        DeselectAll();
+        foreach (NodeViewModel node in selectedNodes)
+        {
+            _graph.RemoveNode(node.Model);
+            Nodes.Remove(node);
+        }
     }
 
     public void BeginDrag(SurfacePosition position)

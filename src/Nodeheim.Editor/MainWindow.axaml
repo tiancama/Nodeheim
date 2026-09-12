@@ -29,7 +29,7 @@
 
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
-                        <Canvas Background="#FF9DC782" PointerPressed="OnCanvasPointerPressed"
+                        <Canvas Background="#FF9DC782" Focusable="True" PointerPressed="OnCanvasPointerPressed"
                                 PointerMoved="OnCanvasPointerMoved" PointerReleased="OnCanvasPointerReleased"
                                 DoubleTapped="OnCanvasDoubleTapped" />
                     </ItemsPanelTemplate>
@@ -76,7 +76,7 @@
                 </ItemsControl.Styles>
 
             </ItemsControl>
-            <ScrollViewer Grid.Column="1">
+            <ScrollViewer Grid.Column="1" Focusable="True">
                 <ItemsControl ItemsSource="{Binding SelectedNodes}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate x:DataType="vm:NodeViewModel">

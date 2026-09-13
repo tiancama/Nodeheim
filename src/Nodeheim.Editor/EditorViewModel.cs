@@ -16,6 +16,7 @@ public class EditorViewModel
 
         _graph.AddNode(new Node());
         _graph.AddNode(new Node());
+        _graph.Connect(_graph.Nodes.ElementAt(0), _graph.Nodes.ElementAt(1));
         _graph.AddNode(new Node());
         int startX = 666;
         foreach (var node in _graph.Nodes)
@@ -24,11 +25,56 @@ public class EditorViewModel
             startX += 42;
             Nodes.Add(nodeViewModel);
         }
+
+        BuildConnections();
     }
 
     public ReadOnlyObservableCollection<NodeViewModel> SelectedNodes { get; }
 
     public ObservableCollection<NodeViewModel> Nodes { get; } = new();
+    public ObservableCollection<ConnectionViewModel> Connections { get; } = new();
+
+    /// <summary>
+    /// Adds the connection between two nodes to the view projection if it is not already present.
+    /// </summary>
+    /// <param name="nodeA">The first endpoint of the connection.</param>
+    /// <param name="nodeB">The second endpoint of the connection.</param>
+    private void BuildConnection(NodeViewModel nodeA, NodeViewModel nodeB)
+    {
+        var newConnection = new ConnectionViewModel(nodeA, nodeB);
+        if (!Connections.Contains(newConnection))
+            Connections.Add(newConnection);
+    }
+
+    /// <summary>
+    /// Projects the view connections from the neighbor relations of all current nodes.
+    /// </summary>
+    private void BuildConnections()
+    {
+        var vmByNode = Nodes.ToDictionary(vm => vm.Model);
+        foreach (NodeViewModel node in Nodes)
+        {
+            foreach (Node modelNeighbor in node.Model.Neighbors)
+            {
+                BuildConnection(node, vmByNode[modelNeighbor]);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Finds every connection that contains the given node and removes it from the view projection.
+    /// </summary>
+    /// <param name="node">The node whose connections are removed.</param>
+    private void RemoveConnectionsOf(NodeViewModel node)
+    {
+        foreach (ConnectionViewModel connection in Connections.ToList())
+        {
+            if (connection.NodeA == node || connection.NodeB == node)
+            {
+                Connections.Remove(connection);
+            }
+        }
+    }
 
     /// <summary>
     /// Core method for both selecting and deselecting a node.
@@ -99,6 +145,7 @@ public class EditorViewModel
         DeselectAll();
         foreach (NodeViewModel node in selectedNodes)
         {
+            RemoveConnectionsOf(node);
             _graph.RemoveNode(node.Model);
             Nodes.Remove(node);
         }

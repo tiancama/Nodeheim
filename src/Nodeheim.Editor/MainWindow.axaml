@@ -21,6 +21,31 @@
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
+            <ItemsControl Grid.Column="0" ItemsSource="{Binding Connections}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <Canvas Background="#FF9DC782" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:ConnectionViewModel">
+                        <Line Stroke="DimGray" StrokeThickness="4">
+                            <Line.StartPoint>
+                                <MultiBinding Converter="{x:Static vm:NodeConverters.Point}">
+                                    <Binding Path="NodeA.X" />
+                                    <Binding Path="NodeA.Y" />
+                                </MultiBinding>
+                            </Line.StartPoint>
+                            <Line.EndPoint>
+                                <MultiBinding Converter="{x:Static vm:NodeConverters.Point}">
+                                    <Binding Path="NodeB.X" />
+                                    <Binding Path="NodeB.Y" />
+                                </MultiBinding>
+                            </Line.EndPoint>
+                        </Line>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
             <ItemsControl Grid.Column="0" ItemsSource="{Binding Nodes}">
 
                 <ItemsControl.Resources>
@@ -29,7 +54,7 @@
 
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
-                        <Canvas Background="#FF9DC782" Focusable="True" PointerPressed="OnCanvasPointerPressed"
+                        <Canvas Background="Transparent" Focusable="True" PointerPressed="OnCanvasPointerPressed"
                                 PointerMoved="OnCanvasPointerMoved" PointerReleased="OnCanvasPointerReleased"
                                 DoubleTapped="OnCanvasDoubleTapped" />
                     </ItemsPanelTemplate>

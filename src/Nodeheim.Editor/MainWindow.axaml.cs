@@ -51,8 +51,11 @@ public partial class MainWindow : Window
 
     private void OnCanvasPointerReleased(object? sender, PointerReleasedEventArgs e) => _vm.EndDrag();
 
-    private void OnCanvasDoubleTapped(object? sender, TappedEventArgs e) =>
+    private void OnCanvasDoubleTapped(object? sender, TappedEventArgs e)
+    {
+        _vm.EndDrag();
         _vm.CreateNode(e.GetPosition((Visual)sender).ToSurfacePosition());
+    }
 
     protected override void OnKeyDown(KeyEventArgs e)
     {

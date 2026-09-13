@@ -6,6 +6,6 @@ public class Node
     public IReadOnlySet<Node> Neighbors => _neighbors;
 
     public Guid Id { get; init; } = Guid.NewGuid();
-    internal void AddNeighbor(Node other) => _neighbors.Add(other);
+    internal bool AddNeighbor(Node other) => _neighbors.Add(other);
     internal void RemoveNeighbor(Node other) => _neighbors.Remove(other);
 }

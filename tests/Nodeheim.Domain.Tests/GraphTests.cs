@@ -144,4 +144,33 @@ public class GraphTests
 
         Assert.Empty(graph.Nodes);
     }
+
+    [Fact]
+    public void Connect_WithNewNodes_ReturnsTrue()
+    {
+        var graph = new Graph();
+        var a = new Node();
+        var b = new Node();
+        graph.AddNode(a);
+        graph.AddNode(b);
+
+        bool result = graph.Connect(a, b);
+
+        Assert.True(result);
+    }
+
+    [Fact]
+    public void Connect_WithAlreadyConnectedNodes_ReturnsFalse()
+    {
+        var graph = new Graph();
+        var a = new Node();
+        var b = new Node();
+        graph.AddNode(a);
+        graph.AddNode(b);
+        graph.Connect(a, b);
+
+        bool result = graph.Connect(a, b);
+
+        Assert.False(result);
+    }
 }

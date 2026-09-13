@@ -66,6 +66,10 @@ public partial class MainWindow : Window
             _vm.DeleteSelectedNodes();
             e.Handled = true;
         }
+        else if (e.Key == Key.C)
+        {
+            _vm.ConnectSelectedNodes();
+        }
     }
 
     private void OnQuitClick(object? sender, RoutedEventArgs e) => Close();

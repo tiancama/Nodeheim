@@ -14,52 +14,17 @@ public class EditorViewModel
     {
         SelectedNodes = new ReadOnlyObservableCollection<NodeViewModel>(_selectedNodes);
 
-        _graph.AddNode(new Node());
-        _graph.AddNode(new Node());
-        _graph.Connect(_graph.Nodes.ElementAt(0), _graph.Nodes.ElementAt(1));
-        _graph.AddNode(new Node());
-        int startX = 666;
-        foreach (var node in _graph.Nodes)
-        {
-            NodeViewModel nodeViewModel = new(node) { X = startX, Y = 256 };
-            startX += 42;
-            Nodes.Add(nodeViewModel);
-        }
-
-        BuildConnections();
+        CreateNode(new SurfacePosition(666, 256));
+        CreateNode(new SurfacePosition(708, 256));
+        CreateNode(new SurfacePosition(750, 256));
+        CreateConnection(Nodes.ElementAt(0), Nodes.ElementAt(1));
+        DeselectAll();
     }
 
     public ReadOnlyObservableCollection<NodeViewModel> SelectedNodes { get; }
 
     public ObservableCollection<NodeViewModel> Nodes { get; } = new();
     public ObservableCollection<ConnectionViewModel> Connections { get; } = new();
-
-    /// <summary>
-    /// Adds the connection between two nodes to the view projection if it is not already present.
-    /// </summary>
-    /// <param name="nodeA">The first endpoint of the connection.</param>
-    /// <param name="nodeB">The second endpoint of the connection.</param>
-    private void BuildConnection(NodeViewModel nodeA, NodeViewModel nodeB)
-    {
-        var newConnection = new ConnectionViewModel(nodeA, nodeB);
-        if (!Connections.Contains(newConnection))
-            Connections.Add(newConnection);
-    }
-
-    /// <summary>
-    /// Projects the view connections from the neighbor relations of all current nodes.
-    /// </summary>
-    private void BuildConnections()
-    {
-        var vmByNode = Nodes.ToDictionary(vm => vm.Model);
-        foreach (NodeViewModel node in Nodes)
-        {
-            foreach (Node modelNeighbor in node.Model.Neighbors)
-            {
-                BuildConnection(node, vmByNode[modelNeighbor]);
-            }
-        }
-    }
 
     /// <summary>
     /// Finds every connection that contains the given node and removes it from the view projection.
@@ -134,6 +99,36 @@ public class EditorViewModel
         NodeViewModel nodeViewModel = new(node) { X = position.X, Y = position.Y };
         Nodes.Add(nodeViewModel);
         SelectOnly(nodeViewModel);
+    }
+
+    /// <summary>
+    /// Connects two nodes in the graph and adds the corresponding connection to the view
+    /// projection. The connection is only projected if the nodes were not already connected.
+    /// </summary>
+    /// <param name="nodeA">One endpoint of the connection.</param>
+    /// <param name="nodeB">The other endpoint of the connection.</param>
+    private void CreateConnection(NodeViewModel nodeA, NodeViewModel nodeB)
+    {
+        if (_graph.Connect(nodeA.Model, nodeB.Model))
+        {
+            Connections.Add(new ConnectionViewModel(nodeA, nodeB));
+        }
+    }
+
+    /// <summary>
+    /// Connects every pair among the currently selected nodes, so that the selection becomes
+    /// fully interconnected. Pairs that are already connected are left unchanged. Does nothing
+    /// if fewer than two nodes are selected.
+    /// </summary>
+    public void ConnectSelectedNodes()
+    {
+        if (_selectedNodes.Count <= 1) return;
+
+        for (int i = 0; i < _selectedNodes.Count - 1; i++)
+            for (int j = i + 1; j < _selectedNodes.Count; j++)
+            {
+                CreateConnection(_selectedNodes[i], _selectedNodes[j]);
+            }
     }
 
     /// <summary>

@@ -7,5 +7,5 @@ public class Node
 
     public Guid Id { get; init; } = Guid.NewGuid();
     internal bool AddNeighbor(Node other) => _neighbors.Add(other);
-    internal void RemoveNeighbor(Node other) => _neighbors.Remove(other);
+    internal bool RemoveNeighbor(Node other) => _neighbors.Remove(other);
 }

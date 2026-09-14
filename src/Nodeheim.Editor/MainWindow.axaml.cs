@@ -70,6 +70,10 @@ public partial class MainWindow : Window
         {
             _vm.ConnectSelectedNodes();
         }
+        else if (e.Key == Key.D)
+        {
+            _vm.DisconnectSelectedNodes();
+        }
     }
 
     private void OnQuitClick(object? sender, RoutedEventArgs e) => Close();

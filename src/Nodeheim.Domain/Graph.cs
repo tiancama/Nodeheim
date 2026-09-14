@@ -39,12 +39,25 @@ public class Graph
         return connected;
     }
 
-    public void Disconnect(Node a, Node b)
+    /// <summary>
+    /// Disconnects two registered nodes, removing the mutual neighbor relation.
+    /// </summary>
+    /// <param name="a">One endpoint of the connection.</param>
+    /// <param name="b">The other endpoint of the connection.</param>
+    /// <returns>
+    /// <c>true</c> if the nodes were connected and are now disconnected; <c>false</c> if
+    /// they were not connected.
+    /// </returns>
+    /// <exception cref="ArgumentException">
+    /// Thrown if either node is not registered in the graph.
+    /// </exception>
+    public bool Disconnect(Node a, Node b)
     {
         if (!_nodes.Contains(a) || !_nodes.Contains(b))
             throw new ArgumentException("Only registered nodes can be disconnected");
 
-        a.RemoveNeighbor(b);
+        bool disconnected = a.RemoveNeighbor(b);
         b.RemoveNeighbor(a);
+        return disconnected;
     }
 }

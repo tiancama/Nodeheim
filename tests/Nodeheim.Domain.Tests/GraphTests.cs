@@ -173,4 +173,33 @@ public class GraphTests
 
         Assert.False(result);
     }
+
+    [Fact]
+    public void Disconnect_WithConnectedNodes_ReturnsTrue()
+    {
+        var graph = new Graph();
+        var a = new Node();
+        var b = new Node();
+        graph.AddNode(a);
+        graph.AddNode(b);
+        graph.Connect(a, b);
+
+        bool result = graph.Disconnect(a, b);
+
+        Assert.True(result);
+    }
+
+    [Fact]
+    public void Disconnect_WithNodesNotConnected_ReturnsFalse()
+    {
+        var graph = new Graph();
+        var a = new Node();
+        var b = new Node();
+        graph.AddNode(a);
+        graph.AddNode(b);
+
+        bool result = graph.Disconnect(a, b);
+
+        Assert.False(result);
+    }
 }

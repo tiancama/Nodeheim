@@ -148,4 +148,32 @@ public class EditorViewModelTests
         Assert.DoesNotContain(new ConnectionViewModel(a, b), editor.Connections);
         Assert.DoesNotContain(new ConnectionViewModel(a, c), editor.Connections);
     }
+
+    [Fact]
+    public void DisconnectSelectedNodes_WithConnectionToUnselectedNode_KeepsThatConnection()
+    {
+        var editor = new EditorViewModel();
+
+        editor.CreateNode(new SurfacePosition(0, 0));
+        var a = editor.SelectedNodes.Single();
+        editor.CreateNode(new SurfacePosition(10, 0));
+        var b = editor.SelectedNodes.Single();
+        editor.CreateNode(new SurfacePosition(20, 0));
+        var c = editor.SelectedNodes.Single();
+
+        editor.SelectOnly(a);
+        editor.ToggleSelected(b);
+        editor.ConnectSelectedNodes();
+
+        editor.SelectOnly(b);
+        editor.ToggleSelected(c);
+        editor.ConnectSelectedNodes();
+
+        editor.SelectOnly(a);
+        editor.ToggleSelected(b);
+        editor.DisconnectSelectedNodes();
+
+        Assert.DoesNotContain(new ConnectionViewModel(a, b), editor.Connections);
+        Assert.Contains(new ConnectionViewModel(b, c), editor.Connections);
+    }
 }

@@ -132,6 +132,36 @@ public class EditorViewModel
     }
 
     /// <summary>
+    /// Disconnects two nodes in the graph and removes the corresponding connection from the
+    /// view projection. The connection is only removed if the nodes were actually connected.
+    /// </summary>
+    /// <param name="nodeA">One endpoint of the connection.</param>
+    /// <param name="nodeB">The other endpoint of the connection.</param>
+    private void DeleteConnection(NodeViewModel nodeA, NodeViewModel nodeB)
+    {
+        if (_graph.Disconnect(nodeA.Model, nodeB.Model))
+        {
+            Connections.Remove(new ConnectionViewModel(nodeA, nodeB));
+        }
+    }
+
+    /// <summary>
+    /// Disconnects every connected pair among the currently selected nodes, removing only
+    /// connections that run between two selected nodes. A connection from a selected node to
+    /// an unselected one is left in place. Does nothing if fewer than two nodes are selected.
+    /// </summary>
+    public void DisconnectSelectedNodes()
+    {
+        if (_selectedNodes.Count <= 1) return;
+
+        for (int i = 0; i < _selectedNodes.Count - 1; i++)
+            for (int j = i + 1; j < _selectedNodes.Count; j++)
+            {
+                DeleteConnection(_selectedNodes[i], _selectedNodes[j]);
+            }
+    }
+
+    /// <summary>
     /// Removes every selected node from the graph and the view, clearing the selection.
     /// </summary>
     public void DeleteSelectedNodes()

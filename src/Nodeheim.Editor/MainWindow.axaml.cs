@@ -1,6 +1,9 @@
 using System.Reflection;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Shapes;
+using Avalonia.Data;
+using Avalonia.Data.Converters;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 
@@ -57,6 +60,23 @@ public partial class MainWindow : Window
         _vm.CreateNode(e.GetPosition((Visual)sender).ToSurfacePosition());
     }
 
+    private void OnConnectionLineLoaded(object? sender, RoutedEventArgs e)
+    {
+        if (sender is not Line line || line.DataContext is not ConnectionViewModel connection)
+            return;
+
+        var selectionBinding = new MultiBinding
+        {
+            Converter = BoolConverters.And,
+            Bindings =
+            {
+                new ReflectionBinding("IsSelected") { Source = connection.NodeA },
+                new ReflectionBinding("IsSelected") { Source = connection.NodeB },
+            },
+        };
+
+        line.BindClass("selected", selectionBinding, null);
+    }
     protected override void OnKeyDown(KeyEventArgs e)
     {
         base.OnKeyDown(e);
@@ -99,4 +119,5 @@ public partial class MainWindow : Window
         };
         dialog.ShowDialog(this);
     }
+
 }

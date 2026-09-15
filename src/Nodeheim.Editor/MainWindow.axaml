@@ -29,7 +29,7 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate x:DataType="vm:ConnectionViewModel">
-                        <Line Stroke="DimGray" StrokeThickness="4">
+                        <Line Classes="connection" Loaded="OnConnectionLineLoaded">
                             <Line.StartPoint>
                                 <MultiBinding Converter="{x:Static vm:NodeConverters.Point}">
                                     <Binding Path="NodeA.X" />
@@ -45,6 +45,18 @@
                         </Line>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
+
+                <ItemsControl.Styles>
+                    <Style Selector="Line.connection">
+                        <Setter Property="Stroke" Value="DarkGray" />
+                        <Setter Property="StrokeThickness" Value="7" />
+                    </Style>
+                    <Style Selector="Line.connection.selected">
+                        <Setter Property="Stroke" Value="CadetBlue" />
+                        <Setter Property="StrokeThickness" Value="8" />
+                    </Style>
+                </ItemsControl.Styles>
+
             </ItemsControl>
             <ItemsControl Grid.Column="0" ItemsSource="{Binding Nodes}">
 
@@ -90,7 +102,7 @@
                     </Style>
 
                     <Style Selector="Ellipse.node">
-                        <Setter Property="Stroke" Value="Gray" />
+                        <Setter Property="Stroke" Value="LightGray" />
                         <Setter Property="StrokeThickness" Value="1" />
                     </Style>
 

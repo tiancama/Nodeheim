@@ -3,12 +3,10 @@ using Nodeheim.Domain;
 
 namespace Nodeheim.Editor;
 
-public class EditorViewModel
+public class EditorViewModel : IEditorOperations
 {
     private readonly Graph _graph = new();
     private readonly ObservableCollection<NodeViewModel> _selectedNodes = new();
-    private readonly Dictionary<NodeViewModel, SurfacePosition> _dragOrigins = new();
-    private SurfacePosition _pointerPressedPosition;
 
     public EditorViewModel()
     {
@@ -27,18 +25,152 @@ public class EditorViewModel
     public ObservableCollection<ConnectionViewModel> Connections { get; } = new();
 
     /// <summary>
-    /// Finds every connection that contains the given node and removes it from the view projection.
+    /// Reports whether the given node is part of the current selection.
     /// </summary>
-    /// <param name="node">The node whose connections are removed.</param>
-    private void RemoveConnectionsOf(NodeViewModel node)
+    /// <param name="node">The node to test.</param>
+    /// <returns><c>true</c> if the node is currently selected; otherwise <c>false</c>.</returns>
+    public bool IsInSelection(NodeViewModel node) => _selectedNodes.Contains(node);
+
+    /// <summary>
+    /// Sets the selection to exactly this node, clearing any previous selection.
+    /// </summary>
+    /// <param name="node">The node to become the sole selected node.</param>
+    public void SelectOnly(NodeViewModel node)
     {
-        foreach (ConnectionViewModel connection in Connections.ToList())
+        DeselectAll();
+        SetSelected(node, true);
+    }
+
+    /// <summary>
+    /// Sets the selection to only these two nodes, clearing any previous selection.
+    /// </summary>
+    /// <param name="nodeA">The first node to become selected.</param>
+    /// <param name="nodeB">The second node to become selected.</param>
+    public void SelectOnly(NodeViewModel nodeA, NodeViewModel nodeB)
+    {
+        DeselectAll();
+        SetSelected(nodeA, true);
+        SetSelected(nodeB, true);
+    }
+
+    /// <summary>
+    /// Toggles the selection state of a node: selects it if currently unselected, deselects it otherwise.
+    /// </summary>
+    /// <param name="node">The node whose selection state is flipped.</param>
+    public void ToggleSelected(NodeViewModel node) => SetSelected(node, !_selectedNodes.Contains(node));
+
+    /// <summary>
+    /// Toggles both nodes to the same selection state. If both are selected, they become unselected;
+    /// otherwise, both become selected.
+    /// </summary>
+    /// <param name="nodeA">The first node of this group.</param>
+    /// <param name="nodeB">The second node of this group.</param>
+    public void ToggleAsGroup(NodeViewModel nodeA, NodeViewModel nodeB)
+    {
+        if (_selectedNodes.Contains(nodeA) && _selectedNodes.Contains(nodeB))
         {
-            if (connection.NodeA == node || connection.NodeB == node)
-            {
-                Connections.Remove(connection);
-            }
+            SetSelected(nodeA, false);
+            SetSelected(nodeB, false);
         }
+        else
+        {
+            SetSelected(nodeA, true);
+            SetSelected(nodeB, true);
+        }
+    }
+
+    /// <summary>
+    /// Clears the selection, resetting the selected flag on every previously selected node.
+    /// </summary>
+    public void DeselectAll()
+    {
+        foreach (NodeViewModel node in _selectedNodes.ToList())
+            SetSelected(node, false);
+    }
+
+    /// <summary>
+    /// Moves a node to the given position.
+    /// </summary>
+    /// <param name="node">The node to move.</param>
+    /// <param name="position">The new center position of the node.</param>
+    public void MoveNode(NodeViewModel node, SurfacePosition position)
+    {
+        node.X = position.X;
+        node.Y = position.Y;
+    }
+
+    /// <summary>
+    /// Creates a node at the given position and selects it as the sole selection.
+    /// </summary>
+    /// <param name="position">The center position of the new node.</param>
+    public void CreateNode(SurfacePosition position)
+    {
+        var node = new Node();
+        _graph.AddNode(node);
+        NodeViewModel nodeViewModel = new(node) { X = position.X, Y = position.Y };
+        Nodes.Add(nodeViewModel);
+        SelectOnly(nodeViewModel);
+    }
+
+    /// <summary>
+    /// Removes every selected node from the graph and the view, clearing the selection.
+    /// </summary>
+    public void DeleteSelectedNodes()
+    {
+        var selectedNodes = _selectedNodes.ToList();
+        DeselectAll();
+        foreach (NodeViewModel node in selectedNodes)
+        {
+            RemoveConnectionsOf(node);
+            _graph.RemoveNode(node.Model);
+            Nodes.Remove(node);
+        }
+    }
+
+    /// <summary>
+    /// Connects every pair among the currently selected nodes, so that the selection becomes
+    /// fully interconnected. Pairs that are already connected are left unchanged. Does nothing
+    /// if fewer than two nodes are selected.
+    /// </summary>
+    public void ConnectSelectedNodes()
+    {
+        if (_selectedNodes.Count <= 1) return;
+
+        for (int i = 0; i < _selectedNodes.Count - 1; i++)
+            for (int j = i + 1; j < _selectedNodes.Count; j++)
+            {
+                CreateConnection(_selectedNodes[i], _selectedNodes[j]);
+            }
+    }
+
+    /// <summary>
+    /// Disconnects every connected pair among the currently selected nodes, removing only
+    /// connections that run between two selected nodes. A connection from a selected node to
+    /// an unselected one is left in place. Does nothing if fewer than two nodes are selected.
+    /// </summary>
+    public void DisconnectSelectedNodes()
+    {
+        if (_selectedNodes.Count <= 1) return;
+
+        for (int i = 0; i < _selectedNodes.Count - 1; i++)
+            for (int j = i + 1; j < _selectedNodes.Count; j++)
+            {
+                DeleteConnection(_selectedNodes[i], _selectedNodes[j]);
+            }
+    }
+
+    /// <summary>
+    /// Returns a snapshot mapping each selected node to its current position.
+    /// </summary>
+    /// <returns>A dictionary from each selected node to its captured position.</returns>
+    public IReadOnlyDictionary<NodeViewModel, SurfacePosition> SnapshotSelectionPositions()
+    {
+        Dictionary<NodeViewModel, SurfacePosition> origins = new();
+        foreach (NodeViewModel node in _selectedNodes)
+        {
+            origins.Add(node, new SurfacePosition(node.X, node.Y));
+        }
+        return origins;
     }
 
     /// <summary>
@@ -64,41 +196,18 @@ public class EditorViewModel
     }
 
     /// <summary>
-    /// Clears the selection, resetting the selected flag on every previously selected node.
+    /// Finds every connection that contains the given node and removes it from the view projection.
     /// </summary>
-    public void DeselectAll()
+    /// <param name="node">The node whose connections are removed.</param>
+    private void RemoveConnectionsOf(NodeViewModel node)
     {
-        foreach (NodeViewModel node in _selectedNodes.ToList())
-            SetSelected(node, false);
-    }
-
-    /// <summary>
-    /// Sets the selection to exactly this node, clearing any previous selection.
-    /// </summary>
-    /// <param name="node">The node to become the sole selected node.</param>
-    public void SelectOnly(NodeViewModel node)
-    {
-        DeselectAll();
-        SetSelected(node, true);
-    }
-
-    /// <summary>
-    /// Toggles the selection state of a node: selects it if currently unselected, deselects it otherwise.
-    /// </summary>
-    /// <param name="node">The node whose selection state is flipped.</param>
-    public void ToggleSelected(NodeViewModel node) => SetSelected(node, !_selectedNodes.Contains(node));
-
-    /// <summary>
-    /// Creates a node at the given position and selects it as the sole selection.
-    /// </summary>
-    /// <param name="position">The center position of the new node.</param>
-    public void CreateNode(SurfacePosition position)
-    {
-        var node = new Node();
-        _graph.AddNode(node);
-        NodeViewModel nodeViewModel = new(node) { X = position.X, Y = position.Y };
-        Nodes.Add(nodeViewModel);
-        SelectOnly(nodeViewModel);
+        foreach (ConnectionViewModel connection in Connections.ToList())
+        {
+            if (connection.NodeA == node || connection.NodeB == node)
+            {
+                Connections.Remove(connection);
+            }
+        }
     }
 
     /// <summary>
@@ -116,22 +225,6 @@ public class EditorViewModel
     }
 
     /// <summary>
-    /// Connects every pair among the currently selected nodes, so that the selection becomes
-    /// fully interconnected. Pairs that are already connected are left unchanged. Does nothing
-    /// if fewer than two nodes are selected.
-    /// </summary>
-    public void ConnectSelectedNodes()
-    {
-        if (_selectedNodes.Count <= 1) return;
-
-        for (int i = 0; i < _selectedNodes.Count - 1; i++)
-            for (int j = i + 1; j < _selectedNodes.Count; j++)
-            {
-                CreateConnection(_selectedNodes[i], _selectedNodes[j]);
-            }
-    }
-
-    /// <summary>
     /// Disconnects two nodes in the graph and removes the corresponding connection from the
     /// view projection. The connection is only removed if the nodes were actually connected.
     /// </summary>
@@ -144,57 +237,4 @@ public class EditorViewModel
             Connections.Remove(new ConnectionViewModel(nodeA, nodeB));
         }
     }
-
-    /// <summary>
-    /// Disconnects every connected pair among the currently selected nodes, removing only
-    /// connections that run between two selected nodes. A connection from a selected node to
-    /// an unselected one is left in place. Does nothing if fewer than two nodes are selected.
-    /// </summary>
-    public void DisconnectSelectedNodes()
-    {
-        if (_selectedNodes.Count <= 1) return;
-
-        for (int i = 0; i < _selectedNodes.Count - 1; i++)
-            for (int j = i + 1; j < _selectedNodes.Count; j++)
-            {
-                DeleteConnection(_selectedNodes[i], _selectedNodes[j]);
-            }
-    }
-
-    /// <summary>
-    /// Removes every selected node from the graph and the view, clearing the selection.
-    /// </summary>
-    public void DeleteSelectedNodes()
-    {
-        var selectedNodes = _selectedNodes.ToList();
-        DeselectAll();
-        foreach (NodeViewModel node in selectedNodes)
-        {
-            RemoveConnectionsOf(node);
-            _graph.RemoveNode(node.Model);
-            Nodes.Remove(node);
-        }
-    }
-
-    public void BeginDrag(SurfacePosition position)
-    {
-        _pointerPressedPosition = position;
-        _dragOrigins.Clear();
-        foreach (NodeViewModel node in _selectedNodes)
-        {
-            SurfacePosition surfacePosition = new(node.X, node.Y);
-            _dragOrigins.Add(node, surfacePosition);
-        }
-    }
-
-    public void UpdateDrag(SurfacePosition position)
-    {
-        foreach (KeyValuePair<NodeViewModel, SurfacePosition> nodePair in _dragOrigins)
-        {
-            nodePair.Key.X = nodePair.Value.X + (position.X - _pointerPressedPosition.X);
-            nodePair.Key.Y = nodePair.Value.Y + (position.Y - _pointerPressedPosition.Y);
-        }
-    }
-
-    public void EndDrag() => _dragOrigins.Clear();
 }

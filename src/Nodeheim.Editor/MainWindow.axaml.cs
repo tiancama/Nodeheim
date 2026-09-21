@@ -12,34 +12,36 @@ namespace Nodeheim.Editor;
 public partial class MainWindow : Window
 {
     private readonly EditorViewModel _vm = new();
+    private readonly InteractionController _controller;
 
     public MainWindow()
     {
         InitializeComponent();
         DataContext = _vm;
+        _controller = new(_vm);
     }
 
     private void OnCanvasPointerPressed(object? sender, PointerPressedEventArgs e)
     {
-        bool ctrl = e.KeyModifiers.HasFlag(KeyModifiers.Control);
-        if (e.Source is StyledElement { DataContext: NodeViewModel node })
-        {
-            if (ctrl)
-            {
-                _vm.ToggleSelected(node);
-            }
-            else
-            {
-                if (!node.IsSelected)
-                    _vm.SelectOnly(node);
+        HitTarget target = Resolve(e);
+        var isCtrlPressed = e.KeyModifiers.HasFlag(KeyModifiers.Control);
+        var position = e.GetCurrentPoint((Visual)sender).Position.ToSurfacePosition();
 
-                _vm.BeginDrag(e.GetCurrentPoint((Visual)sender).Position.ToSurfacePosition());
-            }
+        if (isCtrlPressed)
+        {
+            _controller.Toggle(target);
         }
         else
         {
-            if (!ctrl)
-                _vm.DeselectAll();
+            switch (target)
+            {
+                case EmptyHit:
+                    _controller.Exclusive(target);
+                    break;
+                default:
+                    _controller.Grab(target, position);
+                    break;
+            }
         }
     }
 
@@ -48,16 +50,35 @@ public partial class MainWindow : Window
         PointerPoint point = e.GetCurrentPoint((Visual)sender);
         if (point.Properties.IsLeftButtonPressed)
         {
-            _vm.UpdateDrag(point.Position.ToSurfacePosition());
+            _controller.PointerMoved(point.Position.ToSurfacePosition());
         }
     }
 
-    private void OnCanvasPointerReleased(object? sender, PointerReleasedEventArgs e) => _vm.EndDrag();
+    private void OnCanvasPointerReleased(object? sender, PointerReleasedEventArgs e) =>
+        _controller.PointerReleased();
 
     private void OnCanvasDoubleTapped(object? sender, TappedEventArgs e)
     {
-        _vm.EndDrag();
-        _vm.CreateNode(e.GetPosition((Visual)sender).ToSurfacePosition());
+        _controller.CreateNode(e.GetPosition((Visual)sender).ToSurfacePosition());
+    }
+
+    protected override void OnKeyDown(KeyEventArgs e)
+    {
+        base.OnKeyDown(e);
+
+        if (e.Key == Key.Delete)
+        {
+            _controller.DeleteNodes();
+            e.Handled = true;
+        }
+        else if (e.Key == Key.C)
+        {
+            _controller.ConnectNodes();
+        }
+        else if (e.Key == Key.D)
+        {
+            _controller.DisconnectNodes();
+        }
     }
 
     private void OnConnectionLineLoaded(object? sender, RoutedEventArgs e)
@@ -76,24 +97,6 @@ public partial class MainWindow : Window
         };
 
         line.BindClass("selected", selectionBinding, null);
-    }
-    protected override void OnKeyDown(KeyEventArgs e)
-    {
-        base.OnKeyDown(e);
-
-        if (e.Key == Key.Delete)
-        {
-            _vm.DeleteSelectedNodes();
-            e.Handled = true;
-        }
-        else if (e.Key == Key.C)
-        {
-            _vm.ConnectSelectedNodes();
-        }
-        else if (e.Key == Key.D)
-        {
-            _vm.DisconnectSelectedNodes();
-        }
     }
 
     private void OnQuitClick(object? sender, RoutedEventArgs e) => Close();
@@ -120,4 +123,18 @@ public partial class MainWindow : Window
         dialog.ShowDialog(this);
     }
 
+    private HitTarget Resolve(PointerPressedEventArgs e)
+    {
+        if (e.Source is StyledElement { DataContext: NodeViewModel node })
+        {
+            return new NodeHit(node);
+        }
+
+        if (e.Source is StyledElement { DataContext: ConnectionViewModel connection })
+        {
+            return new ConnectionHit(connection);
+        }
+
+        return new EmptyHit();
+    }
 }

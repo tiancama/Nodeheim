@@ -24,7 +24,9 @@
             <ItemsControl Grid.Column="0" ItemsSource="{Binding Connections}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
-                        <Canvas Background="#FF9DC782" />
+                        <Canvas Background="#FF9DC782" Focusable="True" PointerPressed="OnCanvasPointerPressed"
+                                PointerMoved="OnCanvasPointerMoved" PointerReleased="OnCanvasPointerReleased"
+                                DoubleTapped="OnCanvasDoubleTapped"/>
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
@@ -66,7 +68,7 @@
 
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
-                        <Canvas Background="Transparent" Focusable="True" PointerPressed="OnCanvasPointerPressed"
+                        <Canvas Focusable="True" PointerPressed="OnCanvasPointerPressed"
                                 PointerMoved="OnCanvasPointerMoved" PointerReleased="OnCanvasPointerReleased"
                                 DoubleTapped="OnCanvasDoubleTapped" />
                     </ItemsPanelTemplate>

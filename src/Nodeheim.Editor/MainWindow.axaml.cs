@@ -57,10 +57,8 @@ public partial class MainWindow : Window
     private void OnCanvasPointerReleased(object? sender, PointerReleasedEventArgs e) =>
         _controller.PointerReleased();
 
-    private void OnCanvasDoubleTapped(object? sender, TappedEventArgs e)
-    {
+    private void OnCanvasDoubleTapped(object? sender, TappedEventArgs e) =>
         _controller.CreateNode(e.GetPosition((Visual)sender).ToSurfacePosition());
-    }
 
     protected override void OnKeyDown(KeyEventArgs e)
     {
@@ -103,9 +101,9 @@ public partial class MainWindow : Window
 
     private void OnAboutClick(object? sender, RoutedEventArgs e)
     {
-        var version = Assembly.GetEntryAssembly()?
-            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
-            .InformationalVersion.Split('+')[0];
+        string? version = Assembly.GetEntryAssembly()
+            ?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()
+            ?.InformationalVersion.Split('+')[0];
         var dialog = new Window
         {
             Title = "About",

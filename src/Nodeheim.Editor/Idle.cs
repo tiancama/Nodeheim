@@ -7,9 +7,9 @@
 /// </summary>
 public sealed class Idle : InteractionState
 {
-    public Idle(IEditorOperations operations, InteractionController controller) : base(operations, controller)
-    {
-    }
+    public Idle(IEditorOperations operations, InteractionController controller)
+        : base(operations, controller)
+    { }
 
     public override void OnExclusive(HitTarget target)
     {

@@ -79,7 +79,9 @@ public class EditorViewModel : IEditorOperations
     public void DeselectAll()
     {
         foreach (NodeViewModel node in _selectedNodes.ToList())
+        {
             SetSelected(node, false);
+        }
     }
 
     /// <summary>
@@ -131,10 +133,12 @@ public class EditorViewModel : IEditorOperations
         if (_selectedNodes.Count <= 1) return;
 
         for (int i = 0; i < _selectedNodes.Count - 1; i++)
+        {
             for (int j = i + 1; j < _selectedNodes.Count; j++)
             {
                 CreateConnection(_selectedNodes[i], _selectedNodes[j]);
             }
+        }
     }
 
     /// <summary>
@@ -164,6 +168,7 @@ public class EditorViewModel : IEditorOperations
         {
             origins.Add(node, new SurfacePosition(node.X, node.Y));
         }
+
         return origins;
     }
 

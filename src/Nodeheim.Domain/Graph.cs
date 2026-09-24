@@ -11,7 +11,9 @@ public class Graph
     public void RemoveNode(Node node)
     {
         foreach (Node n in node.Neighbors.ToList())
+        {
             Disconnect(node, n);
+        }
 
         _nodes.Remove(node);
     }

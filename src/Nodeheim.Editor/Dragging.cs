@@ -14,8 +14,8 @@ public sealed class Dragging : InteractionState
     /// <remarks>
     /// Node origins are captured here, so they reflect the positions held before the first move.
     /// </remarks>
-    public Dragging(IEditorOperations operations, InteractionController controller, SurfacePosition anchor) : base(
-        operations, controller)
+    public Dragging(IEditorOperations operations, InteractionController controller, SurfacePosition anchor)
+        : base(operations, controller)
     {
         _anchor = anchor;
         _origins = operations.SnapshotSelectionPositions();

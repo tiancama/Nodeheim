@@ -15,6 +15,7 @@ public class NodeViewModel : INotifyPropertyChanged
     }
 
     internal Node Model { get; }
+    public Guid Id => Model.Id;
 
     private double _x;
 
@@ -67,8 +68,6 @@ public class NodeViewModel : INotifyPropertyChanged
             OnPropertyChanged();
         }
     }
-
-    public Guid Id => Model.Id;
 
     public event PropertyChangedEventHandler? PropertyChanged;
 

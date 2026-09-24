@@ -62,10 +62,6 @@
             </ItemsControl>
             <ItemsControl Grid.Column="0" ItemsSource="{Binding Nodes}">
 
-                <ItemsControl.Resources>
-                    <vm:SubtractConverter x:Key="Subtract" />
-                </ItemsControl.Resources>
-
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <Canvas Focusable="True" PointerPressed="OnCanvasPointerPressed"

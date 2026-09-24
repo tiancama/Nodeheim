@@ -7,8 +7,8 @@
 /// </summary>
 public abstract class InteractionState
 {
-    protected readonly IEditorOperations Operations;
-    protected readonly InteractionController Controller;
+    protected IEditorOperations Operations { get; }
+    protected InteractionController Controller { get; }
 
     protected InteractionState(IEditorOperations operations, InteractionController controller)
     {

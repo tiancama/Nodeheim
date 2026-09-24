@@ -2,9 +2,9 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:Nodeheim.Editor"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="Nodeheim.Editor.MainWindow"
-        xmlns:vm="clr-namespace:Nodeheim.Editor"
         x:DataType="vm:EditorViewModel"
         Title="Nodeheim.Editor">
     <DockPanel>
@@ -26,7 +26,7 @@
                     <ItemsPanelTemplate>
                         <Canvas Background="#FF9DC782" Focusable="True" PointerPressed="OnCanvasPointerPressed"
                                 PointerMoved="OnCanvasPointerMoved" PointerReleased="OnCanvasPointerReleased"
-                                DoubleTapped="OnCanvasDoubleTapped"/>
+                                DoubleTapped="OnCanvasDoubleTapped" />
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
@@ -47,7 +47,6 @@
                         </Line>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
-
                 <ItemsControl.Styles>
                     <Style Selector="Line.connection">
                         <Setter Property="Stroke" Value="DarkGray" />
@@ -58,10 +57,9 @@
                         <Setter Property="StrokeThickness" Value="8" />
                     </Style>
                 </ItemsControl.Styles>
-
             </ItemsControl>
-            <ItemsControl Grid.Column="0" ItemsSource="{Binding Nodes}">
 
+            <ItemsControl Grid.Column="0" ItemsSource="{Binding Nodes}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <Canvas Focusable="True" PointerPressed="OnCanvasPointerPressed"
@@ -69,7 +67,6 @@
                                 DoubleTapped="OnCanvasDoubleTapped" />
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
-
                 <ItemsControl.ItemTemplate>
                     <DataTemplate x:DataType="vm:NodeViewModel">
                         <Ellipse Fill="LightGray" Classes="node"
@@ -78,7 +75,6 @@
                                  Classes.selected="{Binding IsSelected}" />
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
-
                 <ItemsControl.Styles>
                     <Style Selector="ContentPresenter" x:DataType="vm:NodeViewModel">
                         <Setter Property="Canvas.Left">
@@ -98,19 +94,17 @@
                             </Setter.Value>
                         </Setter>
                     </Style>
-
                     <Style Selector="Ellipse.node">
                         <Setter Property="Stroke" Value="LightGray" />
                         <Setter Property="StrokeThickness" Value="1" />
                     </Style>
-
                     <Style Selector="Ellipse.node.selected">
                         <Setter Property="Stroke" Value="CadetBlue" />
                         <Setter Property="StrokeThickness" Value="4" />
                     </Style>
                 </ItemsControl.Styles>
-
             </ItemsControl>
+
             <ScrollViewer Grid.Column="1" Focusable="True">
                 <ItemsControl ItemsSource="{Binding SelectedNodes}">
                     <ItemsControl.ItemTemplate>
@@ -118,18 +112,18 @@
                             <Border BorderBrush="Gray" BorderThickness="1" Padding="6" Margin="4">
                                 <StackPanel>
                                     <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="Id: " Width="20" VerticalAlignment="Center" TextAlignment="Right"/>
+                                        <TextBlock Text="Id: " Width="20" VerticalAlignment="Center" TextAlignment="Right" />
                                         <TextBox Text="{Binding Id}" Width="150" IsReadOnly="True" />
                                     </StackPanel>
                                     <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="X: " Width="20" VerticalAlignment="Center" TextAlignment="Right"/>
+                                        <TextBlock Text="X: " Width="20" VerticalAlignment="Center" TextAlignment="Right" />
                                         <TextBox Text="{Binding X, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
-                                                 Width="50" HorizontalContentAlignment="Right"/>
+                                                 Width="50" HorizontalContentAlignment="Right" />
                                     </StackPanel>
                                     <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="Y: " Width="20" VerticalAlignment="Center" TextAlignment="Right"/>
+                                        <TextBlock Text="Y: " Width="20" VerticalAlignment="Center" TextAlignment="Right" />
                                         <TextBox Text="{Binding Y, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
-                                                 Width="50" HorizontalContentAlignment="Right"/>
+                                                 Width="50" HorizontalContentAlignment="Right" />
                                     </StackPanel>
                                 </StackPanel>
                             </Border>

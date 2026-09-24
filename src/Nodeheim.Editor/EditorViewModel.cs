@@ -11,12 +11,6 @@ public class EditorViewModel : IEditorOperations
     public EditorViewModel()
     {
         SelectedNodes = new ReadOnlyObservableCollection<NodeViewModel>(_selectedNodes);
-
-        CreateNode(new SurfacePosition(666, 256));
-        CreateNode(new SurfacePosition(708, 256));
-        CreateNode(new SurfacePosition(750, 256));
-        CreateConnection(Nodes.ElementAt(0), Nodes.ElementAt(1));
-        DeselectAll();
     }
 
     public ReadOnlyObservableCollection<NodeViewModel> SelectedNodes { get; }

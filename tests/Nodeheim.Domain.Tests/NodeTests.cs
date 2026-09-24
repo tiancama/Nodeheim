@@ -7,6 +7,7 @@ public class NodeTests
     {
         var a = new Node();
         var b = new Node();
+
         Assert.NotEqual(a.Id, b.Id);
     }
 
@@ -14,6 +15,7 @@ public class NodeTests
     public void NodeId_WithNewNode_IsNotEmpty()
     {
         var a = new Node();
-        Assert.NotEqual(a.Id, Guid.Empty);
+
+        Assert.NotEqual(Guid.Empty, a.Id);
     }
 }

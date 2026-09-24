@@ -93,7 +93,7 @@ public class InteractionControllerTests
         var movedPosition = new SurfacePosition(160, 199);
         var offset = new SurfacePosition(movedPosition.X - grabPosition.X, // 160 - 107 = 53
             movedPosition.Y - grabPosition.Y); // 199 - 113 = 86
-        var expected = new SurfacePosition(startNode.X + offset.X, //100 + 53 = 153
+        var expected = new SurfacePosition(startNode.X + offset.X, // 100 + 53 = 153
             startNode.Y + offset.Y); // 100 + 86 = 186
 
         var fake = new FakeEditorOperations();

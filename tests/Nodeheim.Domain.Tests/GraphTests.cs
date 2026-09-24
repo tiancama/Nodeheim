@@ -39,6 +39,7 @@ public class GraphTests
         graph.AddNode(a);
         graph.AddNode(b);
         graph.Connect(a, b);
+
         graph.Connect(a, b);
 
         Assert.Single(a.Neighbors);
@@ -84,6 +85,7 @@ public class GraphTests
         graph.AddNode(a);
         graph.AddNode(b);
         //graph.Connect(a, b);
+
         graph.Disconnect(a, b);
 
         Assert.Empty(a.Neighbors);

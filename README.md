@@ -22,13 +22,13 @@ Every dependency points inward. The domain core references nothing; every other 
 ```mermaid
 flowchart LR
     Editor["Nodeheim.Editor<br/>(Avalonia)"] --> Domain["Nodeheim.Domain<br/>(pure core)"]
-    Tests["Nodeheim.Domain.Tests<br/>(xUnit v3)"] --> Domain
-    Persistence["Persistence adapters<br/>(planned)"] -.-> Domain
+    DomainTests["Nodeheim.Domain.Tests<br/>(xUnit v3)"] --> Domain
+    EditorTests["Nodeheim.Editor.Tests<br/>(xUnit v3)"] --> Editor
 ```
 
 Guiding principles:
 
-- **Hexagonal (ports & adapters)** — the domain is a pure core; UI and persistence live in outer adapters behind ports the core defines.
+- **Hexagonal (ports & adapters)** — the domain is a pure core; UI and persistence live in outer adapters.
 - **Composition over inheritance** — capabilities are attached via interfaces and composition, not base-class hierarchies.
 - **References inside, IDs at the boundaries** — the live in-memory graph uses direct object references; IDs appear only when crossing a boundary (persistence, or an agent's inner map).
 - **Topology ≠ position** — the core is pure topology (nodes and neighbors); geometry is an optional, attached aspect.
@@ -41,7 +41,8 @@ Nodeheim/
 │   ├── Nodeheim.Domain/          # pure domain core — references nothing
 │   └── Nodeheim.Editor/          # Avalonia frontend → Domain
 └── tests/
-    └── Nodeheim.Domain.Tests/    # xUnit v3 → Domain
+    ├── Nodeheim.Domain.Tests/    # xUnit v3 → Domain
+    └── Nodeheim.Editor.Tests/    # xUnit v3 → Editor
 ```
 
 ## Getting started
@@ -63,16 +64,31 @@ dotnet run --project src/Nodeheim.Editor
 dotnet test
 ```
 
+## Using the editor
+
+| Action | Input |
+|---|---|
+| Create a node | Double-click on the canvas |
+| Select a node or connection | Click |
+| Add to or remove from selection | Ctrl+Click |
+| Clear selection | Click on empty canvas |
+| Move selection | Drag |
+| Connect selected nodes | `C` |
+| Disconnect selected nodes | `D` |
+| Delete selected nodes | `Delete` |
+
+Clicking a connection selects both of its endpoints; dragging it moves both.
+
 ## Tech stack
 
 - **Language / runtime:** C# 14 on .NET 10 (LTS)
 - **UI:** Avalonia (MVVM), cross-platform
 - **Tests:** xUnit v3
-- **Persistence** *(planned)*: SQLite first, then PostgreSQL, behind a single port; JSON and XML as export/import adapters
+- **Persistence** *(planned)*: SQLite first, then PostgreSQL; JSON and XML as export/import formats
 
 ## Status
 
-Early development. The domain core (nodes, neighbors, and the `Graph` manager) and a minimal Avalonia editor exist and are covered by tests. Persistence and agent movement are the next milestones. The API is expected to change.
+Early development. The domain core (nodes, neighbors, and the `Graph` manager) and an Avalonia editor exist and are covered by tests. The editor supports creating, selecting, moving, connecting, disconnecting, and deleting nodes. Persistence is the next milestone, followed by agent movement. The API is expected to change.
 
 This is primarily a personal learning project; issues and feedback are welcome.
 

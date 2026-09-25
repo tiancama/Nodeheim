@@ -28,55 +28,20 @@ public class NodeViewModel : INotifyPropertyChanged
     /// </summary>
     public Guid Id => Model.Id;
 
-    private double _x;
-
     /// <summary>
     /// Gets or sets the horizontal coordinate of the node's center.
     /// </summary>
-    public double X
-    {
-        get => _x;
-        set
-        {
-            if (_x.Equals(value)) return;
-            _x = value;
-            OnPropertyChanged();
-        }
-    }
-
-    private double _y;
+    public double X { get; set => SetProperty(ref field, value); }
 
     /// <summary>
     /// Gets or sets the vertical coordinate of the node's center.
     /// </summary>
-    public double Y
-    {
-        get => _y;
-        set
-        {
-            if (_y.Equals(value)) return;
-            _y = value;
-            OnPropertyChanged();
-        }
-    }
-
-    private double _radius;
+    public double Y { get; set => SetProperty(ref field, value); }
 
     /// <summary>
     /// Gets or sets the radius of the node.
     /// </summary>
-    public double Radius
-    {
-        get => _radius;
-        set
-        {
-            if (_radius.Equals(value)) return;
-            _radius = value;
-            OnPropertyChanged();
-        }
-    }
-
-    private bool _isSelected;
+    public double Radius { get; set => SetProperty(ref field, value); }
 
     /// <summary>
     /// Gets or sets a value indicating whether the node is selected.
@@ -84,19 +49,17 @@ public class NodeViewModel : INotifyPropertyChanged
     /// <remarks>
     /// Mirrors the selection held by <see cref="EditorViewModel"/>, which keeps this flag in sync.
     /// </remarks>
-    public bool IsSelected
-    {
-        get => _isSelected;
-        set
-        {
-            if (_isSelected.Equals(value)) return;
-            _isSelected = value;
-            OnPropertyChanged();
-        }
-    }
+    public bool IsSelected { get; set => SetProperty(ref field, value); }
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
     private void OnPropertyChanged([CallerMemberName] string? name = null) =>
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+
+    private void SetProperty<T>(ref T storage, T value, [CallerMemberName] string? name = null)
+    {
+        if (EqualityComparer<T>.Default.Equals(storage, value)) return;
+        storage = value;
+        OnPropertyChanged(name);
+    }
 }

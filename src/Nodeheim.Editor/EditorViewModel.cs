@@ -3,43 +3,49 @@ using Nodeheim.Domain;
 
 namespace Nodeheim.Editor;
 
+/// <summary>
+/// Represents the state of the editor: the nodes and connections on the surface
+/// and the current selection.
+/// </summary>
 public class EditorViewModel : IEditorOperations
 {
     private readonly Graph _graph = new();
     private readonly ObservableCollection<NodeViewModel> _selectedNodes = new();
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="EditorViewModel"/> class with an empty graph.
+    /// </summary>
     public EditorViewModel()
     {
         SelectedNodes = new ReadOnlyObservableCollection<NodeViewModel>(_selectedNodes);
     }
 
+    /// <summary>
+    /// Gets the currently selected nodes.
+    /// </summary>
     public ReadOnlyObservableCollection<NodeViewModel> SelectedNodes { get; }
 
+    /// <summary>
+    /// Gets the nodes on the editor surface.
+    /// </summary>
     public ObservableCollection<NodeViewModel> Nodes { get; } = new();
+
+    /// <summary>
+    /// Gets the connections on the editor surface.
+    /// </summary>
     public ObservableCollection<ConnectionViewModel> Connections { get; } = new();
 
-    /// <summary>
-    /// Reports whether the given node is part of the current selection.
-    /// </summary>
-    /// <param name="node">The node to test.</param>
-    /// <returns><c>true</c> if the node is currently selected; otherwise <c>false</c>.</returns>
+    /// <inheritdoc />
     public bool IsInSelection(NodeViewModel node) => _selectedNodes.Contains(node);
 
-    /// <summary>
-    /// Sets the selection to exactly this node, clearing any previous selection.
-    /// </summary>
-    /// <param name="node">The node to become the sole selected node.</param>
+    /// <inheritdoc />
     public void SelectOnly(NodeViewModel node)
     {
         DeselectAll();
         SetSelected(node, true);
     }
 
-    /// <summary>
-    /// Sets the selection to only these two nodes, clearing any previous selection.
-    /// </summary>
-    /// <param name="nodeA">The first node to become selected.</param>
-    /// <param name="nodeB">The second node to become selected.</param>
+    /// <inheritdoc />
     public void SelectOnly(NodeViewModel nodeA, NodeViewModel nodeB)
     {
         DeselectAll();
@@ -47,18 +53,10 @@ public class EditorViewModel : IEditorOperations
         SetSelected(nodeB, true);
     }
 
-    /// <summary>
-    /// Toggles the selection state of a node: selects it if currently unselected, deselects it otherwise.
-    /// </summary>
-    /// <param name="node">The node whose selection state is flipped.</param>
+    /// <inheritdoc />
     public void ToggleSelected(NodeViewModel node) => SetSelected(node, !_selectedNodes.Contains(node));
 
-    /// <summary>
-    /// Toggles both nodes to the same selection state. If both are selected, they become unselected;
-    /// otherwise, both become selected.
-    /// </summary>
-    /// <param name="nodeA">The first node of this group.</param>
-    /// <param name="nodeB">The second node of this group.</param>
+    /// <inheritdoc />
     public void ToggleAsGroup(NodeViewModel nodeA, NodeViewModel nodeB)
     {
         if (_selectedNodes.Contains(nodeA) && _selectedNodes.Contains(nodeB))
@@ -73,9 +71,7 @@ public class EditorViewModel : IEditorOperations
         }
     }
 
-    /// <summary>
-    /// Clears the selection, resetting the selected flag on every previously selected node.
-    /// </summary>
+    /// <inheritdoc />
     public void DeselectAll()
     {
         foreach (NodeViewModel node in _selectedNodes.ToList())
@@ -84,21 +80,14 @@ public class EditorViewModel : IEditorOperations
         }
     }
 
-    /// <summary>
-    /// Moves a node to the given position.
-    /// </summary>
-    /// <param name="node">The node to move.</param>
-    /// <param name="position">The new center position of the node.</param>
+    /// <inheritdoc />
     public void MoveNode(NodeViewModel node, SurfacePosition position)
     {
         node.X = position.X;
         node.Y = position.Y;
     }
 
-    /// <summary>
-    /// Creates a node at the given position and selects it as the sole selection.
-    /// </summary>
-    /// <param name="position">The center position of the new node.</param>
+    /// <inheritdoc />
     public void CreateNode(SurfacePosition position)
     {
         var node = new Node();
@@ -108,9 +97,7 @@ public class EditorViewModel : IEditorOperations
         SelectOnly(nodeViewModel);
     }
 
-    /// <summary>
-    /// Removes every selected node from the graph and the view, clearing the selection.
-    /// </summary>
+    /// <inheritdoc />
     public void DeleteSelectedNodes()
     {
         var selectedNodes = _selectedNodes.ToList();
@@ -123,11 +110,7 @@ public class EditorViewModel : IEditorOperations
         }
     }
 
-    /// <summary>
-    /// Connects every pair among the currently selected nodes, so that the selection becomes
-    /// fully interconnected. Pairs that are already connected are left unchanged. Does nothing
-    /// if fewer than two nodes are selected.
-    /// </summary>
+    /// <inheritdoc />
     public void ConnectSelectedNodes()
     {
         if (_selectedNodes.Count <= 1) return;
@@ -141,11 +124,7 @@ public class EditorViewModel : IEditorOperations
         }
     }
 
-    /// <summary>
-    /// Disconnects every connected pair among the currently selected nodes, removing only
-    /// connections that run between two selected nodes. A connection from a selected node to
-    /// an unselected one is left in place. Does nothing if fewer than two nodes are selected.
-    /// </summary>
+    /// <inheritdoc />
     public void DisconnectSelectedNodes()
     {
         if (_selectedNodes.Count <= 1) return;
@@ -157,10 +136,7 @@ public class EditorViewModel : IEditorOperations
             }
     }
 
-    /// <summary>
-    /// Returns a snapshot mapping each selected node to its current position.
-    /// </summary>
-    /// <returns>A dictionary from each selected node to its captured position.</returns>
+    /// <inheritdoc />
     public IReadOnlyDictionary<NodeViewModel, SurfacePosition> SnapshotSelectionPositions()
     {
         Dictionary<NodeViewModel, SurfacePosition> origins = new();
@@ -173,10 +149,13 @@ public class EditorViewModel : IEditorOperations
     }
 
     /// <summary>
-    /// Core method for both selecting and deselecting a node.
+    /// Selects or deselects a node, keeping the selection and the node's
+    /// <see cref="NodeViewModel.IsSelected"/> flag in sync.
     /// </summary>
-    /// <param name="node">The node to be selected or deselected.</param>
-    /// <param name="selected"><c>true</c> selects the node; <c>false</c> deselects the node.</param>
+    /// <param name="node">The node to select or deselect.</param>
+    /// <param name="selected">
+    /// <see langword="true"/> to select the node; <see langword="false"/> to deselect it.
+    /// </param>
     private void SetSelected(NodeViewModel node, bool selected)
     {
         if (selected)
@@ -195,7 +174,7 @@ public class EditorViewModel : IEditorOperations
     }
 
     /// <summary>
-    /// Finds every connection that contains the given node and removes it from the view projection.
+    /// Removes every connection that involves the given node from the view projection.
     /// </summary>
     /// <param name="node">The node whose connections are removed.</param>
     private void RemoveConnectionsOf(NodeViewModel node)

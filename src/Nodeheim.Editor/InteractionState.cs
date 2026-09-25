@@ -1,67 +1,93 @@
 ﻿namespace Nodeheim.Editor;
 
 /// <summary>
-/// Base class for interaction states. A state responds to the input intents it cares about
-/// and ignores the rest: every handler is a virtual no-op, so a concrete state overrides
-/// only the intents relevant to it. States drive their own transitions through the controller.
+/// Represents a state of the pointer interaction on the editor surface.
 /// </summary>
+/// <remarks>
+/// Every handler does nothing by default, so a concrete state overrides only the
+/// intents relevant to it. States perform their own transitions through the controller.
+/// </remarks>
 public abstract class InteractionState
 {
+    /// <summary>
+    /// Gets the editor operations this state acts on.
+    /// </summary>
     protected IEditorOperations Operations { get; }
+
+    /// <summary>
+    /// Gets the controller that holds this state.
+    /// </summary>
     protected InteractionController Controller { get; }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="InteractionState"/> class.
+    /// </summary>
+    /// <param name="operations">The editor operations the state acts on.</param>
+    /// <param name="controller">The controller that holds the state and performs transitions.</param>
     protected InteractionState(IEditorOperations operations, InteractionController controller)
     {
         Operations = operations;
         Controller = controller;
     }
 
-    /// <summary>Called when this state becomes current, for entry effects.</summary>
+    /// <summary>
+    /// Performs entry effects when this state becomes current.
+    /// </summary>
     public virtual void OnEnter() { }
 
-    /// <summary>Called when this state stops being current, for cleanup.</summary>
+    /// <summary>
+    /// Performs cleanup when this state stops being current.
+    /// </summary>
     public virtual void OnExit() { }
 
     /// <summary>
-    /// An exclusive selection gesture on the given target.
+    /// Handles an exclusive selection gesture on a target.
     /// </summary>
     /// <param name="target">The target that was hit.</param>
     public virtual void OnExclusive(HitTarget target) { }
 
     /// <summary>
-    /// A toggling selection gesture on the given target.
+    /// Handles a toggling selection gesture on a target.
     /// </summary>
     /// <param name="target">The target that was hit.</param>
     public virtual void OnToggle(HitTarget target) { }
 
     /// <summary>
-    /// A press on the given target that may begin a drag.
+    /// Handles a press on a target that may begin a drag.
     /// </summary>
     /// <param name="target">The target that was hit.</param>
-    /// <param name="position">The press location used as the drag anchor.</param>
+    /// <param name="position">The press position, used as the drag anchor.</param>
     public virtual void OnGrab(HitTarget target, SurfacePosition position) { }
 
     /// <summary>
-    /// The pointer moved.
+    /// Handles a movement of the pointer.
     /// </summary>
-    /// <param name="position">The current position of the pointer.</param>
+    /// <param name="position">The current pointer position.</param>
     public virtual void OnPointerMoved(SurfacePosition position) { }
 
-    /// <summary>The pointer was released.</summary>
+    /// <summary>
+    /// Handles the release of the pointer.
+    /// </summary>
     public virtual void OnPointerReleased() { }
 
     /// <summary>
-    /// A request to create a node.
+    /// Handles a request to create a node.
     /// </summary>
-    /// <param name="position">The position for the new node.</param>
+    /// <param name="position">The center position of the new node.</param>
     public virtual void OnCreateNode(SurfacePosition position) { }
 
-    /// <summary>A command to delete the current selection.</summary>
+    /// <summary>
+    /// Handles a command to delete the selected nodes.
+    /// </summary>
     public virtual void OnDeleteNodes() { }
 
-    /// <summary>A command to connect the current selection.</summary>
+    /// <summary>
+    /// Handles a command to connect the selected nodes.
+    /// </summary>
     public virtual void OnConnectNodes() { }
 
-    /// <summary>A command to disconnect the current selection.</summary>
+    /// <summary>
+    /// Handles a command to disconnect the selected nodes.
+    /// </summary>
     public virtual void OnDisconnectNodes() { }
 }

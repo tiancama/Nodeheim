@@ -1,19 +1,24 @@
 ﻿namespace Nodeheim.Editor;
 
 /// <summary>
-/// Active drag. Captures the positions of the selected nodes at construction, then moves them
-/// together by the pointer's offset from the press anchor, returning to <see cref="Idle"/> on
-/// release.
+/// Represents an active drag of the selected nodes.
 /// </summary>
+/// <remarks>
+/// The nodes move together by the pointer's offset from the anchor. Releasing the
+/// pointer returns to <see cref="Idle"/>.
+/// </remarks>
 public sealed class Dragging : InteractionState
 {
     private readonly SurfacePosition _anchor;
     private readonly IReadOnlyDictionary<NodeViewModel, SurfacePosition> _origins;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Dragging"/> class and captures the
+    /// positions of the selected nodes.
+    /// </summary>
+    /// <param name="operations">The editor operations the state acts on.</param>
+    /// <param name="controller">The controller that holds the state and performs transitions.</param>
     /// <param name="anchor">The pointer position at press time; the origin of the drag offset.</param>
-    /// <remarks>
-    /// Node origins are captured here, so they reflect the positions held before the first move.
-    /// </remarks>
     public Dragging(IEditorOperations operations, InteractionController controller, SurfacePosition anchor)
         : base(operations, controller)
     {
@@ -21,6 +26,10 @@ public sealed class Dragging : InteractionState
         _origins = operations.SnapshotSelectionPositions();
     }
 
+    /// <summary>
+    /// Moves every captured node by the pointer's offset from the anchor.
+    /// </summary>
+    /// <param name="position">The current pointer position.</param>
     public override void OnPointerMoved(SurfacePosition position)
     {
         foreach ((NodeViewModel node, SurfacePosition origin) in _origins)
@@ -31,5 +40,8 @@ public sealed class Dragging : InteractionState
         }
     }
 
+    /// <summary>
+    /// Ends the drag and returns to <see cref="Idle"/>.
+    /// </summary>
     public override void OnPointerReleased() => Controller.TransitionTo(new Idle(Operations, Controller));
 }

@@ -21,6 +21,25 @@ public partial class MainWindow : Window
         _controller = new(_vm);
     }
 
+    protected override void OnKeyDown(KeyEventArgs e)
+    {
+        base.OnKeyDown(e);
+
+        if (e.Key == Key.Delete)
+        {
+            _controller.DeleteNodes();
+            e.Handled = true;
+        }
+        else if (e.Key == Key.C)
+        {
+            _controller.ConnectNodes();
+        }
+        else if (e.Key == Key.D)
+        {
+            _controller.DisconnectNodes();
+        }
+    }
+
     private void OnCanvasPointerPressed(object? sender, PointerPressedEventArgs e)
     {
         HitTarget target = Resolve(e);
@@ -59,25 +78,6 @@ public partial class MainWindow : Window
 
     private void OnCanvasDoubleTapped(object? sender, TappedEventArgs e) =>
         _controller.CreateNode(e.GetPosition((Visual)sender).ToSurfacePosition());
-
-    protected override void OnKeyDown(KeyEventArgs e)
-    {
-        base.OnKeyDown(e);
-
-        if (e.Key == Key.Delete)
-        {
-            _controller.DeleteNodes();
-            e.Handled = true;
-        }
-        else if (e.Key == Key.C)
-        {
-            _controller.ConnectNodes();
-        }
-        else if (e.Key == Key.D)
-        {
-            _controller.DisconnectNodes();
-        }
-    }
 
     private void OnConnectionLineLoaded(object? sender, RoutedEventArgs e)
     {

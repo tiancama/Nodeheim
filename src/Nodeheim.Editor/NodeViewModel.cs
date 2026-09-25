@@ -21,7 +21,7 @@ public class NodeViewModel : INotifyPropertyChanged
         Radius = DefaultRadius;
     }
 
-    internal Node Model { get; }
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     /// <summary>
     /// Gets the identifier of the wrapped node.
@@ -51,7 +51,7 @@ public class NodeViewModel : INotifyPropertyChanged
     /// </remarks>
     public bool IsSelected { get; set => SetProperty(ref field, value); }
 
-    public event PropertyChangedEventHandler? PropertyChanged;
+    internal Node Model { get; }
 
     private void OnPropertyChanged([CallerMemberName] string? name = null) =>
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));

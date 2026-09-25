@@ -9,9 +9,6 @@
 /// </remarks>
 public sealed record class ConnectionViewModel
 {
-    internal NodeViewModel NodeA { get; }
-    internal NodeViewModel NodeB { get; }
-
     /// <summary>
     /// Initializes a new instance of the <see cref="ConnectionViewModel"/> class.
     /// </summary>
@@ -30,4 +27,7 @@ public sealed record class ConnectionViewModel
             NodeB = nodeA;
         }
     }
+
+    internal NodeViewModel NodeA { get; }
+    internal NodeViewModel NodeB { get; }
 }

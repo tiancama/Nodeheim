@@ -10,16 +10,6 @@
 public abstract class InteractionState
 {
     /// <summary>
-    /// Gets the editor operations this state acts on.
-    /// </summary>
-    protected IEditorOperations Operations { get; }
-
-    /// <summary>
-    /// Gets the controller that holds this state.
-    /// </summary>
-    protected InteractionController Controller { get; }
-
-    /// <summary>
     /// Initializes a new instance of the <see cref="InteractionState"/> class.
     /// </summary>
     /// <param name="operations">The editor operations the state acts on.</param>
@@ -29,6 +19,16 @@ public abstract class InteractionState
         Operations = operations;
         Controller = controller;
     }
+
+    /// <summary>
+    /// Gets the editor operations this state acts on.
+    /// </summary>
+    protected IEditorOperations Operations { get; }
+
+    /// <summary>
+    /// Gets the controller that holds this state.
+    /// </summary>
+    protected InteractionController Controller { get; }
 
     /// <summary>
     /// Performs entry effects when this state becomes current.

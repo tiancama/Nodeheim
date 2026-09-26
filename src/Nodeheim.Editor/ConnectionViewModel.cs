@@ -28,6 +28,13 @@ public sealed record class ConnectionViewModel
         }
     }
 
-    internal NodeViewModel NodeA { get; }
-    internal NodeViewModel NodeB { get; }
+    /// <summary>
+    /// Gets one endpoint of the connection.
+    /// </summary>
+    public NodeViewModel NodeA { get; }
+
+    /// <summary>
+    /// Gets the other endpoint of the connection.
+    /// </summary>
+    public NodeViewModel NodeB { get; }
 }

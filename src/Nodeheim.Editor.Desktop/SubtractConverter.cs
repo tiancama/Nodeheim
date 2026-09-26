@@ -2,7 +2,7 @@
 using Avalonia;
 using Avalonia.Data.Converters;
 
-namespace Nodeheim.Editor;
+namespace Nodeheim.Editor.Desktop;
 
 public class SubtractConverter : IMultiValueConverter
 {

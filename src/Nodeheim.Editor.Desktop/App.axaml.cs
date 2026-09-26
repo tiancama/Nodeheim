@@ -2,7 +2,7 @@ using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 
-namespace Nodeheim.Editor;
+namespace Nodeheim.Editor.Desktop;
 
 public partial class App : Application
 {

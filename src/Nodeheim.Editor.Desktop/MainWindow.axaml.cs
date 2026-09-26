@@ -7,7 +7,7 @@ using Avalonia.Data.Converters;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 
-namespace Nodeheim.Editor;
+namespace Nodeheim.Editor.Desktop;
 
 public partial class MainWindow : Window
 {

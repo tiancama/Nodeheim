@@ -1,6 +1,6 @@
 ﻿using Avalonia.Data.Converters;
 
-namespace Nodeheim.Editor;
+namespace Nodeheim.Editor.Desktop;
 
 public static class NodeConverters
 {

@@ -1,6 +1,6 @@
 ﻿using Avalonia;
 
-namespace Nodeheim.Editor;
+namespace Nodeheim.Editor.Desktop;
 
 public static class PointExtensions
 {

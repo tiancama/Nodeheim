@@ -1,7 +1,7 @@
 ﻿using Avalonia;
 using System;
 
-namespace Nodeheim.Editor;
+namespace Nodeheim.Editor.Desktop;
 
 class Program
 {

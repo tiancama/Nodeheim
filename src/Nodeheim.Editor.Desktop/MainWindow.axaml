@@ -3,8 +3,9 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="using:Nodeheim.Editor"
+        xmlns:local="using:Nodeheim.Editor.Desktop"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-        x:Class="Nodeheim.Editor.MainWindow"
+        x:Class="Nodeheim.Editor.Desktop.MainWindow"
         x:DataType="vm:EditorViewModel"
         Title="Nodeheim.Editor">
     <DockPanel>
@@ -33,13 +34,13 @@
                     <DataTemplate x:DataType="vm:ConnectionViewModel">
                         <Line Classes="connection" Loaded="OnConnectionLineLoaded">
                             <Line.StartPoint>
-                                <MultiBinding Converter="{x:Static vm:NodeConverters.Point}">
+                                <MultiBinding Converter="{x:Static local:NodeConverters.Point}">
                                     <Binding Path="NodeA.X" />
                                     <Binding Path="NodeA.Y" />
                                 </MultiBinding>
                             </Line.StartPoint>
                             <Line.EndPoint>
-                                <MultiBinding Converter="{x:Static vm:NodeConverters.Point}">
+                                <MultiBinding Converter="{x:Static local:NodeConverters.Point}">
                                     <Binding Path="NodeB.X" />
                                     <Binding Path="NodeB.Y" />
                                 </MultiBinding>
@@ -70,8 +71,8 @@
                 <ItemsControl.ItemTemplate>
                     <DataTemplate x:DataType="vm:NodeViewModel">
                         <Ellipse Fill="LightGray" Classes="node"
-                                 Width="{Binding Radius, Converter={x:Static vm:NodeConverters.Diameter}}"
-                                 Height="{Binding Radius, Converter={x:Static vm:NodeConverters.Diameter}}"
+                                 Width="{Binding Radius, Converter={x:Static local:NodeConverters.Diameter}}"
+                                 Height="{Binding Radius, Converter={x:Static local:NodeConverters.Diameter}}"
                                  Classes.selected="{Binding IsSelected}" />
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
@@ -79,7 +80,7 @@
                     <Style Selector="ContentPresenter" x:DataType="vm:NodeViewModel">
                         <Setter Property="Canvas.Left">
                             <Setter.Value>
-                                <MultiBinding Converter="{x:Static vm:NodeConverters.Subtract}">
+                                <MultiBinding Converter="{x:Static local:NodeConverters.Subtract}">
                                     <Binding Path="X" />
                                     <Binding Path="Radius" />
                                 </MultiBinding>
@@ -87,7 +88,7 @@
                         </Setter>
                         <Setter Property="Canvas.Top">
                             <Setter.Value>
-                                <MultiBinding Converter="{x:Static vm:NodeConverters.Subtract}">
+                                <MultiBinding Converter="{x:Static local:NodeConverters.Subtract}">
                                     <Binding Path="Y" />
                                     <Binding Path="Radius" />
                                 </MultiBinding>

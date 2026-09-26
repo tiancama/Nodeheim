@@ -21,7 +21,7 @@ Every dependency points inward. The domain core references nothing; every other 
 
 ```mermaid
 flowchart LR
-    Editor["Nodeheim.Editor<br/>(Avalonia)"] --> Domain["Nodeheim.Domain<br/>(pure core)"]
+    Desktop["Nodeheim.Editor.Desktop<br/>(Avalonia)"] --> Editor["Nodeheim.Editor<br/>(view models)"] --> Domain["Nodeheim.Domain<br/>(pure core)"]
     DomainTests["Nodeheim.Domain.Tests<br/>(xUnit v3)"] --> Domain
     EditorTests["Nodeheim.Editor.Tests<br/>(xUnit v3)"] --> Editor
 ```
@@ -39,7 +39,8 @@ Guiding principles:
 Nodeheim/
 ├── src/
 │   ├── Nodeheim.Domain/          # pure domain core — references nothing
-│   └── Nodeheim.Editor/          # Avalonia frontend → Domain
+│   ├── Nodeheim.Editor/          # framework-free view models → Domain
+│   └── Nodeheim.Editor.Desktop/  # Avalonia frontend → Editor
 └── tests/
     ├── Nodeheim.Domain.Tests/    # xUnit v3 → Domain
     └── Nodeheim.Editor.Tests/    # xUnit v3 → Editor
@@ -58,7 +59,7 @@ cd Nodeheim
 dotnet build
 
 # run the editor
-dotnet run --project src/Nodeheim.Editor
+dotnet run --project src/Nodeheim.Editor.Desktop
 
 # run the tests
 dotnet test

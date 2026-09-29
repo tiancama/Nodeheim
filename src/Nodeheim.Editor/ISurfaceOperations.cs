@@ -6,7 +6,7 @@
 /// <remarks>
 /// Separates the framework-free interaction layer from the view model.
 /// </remarks>
-public interface IEditorOperations
+public interface ISurfaceOperations
 {
     /// <summary>
     /// Determines whether the given node is part of the current selection.

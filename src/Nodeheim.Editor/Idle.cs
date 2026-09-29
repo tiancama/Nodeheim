@@ -14,7 +14,7 @@ public sealed class Idle : InteractionState
     /// </summary>
     /// <param name="operations">The editor operations the state acts on.</param>
     /// <param name="controller">The controller that holds the state and performs transitions.</param>
-    public Idle(IEditorOperations operations, InteractionController controller)
+    public Idle(ISurfaceOperations operations, InteractionController controller)
         : base(operations, controller)
     { }
 

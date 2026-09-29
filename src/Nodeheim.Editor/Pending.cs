@@ -20,7 +20,7 @@ public sealed class Pending : InteractionState
     /// <param name="controller">The controller that holds the state and performs transitions.</param>
     /// <param name="target">The target that was grabbed.</param>
     /// <param name="anchor">The pointer position at the time of the grab.</param>
-    public Pending(IEditorOperations operations, InteractionController controller, HitTarget target,
+    public Pending(ISurfaceOperations operations, InteractionController controller, HitTarget target,
         SurfacePosition anchor)
         : base(operations, controller)
     {

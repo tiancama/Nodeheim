@@ -19,7 +19,7 @@ public sealed class Dragging : InteractionState
     /// <param name="operations">The editor operations the state acts on.</param>
     /// <param name="controller">The controller that holds the state and performs transitions.</param>
     /// <param name="anchor">The pointer position at press time; the origin of the drag offset.</param>
-    public Dragging(IEditorOperations operations, InteractionController controller, SurfacePosition anchor)
+    public Dragging(ISurfaceOperations operations, InteractionController controller, SurfacePosition anchor)
         : base(operations, controller)
     {
         _anchor = anchor;

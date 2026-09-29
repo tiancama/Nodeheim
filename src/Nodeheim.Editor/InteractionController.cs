@@ -17,7 +17,7 @@ public class InteractionController
     /// <see cref="Idle"/> state.
     /// </summary>
     /// <param name="operations">The editor operations the states act on.</param>
-    public InteractionController(IEditorOperations operations)
+    public InteractionController(ISurfaceOperations operations)
     {
         _current = new Idle(operations, this);
     }

@@ -7,74 +7,74 @@ public class InteractionControllerTests
     [Fact]
     public void CreateNode_WhenIdle_DelegatesToCreateNode()
     {
-        var fake = new FakeEditorOperations();
+        var fake = new FakeSurfaceOperations();
         var controller = new InteractionController(fake);
 
         controller.CreateNode(new SurfacePosition(0, 0));
 
-        Assert.Contains(nameof(IEditorOperations.CreateNode), fake.Calls);
+        Assert.Contains(nameof(ISurfaceOperations.CreateNode), fake.Calls);
     }
 
     [Fact]
     public void DeleteNodes_WhenIdle_DelegatesToDeleteSelectedNodes()
     {
-        var fake = new FakeEditorOperations();
+        var fake = new FakeSurfaceOperations();
         var controller = new InteractionController(fake);
 
         controller.DeleteNodes();
 
-        Assert.Contains(nameof(IEditorOperations.DeleteSelectedNodes), fake.Calls);
+        Assert.Contains(nameof(ISurfaceOperations.DeleteSelectedNodes), fake.Calls);
     }
 
     [Fact]
     public void ConnectNodes_WhenIdle_DelegatesToConnectSelectedNodes()
     {
-        var fake = new FakeEditorOperations();
+        var fake = new FakeSurfaceOperations();
         var controller = new InteractionController(fake);
 
         controller.ConnectNodes();
 
-        Assert.Contains(nameof(IEditorOperations.ConnectSelectedNodes), fake.Calls);
+        Assert.Contains(nameof(ISurfaceOperations.ConnectSelectedNodes), fake.Calls);
     }
 
     [Fact]
     public void DisconnectNodes_WhenIdle_DelegatesToDisconnectSelectedNodes()
     {
-        var fake = new FakeEditorOperations();
+        var fake = new FakeSurfaceOperations();
         var controller = new InteractionController(fake);
 
         controller.DisconnectNodes();
 
-        Assert.Contains(nameof(IEditorOperations.DisconnectSelectedNodes), fake.Calls);
+        Assert.Contains(nameof(ISurfaceOperations.DisconnectSelectedNodes), fake.Calls);
     }
 
     [Fact]
     public void Exclusive_WithEmptyHit_DelegatesToDeselectAll()
     {
-        var fake = new FakeEditorOperations();
+        var fake = new FakeSurfaceOperations();
         var controller = new InteractionController(fake);
 
         controller.Exclusive(new EmptyHit());
 
-        Assert.Contains(nameof(IEditorOperations.DeselectAll), fake.Calls);
+        Assert.Contains(nameof(ISurfaceOperations.DeselectAll), fake.Calls);
     }
 
     [Fact]
     public void Toggle_WithNodeHit_DelegatesToToggleSelected()
     {
-        var fake = new FakeEditorOperations();
+        var fake = new FakeSurfaceOperations();
         var controller = new InteractionController(fake);
         var node = new NodeViewModel(new Node());
 
         controller.Toggle(new NodeHit(node));
 
-        Assert.Contains(nameof(IEditorOperations.ToggleSelected), fake.Calls);
+        Assert.Contains(nameof(ISurfaceOperations.ToggleSelected), fake.Calls);
     }
 
     [Fact]
     public void Toggle_WithConnectionHit_DelegatesToToggleAsGroup()
     {
-        var fake = new FakeEditorOperations();
+        var fake = new FakeSurfaceOperations();
         var controller = new InteractionController(fake);
         var connection = new ConnectionViewModel(
             new NodeViewModel(new Node()),
@@ -82,7 +82,7 @@ public class InteractionControllerTests
 
         controller.Toggle(new ConnectionHit(connection));
 
-        Assert.Contains(nameof(IEditorOperations.ToggleAsGroup), fake.Calls);
+        Assert.Contains(nameof(ISurfaceOperations.ToggleAsGroup), fake.Calls);
     }
 
     [Fact]
@@ -96,7 +96,7 @@ public class InteractionControllerTests
         var expected = new SurfacePosition(startNode.X + offset.X, // 100 + 53 = 153
             startNode.Y + offset.Y); // 100 + 86 = 186
 
-        var fake = new FakeEditorOperations();
+        var fake = new FakeSurfaceOperations();
         var controller = new InteractionController(fake);
         var node = new NodeViewModel(new Node()) { X = startNode.X, Y = startNode.Y };
 
@@ -121,7 +121,7 @@ public class InteractionControllerTests
         var expectedB = new SurfacePosition(startNodeB.X + offset.X, // 142 + 53 = 195
             startNodeB.Y + offset.Y); // 166 + 86 = 252
 
-        var fake = new FakeEditorOperations();
+        var fake = new FakeSurfaceOperations();
         var controller = new InteractionController(fake);
 
         var nodeA = new NodeViewModel(new Node()) { X = startNodeA.X, Y = startNodeA.Y };
@@ -140,7 +140,7 @@ public class InteractionControllerTests
     [Fact]
     public void PointerReleased_AfterGrabbingSelectedNodeWithoutMoving_CollapsesSelectionToThatNode()
     {
-        var fake = new FakeEditorOperations();
+        var fake = new FakeSurfaceOperations();
         var controller = new InteractionController(fake);
         var nodeA = new NodeViewModel(new Node());
         var nodeB = new NodeViewModel(new Node());
@@ -158,7 +158,7 @@ public class InteractionControllerTests
     [Fact]
     public void PointerMoved_AfterGrabbingSelectedNode_BeginsDragInsteadOfCollapsing()
     {
-        var fake = new FakeEditorOperations();
+        var fake = new FakeSurfaceOperations();
         var controller = new InteractionController(fake);
         var node = new NodeViewModel(new Node()) { X = 100, Y = 100 };
 
@@ -173,7 +173,7 @@ public class InteractionControllerTests
     }
 }
 
-file sealed class FakeEditorOperations : IEditorOperations
+file sealed class FakeSurfaceOperations : ISurfaceOperations
 {
     private readonly HashSet<NodeViewModel> _selection = new();
 

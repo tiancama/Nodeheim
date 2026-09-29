@@ -14,7 +14,7 @@ public abstract class InteractionState
     /// </summary>
     /// <param name="operations">The editor operations the state acts on.</param>
     /// <param name="controller">The controller that holds the state and performs transitions.</param>
-    protected InteractionState(IEditorOperations operations, InteractionController controller)
+    protected InteractionState(ISurfaceOperations operations, InteractionController controller)
     {
         Operations = operations;
         Controller = controller;
@@ -23,7 +23,7 @@ public abstract class InteractionState
     /// <summary>
     /// Gets the editor operations this state acts on.
     /// </summary>
-    protected IEditorOperations Operations { get; }
+    protected ISurfaceOperations Operations { get; }
 
     /// <summary>
     /// Gets the controller that holds this state.

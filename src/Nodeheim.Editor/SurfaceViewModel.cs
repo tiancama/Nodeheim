@@ -9,14 +9,16 @@ namespace Nodeheim.Editor;
 /// </summary>
 public class SurfaceViewModel : ISurfaceOperations
 {
-    private readonly Graph _graph = new();
+    private readonly Graph _graph;
     private readonly ObservableCollection<NodeViewModel> _selectedNodes = new();
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="SurfaceViewModel"/> class with an empty graph.
+    /// Initializes a new instance of the <see cref="SurfaceViewModel"/> class.
     /// </summary>
-    public SurfaceViewModel()
+    /// <param name="graph">The graph whose nodes and connections the surface works on.</param>
+    public SurfaceViewModel(Graph graph)
     {
+        _graph = graph;
         SelectedNodes = new ReadOnlyObservableCollection<NodeViewModel>(_selectedNodes);
     }
 

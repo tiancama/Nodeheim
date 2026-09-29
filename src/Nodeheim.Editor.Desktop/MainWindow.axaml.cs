@@ -6,12 +6,13 @@ using Avalonia.Data;
 using Avalonia.Data.Converters;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Nodeheim.Domain;
 
 namespace Nodeheim.Editor.Desktop;
 
 public partial class MainWindow : Window
 {
-    private readonly SurfaceViewModel _vm = new();
+    private readonly SurfaceViewModel _vm = new(new Graph());
     private readonly InteractionController _controller;
 
     public MainWindow()

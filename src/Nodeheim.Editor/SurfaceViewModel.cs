@@ -7,15 +7,15 @@ namespace Nodeheim.Editor;
 /// Represents the state of the editor: the nodes and connections on the surface
 /// and the current selection.
 /// </summary>
-public class EditorViewModel : IEditorOperations
+public class SurfaceViewModel : IEditorOperations
 {
     private readonly Graph _graph = new();
     private readonly ObservableCollection<NodeViewModel> _selectedNodes = new();
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="EditorViewModel"/> class with an empty graph.
+    /// Initializes a new instance of the <see cref="SurfaceViewModel"/> class with an empty graph.
     /// </summary>
-    public EditorViewModel()
+    public SurfaceViewModel()
     {
         SelectedNodes = new ReadOnlyObservableCollection<NodeViewModel>(_selectedNodes);
     }

@@ -6,7 +6,7 @@
         xmlns:local="using:Nodeheim.Editor.Desktop"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="Nodeheim.Editor.Desktop.MainWindow"
-        x:DataType="vm:EditorViewModel"
+        x:DataType="vm:SurfaceViewModel"
         Title="Nodeheim.Editor">
     <DockPanel>
         <Menu DockPanel.Dock="Top">

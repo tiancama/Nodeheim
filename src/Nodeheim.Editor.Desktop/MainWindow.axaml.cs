@@ -11,7 +11,7 @@ namespace Nodeheim.Editor.Desktop;
 
 public partial class MainWindow : Window
 {
-    private readonly EditorViewModel _vm = new();
+    private readonly SurfaceViewModel _vm = new();
     private readonly InteractionController _controller;
 
     public MainWindow()

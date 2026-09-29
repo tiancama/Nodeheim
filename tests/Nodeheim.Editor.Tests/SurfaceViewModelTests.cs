@@ -2,12 +2,12 @@
 
 namespace Nodeheim.Editor.Tests;
 
-public class EditorViewModelTests
+public class SurfaceViewModelTests
 {
     [Fact]
     public void SelectOnly_WithSingleNode_SelectsOnlyThatNode()
     {
-        var editor = new EditorViewModel();
+        var editor = new SurfaceViewModel();
         var node = new NodeViewModel(new Node());
 
         editor.SelectOnly(node);
@@ -20,7 +20,7 @@ public class EditorViewModelTests
     [Fact]
     public void SelectOnly_CalledTwiceWithSameNode_KeepsSingleSelection()
     {
-        var editor = new EditorViewModel();
+        var editor = new SurfaceViewModel();
         var node = new NodeViewModel(new Node());
 
         editor.SelectOnly(node);
@@ -32,7 +32,7 @@ public class EditorViewModelTests
     [Fact]
     public void DeselectAll_WithSelectedNode_ClearsSelectionAndResetsFlag()
     {
-        var editor = new EditorViewModel();
+        var editor = new SurfaceViewModel();
         var node = new NodeViewModel(new Node());
         editor.SelectOnly(node);
 
@@ -45,7 +45,7 @@ public class EditorViewModelTests
     [Fact]
     public void ToggleSelected_OnUnselectedNode_AddsToSelection()
     {
-        var editor = new EditorViewModel();
+        var editor = new SurfaceViewModel();
         var node = new NodeViewModel(new Node());
 
         editor.ToggleSelected(node);
@@ -57,7 +57,7 @@ public class EditorViewModelTests
     [Fact]
     public void ToggleSelected_OnSelectedNode_RemovesFromSelection()
     {
-        var editor = new EditorViewModel();
+        var editor = new SurfaceViewModel();
         var node = new NodeViewModel(new Node());
         editor.ToggleSelected(node);
 
@@ -70,7 +70,7 @@ public class EditorViewModelTests
     [Fact]
     public void ToggleSelected_WithExistingSelection_KeepsBothWithoutDuplication()
     {
-        var editor = new EditorViewModel();
+        var editor = new SurfaceViewModel();
         var first = new NodeViewModel(new Node());
         var second = new NodeViewModel(new Node());
 
@@ -85,7 +85,7 @@ public class EditorViewModelTests
     [Fact]
     public void CreateNode_AtPosition_AddsNodeAndSelectsItExclusively()
     {
-        var editor = new EditorViewModel();
+        var editor = new SurfaceViewModel();
         var position = new SurfacePosition(100, 200);
 
         editor.CreateNode(position);
@@ -99,7 +99,7 @@ public class EditorViewModelTests
     [Fact]
     public void DeleteSelectedNodes_WithSelection_RemovesSelectedAndKeepsOthers()
     {
-        var editor = new EditorViewModel();
+        var editor = new SurfaceViewModel();
         var toDelete = new NodeViewModel(new Node());
         var toKeep = new NodeViewModel(new Node());
         editor.Nodes.Add(toDelete);
@@ -116,7 +116,7 @@ public class EditorViewModelTests
     [Fact]
     public void DeleteSelectedNodes_WithConnectedNode_KeepsUnrelatedConnections()
     {
-        var editor = new EditorViewModel();
+        var editor = new SurfaceViewModel();
 
         editor.CreateNode(new SurfacePosition(0, 0));
         var a = editor.SelectedNodes.Single();
@@ -141,7 +141,7 @@ public class EditorViewModelTests
     [Fact]
     public void DisconnectSelectedNodes_WithConnectionToUnselectedNode_KeepsThatConnection()
     {
-        var editor = new EditorViewModel();
+        var editor = new SurfaceViewModel();
 
         editor.CreateNode(new SurfacePosition(0, 0));
         var a = editor.SelectedNodes.Single();

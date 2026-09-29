@@ -47,7 +47,7 @@ public class NodeViewModel : INotifyPropertyChanged
     /// Gets or sets a value indicating whether the node is selected.
     /// </summary>
     /// <remarks>
-    /// Mirrors the selection held by <see cref="EditorViewModel"/>, which keeps this flag in sync.
+    /// Mirrors the selection held by <see cref="SurfaceViewModel"/>, which keeps this flag in sync.
     /// </remarks>
     public bool IsSelected { get; set => SetProperty(ref field, value); }
 

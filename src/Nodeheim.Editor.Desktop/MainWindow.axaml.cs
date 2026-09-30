@@ -6,21 +6,20 @@ using Avalonia.Data;
 using Avalonia.Data.Converters;
 using Avalonia.Input;
 using Avalonia.Interactivity;
-using Nodeheim.Domain;
 
 namespace Nodeheim.Editor.Desktop;
 
 public partial class MainWindow : Window
 {
-    private readonly DocumentViewModel _documentViewModel;
+    private readonly ShellViewModel _shellViewModel;
     private readonly InteractionController _controller;
 
     public MainWindow()
     {
         InitializeComponent();
-        _documentViewModel = new(new Graph());
-        DataContext = _documentViewModel.Surface;
-        _controller = _documentViewModel.InteractionController;
+        _shellViewModel = new ShellViewModel();
+        DataContext = _shellViewModel.ActiveDocument.Surface;
+        _controller = _shellViewModel.ActiveDocument.InteractionController;
     }
 
     protected override void OnKeyDown(KeyEventArgs e)

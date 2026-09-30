@@ -1,9 +1,6 @@
 using System.Reflection;
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Controls.Shapes;
-using Avalonia.Data;
-using Avalonia.Data.Converters;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 
@@ -12,90 +9,33 @@ namespace Nodeheim.Editor.Desktop;
 public partial class MainWindow : Window
 {
     private readonly ShellViewModel _shellViewModel;
-    private readonly InteractionController _controller;
 
     public MainWindow()
     {
         InitializeComponent();
         _shellViewModel = new ShellViewModel();
-        DataContext = _shellViewModel.ActiveDocument.Surface;
-        _controller = _shellViewModel.ActiveDocument.InteractionController;
+        DataContext = _shellViewModel;
     }
 
     protected override void OnKeyDown(KeyEventArgs e)
     {
         base.OnKeyDown(e);
 
+        InteractionController controller = _shellViewModel.ActiveDocument.InteractionController;
+
         if (e.Key == Key.Delete)
         {
-            _controller.DeleteNodes();
+            controller.DeleteNodes();
             e.Handled = true;
         }
         else if (e.Key == Key.C)
         {
-            _controller.ConnectNodes();
+            controller.ConnectNodes();
         }
         else if (e.Key == Key.D)
         {
-            _controller.DisconnectNodes();
+            controller.DisconnectNodes();
         }
-    }
-
-    private void OnCanvasPointerPressed(object? sender, PointerPressedEventArgs e)
-    {
-        HitTarget target = Resolve(e);
-        var isCtrlPressed = e.KeyModifiers.HasFlag(KeyModifiers.Control);
-        var position = e.GetCurrentPoint((Visual)sender).Position.ToSurfacePosition();
-
-        if (isCtrlPressed)
-        {
-            _controller.Toggle(target);
-        }
-        else
-        {
-            switch (target)
-            {
-                case EmptyHit:
-                    _controller.Exclusive(target);
-                    break;
-                default:
-                    _controller.Grab(target, position);
-                    break;
-            }
-        }
-    }
-
-    private void OnCanvasPointerMoved(object? sender, PointerEventArgs e)
-    {
-        PointerPoint point = e.GetCurrentPoint((Visual)sender);
-        if (point.Properties.IsLeftButtonPressed)
-        {
-            _controller.PointerMoved(point.Position.ToSurfacePosition());
-        }
-    }
-
-    private void OnCanvasPointerReleased(object? sender, PointerReleasedEventArgs e) =>
-        _controller.PointerReleased();
-
-    private void OnCanvasDoubleTapped(object? sender, TappedEventArgs e) =>
-        _controller.CreateNode(e.GetPosition((Visual)sender).ToSurfacePosition());
-
-    private void OnConnectionLineLoaded(object? sender, RoutedEventArgs e)
-    {
-        if (sender is not Line line || line.DataContext is not ConnectionViewModel connection)
-            return;
-
-        var selectionBinding = new MultiBinding
-        {
-            Converter = BoolConverters.And,
-            Bindings =
-            {
-                new ReflectionBinding("IsSelected") { Source = connection.NodeA },
-                new ReflectionBinding("IsSelected") { Source = connection.NodeB },
-            },
-        };
-
-        line.BindClass("selected", selectionBinding, null);
     }
 
     private void OnQuitClick(object? sender, RoutedEventArgs e) => Close();
@@ -120,20 +60,5 @@ public partial class MainWindow : Window
             }
         };
         dialog.ShowDialog(this);
-    }
-
-    private HitTarget Resolve(PointerPressedEventArgs e)
-    {
-        if (e.Source is StyledElement { DataContext: NodeViewModel node })
-        {
-            return new NodeHit(node);
-        }
-
-        if (e.Source is StyledElement { DataContext: ConnectionViewModel connection })
-        {
-            return new ConnectionHit(connection);
-        }
-
-        return new EmptyHit();
     }
 }

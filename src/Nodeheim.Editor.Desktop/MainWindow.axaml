@@ -6,7 +6,7 @@
         xmlns:local="using:Nodeheim.Editor.Desktop"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="Nodeheim.Editor.Desktop.MainWindow"
-        x:DataType="vm:SurfaceViewModel"
+        x:DataType="vm:ShellViewModel"
         Title="Nodeheim.Editor">
     <DockPanel>
         <Menu DockPanel.Dock="Top">
@@ -17,121 +17,12 @@
                 <MenuItem Header="_About" Click="OnAboutClick" />
             </MenuItem>
         </Menu>
-        <Grid>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
-            <ItemsControl Grid.Column="0" ItemsSource="{Binding Connections}">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <Canvas Background="#FF9DC782" Focusable="True" PointerPressed="OnCanvasPointerPressed"
-                                PointerMoved="OnCanvasPointerMoved" PointerReleased="OnCanvasPointerReleased"
-                                DoubleTapped="OnCanvasDoubleTapped" />
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate x:DataType="vm:ConnectionViewModel">
-                        <Line Classes="connection" Loaded="OnConnectionLineLoaded">
-                            <Line.StartPoint>
-                                <MultiBinding Converter="{x:Static local:NodeConverters.Point}">
-                                    <Binding Path="NodeA.X" />
-                                    <Binding Path="NodeA.Y" />
-                                </MultiBinding>
-                            </Line.StartPoint>
-                            <Line.EndPoint>
-                                <MultiBinding Converter="{x:Static local:NodeConverters.Point}">
-                                    <Binding Path="NodeB.X" />
-                                    <Binding Path="NodeB.Y" />
-                                </MultiBinding>
-                            </Line.EndPoint>
-                        </Line>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-                <ItemsControl.Styles>
-                    <Style Selector="Line.connection">
-                        <Setter Property="Stroke" Value="DarkGray" />
-                        <Setter Property="StrokeThickness" Value="7" />
-                    </Style>
-                    <Style Selector="Line.connection.selected">
-                        <Setter Property="Stroke" Value="CadetBlue" />
-                        <Setter Property="StrokeThickness" Value="8" />
-                    </Style>
-                </ItemsControl.Styles>
-            </ItemsControl>
-
-            <ItemsControl Grid.Column="0" ItemsSource="{Binding Nodes}">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <Canvas Focusable="True" PointerPressed="OnCanvasPointerPressed"
-                                PointerMoved="OnCanvasPointerMoved" PointerReleased="OnCanvasPointerReleased"
-                                DoubleTapped="OnCanvasDoubleTapped" />
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate x:DataType="vm:NodeViewModel">
-                        <Ellipse Fill="LightGray" Classes="node"
-                                 Width="{Binding Radius, Converter={x:Static local:NodeConverters.Diameter}}"
-                                 Height="{Binding Radius, Converter={x:Static local:NodeConverters.Diameter}}"
-                                 Classes.selected="{Binding IsSelected}" />
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-                <ItemsControl.Styles>
-                    <Style Selector="ContentPresenter" x:DataType="vm:NodeViewModel">
-                        <Setter Property="Canvas.Left">
-                            <Setter.Value>
-                                <MultiBinding Converter="{x:Static local:NodeConverters.Subtract}">
-                                    <Binding Path="X" />
-                                    <Binding Path="Radius" />
-                                </MultiBinding>
-                            </Setter.Value>
-                        </Setter>
-                        <Setter Property="Canvas.Top">
-                            <Setter.Value>
-                                <MultiBinding Converter="{x:Static local:NodeConverters.Subtract}">
-                                    <Binding Path="Y" />
-                                    <Binding Path="Radius" />
-                                </MultiBinding>
-                            </Setter.Value>
-                        </Setter>
-                    </Style>
-                    <Style Selector="Ellipse.node">
-                        <Setter Property="Stroke" Value="LightGray" />
-                        <Setter Property="StrokeThickness" Value="1" />
-                    </Style>
-                    <Style Selector="Ellipse.node.selected">
-                        <Setter Property="Stroke" Value="CadetBlue" />
-                        <Setter Property="StrokeThickness" Value="4" />
-                    </Style>
-                </ItemsControl.Styles>
-            </ItemsControl>
-
-            <ScrollViewer Grid.Column="1" Focusable="True">
-                <ItemsControl ItemsSource="{Binding SelectedNodes}">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate x:DataType="vm:NodeViewModel">
-                            <Border BorderBrush="Gray" BorderThickness="1" Padding="6" Margin="4">
-                                <StackPanel>
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="Id: " Width="20" VerticalAlignment="Center" TextAlignment="Right" />
-                                        <TextBox Text="{Binding Id}" Width="150" IsReadOnly="True" />
-                                    </StackPanel>
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="X: " Width="20" VerticalAlignment="Center" TextAlignment="Right" />
-                                        <TextBox Text="{Binding X, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
-                                                 Width="50" HorizontalContentAlignment="Right" />
-                                    </StackPanel>
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="Y: " Width="20" VerticalAlignment="Center" TextAlignment="Right" />
-                                        <TextBox Text="{Binding Y, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
-                                                 Width="50" HorizontalContentAlignment="Right" />
-                                    </StackPanel>
-                                </StackPanel>
-                            </Border>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-            </ScrollViewer>
-        </Grid>
+        <ContentControl Content="{Binding ActiveDocument}">
+            <ContentControl.ContentTemplate>
+                <DataTemplate DataType="vm:DocumentViewModel">
+                    <local:DocumentView />
+                </DataTemplate>
+            </ContentControl.ContentTemplate>
+        </ContentControl>
     </DockPanel>
 </Window>

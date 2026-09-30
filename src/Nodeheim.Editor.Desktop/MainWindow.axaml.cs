@@ -12,14 +12,15 @@ namespace Nodeheim.Editor.Desktop;
 
 public partial class MainWindow : Window
 {
-    private readonly SurfaceViewModel _vm = new(new Graph());
+    private readonly DocumentViewModel _documentViewModel;
     private readonly InteractionController _controller;
 
     public MainWindow()
     {
         InitializeComponent();
-        DataContext = _vm;
-        _controller = new(_vm);
+        _documentViewModel = new(new Graph());
+        DataContext = _documentViewModel.Surface;
+        _controller = _documentViewModel.InteractionController;
     }
 
     protected override void OnKeyDown(KeyEventArgs e)

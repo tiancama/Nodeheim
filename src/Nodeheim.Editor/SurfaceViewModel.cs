@@ -15,10 +15,30 @@ public class SurfaceViewModel : ISurfaceOperations
     /// <summary>
     /// Initializes a new instance of the <see cref="SurfaceViewModel"/> class.
     /// </summary>
-    /// <param name="graph">The graph whose nodes and connections the surface works on.</param>
+    /// <param name="graph">The graph to project onto the surface.</param>
     public SurfaceViewModel(Graph graph)
     {
         _graph = graph;
+        foreach (Node node in graph.Nodes)
+        {
+            Nodes.Add(new NodeViewModel(node));
+        }
+
+        var viewModelByNode = Nodes.ToDictionary(n => n.Model);
+        HashSet<Node> processed = new();
+        foreach (NodeViewModel nodeViewModelA in Nodes)
+        {
+            foreach (Node nodeB in nodeViewModelA.Model.Neighbors)
+            {
+                if (!processed.Contains(nodeB))
+                {
+                    Connections.Add(new ConnectionViewModel(nodeViewModelA, viewModelByNode[nodeB]));
+                }
+            }
+
+            processed.Add(nodeViewModelA.Model);
+        }
+
         SelectedNodes = new ReadOnlyObservableCollection<NodeViewModel>(_selectedNodes);
     }
 

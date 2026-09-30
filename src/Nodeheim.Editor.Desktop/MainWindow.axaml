@@ -11,6 +11,7 @@
     <DockPanel>
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="_File">
+                <MenuItem Header="_New" Click="OnNewClick" />
                 <MenuItem Header="_Quit" Click="OnQuitClick" />
             </MenuItem>
             <MenuItem Header="_Help">

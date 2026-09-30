@@ -38,6 +38,8 @@ public partial class MainWindow : Window
         }
     }
 
+    private void OnNewClick(object? sender, RoutedEventArgs e) => _shellViewModel.New();
+
     private void OnQuitClick(object? sender, RoutedEventArgs e) => Close();
 
     private void OnAboutClick(object? sender, RoutedEventArgs e)

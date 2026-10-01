@@ -8,5 +8,6 @@
   <Folder Name="/tests/">
     <Project Path="tests/Nodeheim.Domain.Tests/Nodeheim.Domain.Tests.csproj" />
     <Project Path="tests/Nodeheim.Editor.Tests/Nodeheim.Editor.Tests.csproj" />
+    <Project Path="tests/Nodeheim.Persistence.Documents.Tests/Nodeheim.Persistence.Documents.Tests.csproj" />
   </Folder>
 </Solution>

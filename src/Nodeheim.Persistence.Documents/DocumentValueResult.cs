@@ -19,5 +19,5 @@ public sealed record DocumentValueSuccess(DocumentValue Value) : DocumentValueRe
 /// <summary>
 /// Represents a failure to build a document value.
 /// </summary>
-/// <param name="Error">The first rule violation, which caused the failure.</param>
-public sealed record DocumentValueFailure(DocumentError Error) : DocumentValueResult;
+/// <param name="Rejection">The first rule violation, which caused the failure.</param>
+public sealed record DocumentValueFailure(DocumentRejection Rejection) : DocumentValueResult;

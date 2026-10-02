@@ -7,7 +7,7 @@
 /// New kinds are added as the value model grows. Code that switches over this enumeration
 /// should handle unrecognized values in its default case.
 /// </remarks>
-public enum DocumentErrorKind
+public enum DocumentRejectionKind
 {
     /// <summary>
     /// A text contains a character that XML 1.0 does not permit.

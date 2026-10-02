@@ -23,4 +23,9 @@ public enum DocumentRejectionKind
     /// A number cannot be represented in the value model, such as not a number (NaN) or infinity.
     /// </summary>
     NumberNotRepresentable,
+
+    /// <summary>
+    /// A value exceeds the maximum nesting depth, <see cref="DocumentValue.MaxNestingDepth"/>.
+    /// </summary>
+    MaxNestingDepthExceeded,
 }

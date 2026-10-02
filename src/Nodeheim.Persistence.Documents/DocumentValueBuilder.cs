@@ -40,6 +40,13 @@ public sealed class DocumentValueBuilder : IDocumentValueWriter
     {
         if (!CanAccept()) return;
 
+        if (_frames.Count == DocumentValue.MaxNestingDepth)
+        {
+            Fail(DocumentRejectionKind.MaxNestingDepthExceeded,
+                $"The maximum nesting depth of {DocumentValue.MaxNestingDepth} is exceeded.");
+            return;
+        }
+
         _frames.Push(new List<DocumentValue>());
     }
 

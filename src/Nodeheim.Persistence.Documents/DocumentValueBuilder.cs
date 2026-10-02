@@ -10,7 +10,7 @@
 /// </para>
 /// <para>
 /// The first rejection is recorded, and all later write calls are ignored without checking the protocol;
-/// <see cref="ArgumentNullException"/> is still thrown. A write call after a complete root value throws
+/// <see cref="ArgumentNullException"/> is still thrown. A write call that violates the protocol throws
 /// <see cref="InvalidOperationException"/>.
 /// </para>
 /// <para>
@@ -22,6 +22,7 @@ public sealed class DocumentValueBuilder : IDocumentValueWriter
     private DocumentValue? _root;
     private DocumentRejection? _rejection;
     private bool _isConsumed;
+    private readonly Stack<List<DocumentValue>> _frames = new();
 
     /// <summary>
     /// Gets a value indicating whether a rejection has been recorded.
@@ -34,9 +35,24 @@ public sealed class DocumentValueBuilder : IDocumentValueWriter
     /// </remarks>
     public bool HasFailed => _rejection is not null;
 
-    public void BeginList() => throw new NotImplementedException();
+    /// <inheritdoc />
+    public void BeginList()
+    {
+        if (!CanAccept()) return;
 
-    public void EndList() => throw new NotImplementedException();
+        _frames.Push(new List<DocumentValue>());
+    }
+
+    /// <inheritdoc />
+    public void EndList()
+    {
+        if (!CanAccept()) return;
+
+        if (_frames.Count == 0)
+            throw new InvalidOperationException("No list is open.");
+
+        Add(new ListValue(_frames.Pop()));
+    }
 
     /// <inheritdoc />
     public void Text(string value)
@@ -162,7 +178,17 @@ public sealed class DocumentValueBuilder : IDocumentValueWriter
         return true;
     }
 
-    private void Add(DocumentValue value) => _root = value;
+    private void Add(DocumentValue value)
+    {
+        if (_frames.Count > 0)
+        {
+            _frames.Peek().Add(value);
+        }
+        else
+        {
+            _root = value;
+        }
+    }
 
     private void Fail(DocumentRejectionKind kind, string message) => _rejection = new DocumentRejection(kind, message);
 }

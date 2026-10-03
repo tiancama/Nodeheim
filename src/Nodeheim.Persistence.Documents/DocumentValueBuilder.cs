@@ -49,7 +49,7 @@ public sealed class DocumentValueBuilder : IDocumentValueWriter
     /// <inheritdoc />
     public void BeginList()
     {
-        if (!CanAccept()) return;
+        if (!CanAcceptValue()) return;
 
         if (_frames.Count == DocumentValue.MaxNestingDepth)
         {
@@ -81,7 +81,7 @@ public sealed class DocumentValueBuilder : IDocumentValueWriter
     {
         ArgumentNullException.ThrowIfNull(value);
 
-        if (!CanAccept()) return;
+        if (!CanAcceptValue()) return;
 
         if (!TextValue.IsValid(value))
         {
@@ -96,7 +96,7 @@ public sealed class DocumentValueBuilder : IDocumentValueWriter
     /// <inheritdoc />
     public void Integer(long value)
     {
-        if (!CanAccept()) return;
+        if (!CanAcceptValue()) return;
 
         if (value is < IntegerValue.MinValue or > IntegerValue.MaxValue)
         {
@@ -110,7 +110,7 @@ public sealed class DocumentValueBuilder : IDocumentValueWriter
     /// <inheritdoc />
     public void Real(double value)
     {
-        if (!CanAccept()) return;
+        if (!CanAcceptValue()) return;
 
         if (!double.IsFinite(value))
         {
@@ -124,7 +124,7 @@ public sealed class DocumentValueBuilder : IDocumentValueWriter
     /// <inheritdoc />
     public void Boolean(bool value)
     {
-        if (!CanAccept()) return;
+        if (!CanAcceptValue()) return;
 
         Add(new BooleanValue(value));
     }
@@ -132,7 +132,7 @@ public sealed class DocumentValueBuilder : IDocumentValueWriter
     /// <inheritdoc />
     public void Null()
     {
-        if (!CanAccept()) return;
+        if (!CanAcceptValue()) return;
 
         Add(NullValue.Instance);
     }
@@ -142,7 +142,7 @@ public sealed class DocumentValueBuilder : IDocumentValueWriter
     {
         ArgumentNullException.ThrowIfNull(value);
 
-        if (!CanAccept()) return;
+        if (!CanAcceptValue()) return;
 
         if (value.Length == 0)
         {
@@ -185,6 +185,17 @@ public sealed class DocumentValueBuilder : IDocumentValueWriter
             throw new InvalidOperationException("No complete root value has been reported.");
 
         return new DocumentValueSuccess(_root);
+    }
+
+    private bool CanAcceptValue()
+    {
+        if (!CanAccept())
+            return false;
+
+        if (_frames.TryPeek(out Frame? frame) && frame is CompoundFrame { PendingKey: null })
+            throw new InvalidOperationException("A value in a compound requires a key.");
+
+        return true;
     }
 
     private bool CanAccept()

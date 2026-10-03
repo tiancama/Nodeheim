@@ -27,7 +27,7 @@ public sealed record CompoundValue : DocumentValue
         var dictionary = new Dictionary<string, DocumentValue>(copy.Length, StringComparer.Ordinal);
         foreach ((string key, DocumentValue value) in copy)
         {
-            if (key is null || !TextValue.IsValid(key) || key.AsSpan().ContainsAny('\t', '\n', '\r'))
+            if (!IsValidKey(key))
                 throw new ArgumentException($"The key '{key}' is null or contains a character that is not permitted.", nameof(entries));
 
             if (value is null)
@@ -70,4 +70,19 @@ public sealed record CompoundValue : DocumentValue
 
         return hash;
     }
+
+    /// <summary>
+    /// Determines whether a string is a valid key.
+    /// </summary>
+    /// <param name="key">The string to check.</param>
+    /// <returns>
+    /// <see langword="true"/> if <paramref name="key"/> is not <see langword="null"/> and contains only permitted
+    /// characters; otherwise, <see langword="false"/>.
+    /// </returns>
+    /// <remarks>
+    /// Format contract: A key has the character set of a text value, without tab, line feed, and carriage return.
+    /// An empty key is valid.
+    /// </remarks>
+    internal static bool IsValidKey(string? key) =>
+        key is not null && TextValue.IsValid(key) && !key.AsSpan().ContainsAny('\t', '\n', '\r');
 }

@@ -1,4 +1,6 @@
-﻿namespace Nodeheim.Persistence.Documents;
+﻿using System.Diagnostics;
+
+namespace Nodeheim.Persistence.Documents;
 
 /// <summary>
 /// Represents a writer that builds a <see cref="DocumentValue"/> from write calls.
@@ -22,7 +24,7 @@ public sealed class DocumentValueBuilder : IDocumentValueWriter
     private DocumentValue? _root;
     private DocumentRejection? _rejection;
     private bool _isConsumed;
-    private readonly Stack<List<DocumentValue>> _frames = new();
+    private readonly Stack<Frame> _frames = new();
 
     /// <summary>
     /// Gets a value indicating whether a rejection has been recorded.
@@ -56,7 +58,7 @@ public sealed class DocumentValueBuilder : IDocumentValueWriter
             return;
         }
 
-        _frames.Push(new List<DocumentValue>());
+        _frames.Push(new ListFrame());
     }
 
     /// <inheritdoc />
@@ -67,7 +69,11 @@ public sealed class DocumentValueBuilder : IDocumentValueWriter
         if (_frames.Count == 0)
             throw new InvalidOperationException("No list is open.");
 
-        Add(new ListValue(_frames.Pop()));
+        if (_frames.Peek() is not ListFrame list)
+            throw new InvalidOperationException("The innermost open container is not a list.");
+
+        _frames.Pop();
+        Add(new ListValue(list.Items));
     }
 
     /// <inheritdoc />
@@ -198,7 +204,14 @@ public sealed class DocumentValueBuilder : IDocumentValueWriter
     {
         if (_frames.Count > 0)
         {
-            _frames.Peek().Add(value);
+            switch (_frames.Peek())
+            {
+                case ListFrame list:
+                    list.Items.Add(value);
+                    break;
+                default:
+                    throw new UnreachableException();
+            }
         }
         else
         {
@@ -207,4 +220,29 @@ public sealed class DocumentValueBuilder : IDocumentValueWriter
     }
 
     private void Fail(DocumentRejectionKind kind, string message) => _rejection = new DocumentRejection(kind, message);
+
+    /// <summary>
+    /// Represents an open container whose values are still being reported.
+    /// </summary>
+    private abstract class Frame
+    {
+        private protected Frame()
+        {
+        }
+    }
+
+    private sealed class ListFrame : Frame
+    {
+        public List<DocumentValue> Items { get; } = new();
+    }
+
+    private sealed class CompoundFrame : Frame
+    {
+        public Dictionary<string, DocumentValue> Entries { get; } = new(StringComparer.Ordinal);
+
+        /// <summary>
+        /// Gets or sets the key reported for the next value, or <see langword="null"/> if no key is pending.
+        /// </summary>
+        public string? PendingKey { get; set; }
+    }
 }

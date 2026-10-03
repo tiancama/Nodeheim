@@ -36,6 +36,15 @@ public sealed class DocumentValueBuilder : IDocumentValueWriter
     public bool HasFailed => _rejection is not null;
 
     /// <inheritdoc />
+    public void BeginCompound() => throw new NotImplementedException();
+
+    /// <inheritdoc />
+    public void Key(string key) => throw new NotImplementedException();
+
+    /// <inheritdoc />
+    public void EndCompound() => throw new NotImplementedException();
+
+    /// <inheritdoc />
     public void BeginList()
     {
         if (!CanAccept()) return;

@@ -66,11 +66,7 @@ public sealed class DocumentValueBuilder : IDocumentValueWriter
     {
         if (!CanAccept()) return;
 
-        if (_frames.Count == 0)
-            throw new InvalidOperationException("No list is open.");
-
-        if (_frames.Peek() is not ListFrame list)
-            throw new InvalidOperationException("The innermost open container is not a list.");
+        ListFrame list = PeekFrame<ListFrame>("list");
 
         _frames.Pop();
         Add(new ListValue(list.Items));
@@ -231,6 +227,17 @@ public sealed class DocumentValueBuilder : IDocumentValueWriter
     }
 
     private void Fail(DocumentRejectionKind kind, string message) => _rejection = new DocumentRejection(kind, message);
+
+    private T PeekFrame<T>(string containerName) where T : Frame
+    {
+        if (!_frames.TryPeek(out Frame? frame))
+            throw new InvalidOperationException($"No {containerName} is open.");
+
+        if (frame is not T typedFrame)
+            throw new InvalidOperationException($"The innermost open container is not a {containerName}.");
+
+        return typedFrame;
+    }
 
     /// <summary>
     /// Represents an open container whose values are still being reported.

@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using Nodeheim.Domain;
 
@@ -27,6 +28,7 @@ public class ShellViewModel : INotifyPropertyChanged
     /// <summary>
     /// Replaces the active document with a new document containing an empty graph.
     /// </summary>
+    [MemberNotNull(nameof(ActiveDocument))]
     public void New() => ActiveDocument = new(new Graph());
 
     private void OnPropertyChanged([CallerMemberName] string? propertyName = null) =>

@@ -20,12 +20,15 @@ public partial class DocumentView : UserControl
 
     private void OnCanvasPointerPressed(object? sender, PointerPressedEventArgs e)
     {
+        if (sender is not Visual canvas)
+            throw new ArgumentException("Handler must be attached to a Visual.", nameof(sender));
+
         if (Controller is not { } controller)
             return;
 
         HitTarget target = Resolve(e);
         var isCtrlPressed = e.KeyModifiers.HasFlag(KeyModifiers.Control);
-        var position = e.GetCurrentPoint((Visual)sender).Position.ToSurfacePosition();
+        var position = e.GetCurrentPoint(canvas).Position.ToSurfacePosition();
 
         if (isCtrlPressed)
         {
@@ -47,7 +50,10 @@ public partial class DocumentView : UserControl
 
     private void OnCanvasPointerMoved(object? sender, PointerEventArgs e)
     {
-        PointerPoint point = e.GetCurrentPoint((Visual)sender);
+        if (sender is not Visual canvas)
+            throw new ArgumentException("Handler must be attached to a Visual.", nameof(sender));
+
+        PointerPoint point = e.GetCurrentPoint(canvas);
         if (point.Properties.IsLeftButtonPressed)
         {
             Controller?.PointerMoved(point.Position.ToSurfacePosition());
@@ -57,8 +63,13 @@ public partial class DocumentView : UserControl
     private void OnCanvasPointerReleased(object? sender, PointerReleasedEventArgs e) =>
         Controller?.PointerReleased();
 
-    private void OnCanvasDoubleTapped(object? sender, TappedEventArgs e) =>
-        Controller?.CreateNode(e.GetPosition((Visual)sender).ToSurfacePosition());
+    private void OnCanvasDoubleTapped(object? sender, TappedEventArgs e)
+    {
+        if (sender is not Visual canvas)
+            throw new ArgumentException("Handler must be attached to a Visual.", nameof(sender));
+
+        Controller?.CreateNode(e.GetPosition(canvas).ToSurfacePosition());
+    }
 
     private void OnConnectionLineLoaded(object? sender, RoutedEventArgs e)
     {
@@ -75,7 +86,9 @@ public partial class DocumentView : UserControl
             },
         };
 
-        line.BindClass("selected", selectionBinding, null);
+        // anchor is annotated non-nullable but unused (Avalonia 12.1.3);
+        // Avalonia's XAML compiler passes null here for Classes bindings too.
+        line.BindClass("selected", selectionBinding, null!);
     }
 
     private HitTarget Resolve(PointerPressedEventArgs e)

@@ -38,13 +38,60 @@ public sealed class DocumentValueBuilder : IDocumentValueWriter
     public bool HasFailed => _rejection is not null;
 
     /// <inheritdoc />
-    public void BeginCompound() => throw new NotImplementedException();
+    public void BeginCompound()
+    {
+        if (!CanAcceptValue()) return;
+
+        if (_frames.Count == DocumentValue.MaxNestingDepth)
+        {
+            Fail(DocumentRejectionKind.MaxNestingDepthExceeded,
+                $"The maximum nesting depth of {DocumentValue.MaxNestingDepth} is exceeded.");
+            return;
+        }
+
+        _frames.Push(new CompoundFrame());
+    }
 
     /// <inheritdoc />
-    public void Key(string key) => throw new NotImplementedException();
+    public void Key(string key)
+    {
+        ArgumentNullException.ThrowIfNull(key);
+
+        if (!CanAccept()) return;
+
+        CompoundFrame compound = PeekFrame<CompoundFrame>("compound");
+
+        if (compound.PendingKey is not null)
+            throw new InvalidOperationException("The previous key has no value yet.");
+
+        if (!CompoundValue.IsValidKey(key))
+        {
+            Fail(DocumentRejectionKind.InvalidCharacter, "A key contains a character that is not permitted.");
+            return;
+        }
+
+        if (compound.Entries.ContainsKey(key))
+        {
+            Fail(DocumentRejectionKind.DuplicateKey, "A key occurs more than once in a compound.");
+            return;
+        }
+
+        compound.PendingKey = key;
+    }
 
     /// <inheritdoc />
-    public void EndCompound() => throw new NotImplementedException();
+    public void EndCompound()
+    {
+        if (!CanAccept()) return;
+
+        CompoundFrame compound = PeekFrame<CompoundFrame>("compound");
+
+        if (compound.PendingKey is not null)
+            throw new InvalidOperationException("The last key has no value.");
+
+        _frames.Pop();
+        Add(new CompoundValue(compound.Entries));
+    }
 
     /// <inheritdoc />
     public void BeginList()
@@ -215,6 +262,10 @@ public sealed class DocumentValueBuilder : IDocumentValueWriter
             {
                 case ListFrame list:
                     list.Items.Add(value);
+                    break;
+                case CompoundFrame { PendingKey: { } key } compound:
+                    compound.Entries.Add(key, value);
+                    compound.PendingKey = null;
                     break;
                 default:
                     throw new UnreachableException();

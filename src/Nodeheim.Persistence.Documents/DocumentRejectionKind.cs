@@ -10,7 +10,7 @@
 public enum DocumentRejectionKind
 {
     /// <summary>
-    /// A text contains a character that XML 1.0 does not permit.
+    /// A text value, a reference value, or a key contains a character that is not permitted.
     /// </summary>
     InvalidCharacter,
 
@@ -28,4 +28,13 @@ public enum DocumentRejectionKind
     /// A value exceeds the maximum nesting depth, <see cref="DocumentValue.MaxNestingDepth"/>.
     /// </summary>
     MaxNestingDepthExceeded,
+
+    /// <summary>
+    /// A compound contains the same key more than once.
+    /// </summary>
+    /// <remarks>
+    /// Format contract: Keys are compared ordinally, so keys that look alike but are encoded differently are not
+    /// duplicates.
+    /// </remarks>
+    DuplicateKey,
 }

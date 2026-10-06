@@ -18,6 +18,7 @@
   
   <ItemGroup>
     <ProjectReference Include="..\Nodeheim.Editor\Nodeheim.Editor.csproj" />
+    <ProjectReference Include="..\Nodeheim.Persistence.Json\Nodeheim.Persistence.Json.csproj" />
   </ItemGroup>
   
 </Project>

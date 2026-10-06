@@ -3,6 +3,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Nodeheim.Persistence.Json;
 
 namespace Nodeheim.Editor.Desktop;
 
@@ -66,6 +67,6 @@ public partial class MainWindow : Window
 
     private void OnOpenClick(object? sender, RoutedEventArgs e)
     {
-        //TODO
+        new JsonDocumentStorage(@"C:\\Testdatei\\TestFile-OneNode.json").Load();
     }
 }

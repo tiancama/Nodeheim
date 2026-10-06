@@ -37,4 +37,9 @@ public enum DocumentRejectionKind
     /// duplicates.
     /// </remarks>
     DuplicateKey,
+
+    /// <summary>
+    /// The document does not conform to the syntax of its format, such as JSON or XML.
+    /// </summary>
+    InvalidSyntax,
 }

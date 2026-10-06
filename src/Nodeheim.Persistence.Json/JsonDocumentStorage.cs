@@ -4,7 +4,7 @@ using Nodeheim.Persistence.Documents;
 
 namespace Nodeheim.Persistence.Json;
 
-public sealed class JsonDocumentStorage
+public sealed class JsonDocumentStorage : IDocumentStorage
 {
     private readonly string _path;
 
@@ -13,12 +13,11 @@ public sealed class JsonDocumentStorage
         _path = path;
     }
 
-    public void Load()
+    public DocumentValueResult Load()
     {
         byte[] bytes = File.ReadAllBytes(_path);
         Utf8JsonReader reader = new(bytes);
         DocumentValueBuilder builder = new();
-        DocumentValueResult result;
 
         try
         {
@@ -39,11 +38,11 @@ public sealed class JsonDocumentStorage
                 }
             }
 
-            result = builder.GetResult();
+            return builder.GetResult();
         }
         catch (JsonException exception)
         {
-            result = builder.HasFailed
+            return builder.HasFailed
                 ? builder.GetResult()
                 : new DocumentValueFailure(
                     new DocumentRejection(DocumentRejectionKind.InvalidSyntax, exception.Message));

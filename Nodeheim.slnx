@@ -5,6 +5,7 @@
     <Project Path="src/Nodeheim.Editor/Nodeheim.Editor.csproj" />
     <Project Path="src/Nodeheim.Persistence.Documents/Nodeheim.Persistence.Documents.csproj" />
     <Project Path="src/Nodeheim.Persistence.Json/Nodeheim.Persistence.Json.csproj" />
+    <Project Path="src/Nodeheim.Persistence/Nodeheim.Persistence.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Nodeheim.Domain.Tests/Nodeheim.Domain.Tests.csproj" />

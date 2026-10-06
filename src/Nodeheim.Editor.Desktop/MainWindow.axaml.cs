@@ -63,4 +63,9 @@ public partial class MainWindow : Window
         };
         dialog.ShowDialog(this);
     }
+
+    private void OnOpenClick(object? sender, RoutedEventArgs e)
+    {
+        //TODO
+    }
 }

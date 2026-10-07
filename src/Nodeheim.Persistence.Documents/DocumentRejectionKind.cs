@@ -42,4 +42,19 @@ public enum DocumentRejectionKind
     /// The document does not conform to the syntax of its format, such as JSON or XML.
     /// </summary>
     InvalidSyntax,
+
+    /// <summary>
+    /// The input is not marked as a Nodeheim document.
+    /// </summary>
+    NotNodeheimDocument,
+
+    /// <summary>
+    /// The document has a format version that is not supported.
+    /// </summary>
+    UnsupportedFormatVersion,
+
+    /// <summary>
+    /// The structure of the document does not match its format, such as a missing or unexpected part.
+    /// </summary>
+    InvalidStructure,
 }

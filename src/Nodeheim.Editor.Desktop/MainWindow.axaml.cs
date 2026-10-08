@@ -69,6 +69,6 @@ public partial class MainWindow : Window
 
     private void OnOpenClick(object? sender, RoutedEventArgs e)
     {
-        DocumentValueResult result = new DocumentRepository(new JsonDocumentStorage(@"C:\Testdatei\TestFile-OneNode.json")).Load();
+        DocumentResult result = new DocumentRepository(new JsonDocumentStorage(@"C:\Testdatei\TestFile-OneNode.json")).Load();
     }
 }

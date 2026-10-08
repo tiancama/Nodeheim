@@ -1,4 +1,5 @@
-﻿using Nodeheim.Persistence.Documents;
+﻿using System.Diagnostics;
+using Nodeheim.Persistence.Documents;
 
 namespace Nodeheim.Persistence;
 
@@ -11,8 +12,10 @@ public sealed class DocumentRepository
         _storage = storage;
     }
 
-    public DocumentValueResult Load()
+    public DocumentResult Load() => _storage.Load() switch
     {
-        return _storage.Load();
-    }
+        DocumentValueSuccess success => DocumentMapper.Read(success.Value),
+        DocumentValueFailure failure => new DocumentFailure(failure.Rejection),
+        _ => throw new UnreachableException()
+    };
 }

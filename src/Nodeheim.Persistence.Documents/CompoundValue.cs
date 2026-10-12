@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Buffers;
+using System.Collections.ObjectModel;
 
 namespace Nodeheim.Persistence.Documents;
 
@@ -6,11 +7,14 @@ namespace Nodeheim.Persistence.Documents;
 /// Represents a set of named values with unique keys and no meaningful order.
 /// </summary>
 /// <remarks>
-/// Format contract: keys use the character set of text values, excluding tab, line feed and carriage return.
-/// Keys are compared ordinally. Equality does not depend on the order of the entries.
+/// Format contract: A key consists of at least one ASCII letter, digit, period, hyphen, or underscore. Keys are
+/// compared ordinally, so they are case-sensitive. Equality does not depend on the order of the entries.
 /// </remarks>
 public sealed record CompoundValue : DocumentValue
 {
+    private static readonly SearchValues<char> KeyCharacters =
+        SearchValues.Create("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.-_");
+
     /// <summary>
     /// Initializes a new instance of the <see cref="CompoundValue"/> record.
     /// </summary>
@@ -28,7 +32,8 @@ public sealed record CompoundValue : DocumentValue
         foreach ((string key, DocumentValue value) in copy)
         {
             if (!IsValidKey(key))
-                throw new ArgumentException($"The key '{key}' is null or contains a character that is not permitted.", nameof(entries));
+                throw new ArgumentException(
+                    $"The key '{key}' is empty or contains a character that is not permitted.", nameof(entries));
 
             if (value is null)
                 throw new ArgumentException($"The value for key '{key}' is null; use NullValue instead.", nameof(entries));
@@ -76,13 +81,11 @@ public sealed record CompoundValue : DocumentValue
     /// </summary>
     /// <param name="key">The string to check.</param>
     /// <returns>
-    /// <see langword="true"/> if <paramref name="key"/> is not <see langword="null"/> and contains only permitted
-    /// characters; otherwise, <see langword="false"/>.
+    /// <see langword="true"/> if <paramref name="key"/> is a valid key; otherwise, <see langword="false"/>.
     /// </returns>
     /// <remarks>
-    /// Format contract: A key has the character set of a text value, without tab, line feed, and carriage return.
-    /// An empty key is valid.
+    /// Format contract: The rule for keys is described on <see cref="CompoundValue"/>.
     /// </remarks>
     internal static bool IsValidKey(string? key) =>
-        key is not null && TextValue.IsValid(key) && !key.AsSpan().ContainsAny('\t', '\n', '\r');
+        key is { Length: > 0 } && !key.AsSpan().ContainsAnyExcept(KeyCharacters);
 }

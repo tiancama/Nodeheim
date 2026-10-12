@@ -10,7 +10,7 @@
 public enum DocumentRejectionKind
 {
     /// <summary>
-    /// A text value, a reference value, or a key contains a character that is not permitted.
+    /// A text value, a reference value, or a key contains a character that is not permitted, or a key is empty.
     /// </summary>
     InvalidCharacter,
 
@@ -32,10 +32,6 @@ public enum DocumentRejectionKind
     /// <summary>
     /// A compound contains the same key more than once.
     /// </summary>
-    /// <remarks>
-    /// Format contract: Keys are compared ordinally, so keys that look alike but are encoded differently are not
-    /// duplicates.
-    /// </remarks>
     DuplicateKey,
 
     /// <summary>

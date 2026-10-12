@@ -66,7 +66,8 @@ public sealed class DocumentValueBuilder : IDocumentValueWriter
 
         if (!CompoundValue.IsValidKey(key))
         {
-            Fail(DocumentRejectionKind.InvalidCharacter, "A key contains a character that is not permitted.");
+            Fail(DocumentRejectionKind.InvalidCharacter,
+                "A key is empty or contains a character that is not permitted.");
             return;
         }
 

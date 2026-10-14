@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using Nodeheim.Domain;
 using Nodeheim.Persistence.Documents;
 
 namespace Nodeheim.Persistence;
@@ -12,10 +13,25 @@ public sealed class DocumentRepository
         _storage = storage;
     }
 
-    public DocumentResult Load() => _storage.Load() switch
+    public Graph Load()
     {
-        DocumentValueSuccess success => DocumentMapper.Read(success.Value),
-        DocumentValueFailure failure => new DocumentFailure(failure.Rejection),
-        _ => throw new UnreachableException()
-    };
+        DocumentValue root = _storage.Load() switch
+        {
+            DocumentValueSuccess success => success.Value,
+            DocumentValueFailure failure => throw new InvalidOperationException(failure.Rejection.Message),
+            _ => throw new UnreachableException()
+        };
+
+        Document document = DocumentMapper.Read(root) switch
+        {
+            DocumentSuccess success => success.Document,
+            DocumentFailure failure => throw new InvalidOperationException(failure.Rejection.Message),
+            _ => throw new UnreachableException()
+        };
+
+        if (!document.Sections.TryGetValue(GraphMapper.SectionType, out DocumentSection? section))
+            throw new InvalidOperationException($"The section '{GraphMapper.SectionType}' is missing.");
+
+        return GraphMapper.Read(section);
+    }
 }

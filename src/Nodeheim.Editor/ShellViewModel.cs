@@ -25,11 +25,14 @@ public class ShellViewModel : INotifyPropertyChanged
     /// </summary>
     public DocumentViewModel ActiveDocument { get; private set => SetProperty(ref field, value); }
 
+    [MemberNotNull(nameof(ActiveDocument))]
+    public void Open(Graph graph) => ActiveDocument = new(graph);
+
     /// <summary>
     /// Replaces the active document with a new document containing an empty graph.
     /// </summary>
     [MemberNotNull(nameof(ActiveDocument))]
-    public void New() => ActiveDocument = new(new Graph());
+    public void New() => Open(new Graph());
 
     private void OnPropertyChanged([CallerMemberName] string? propertyName = null) =>
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));

@@ -6,20 +6,20 @@
     <Nullable>enable</Nullable>
     <OutputType>WinExe</OutputType>
     <ApplicationManifest>app.manifest</ApplicationManifest>
-    <Version>0.2.0</Version>
+    <Version>0.3.0</Version>
   </PropertyGroup>
-  
+
   <ItemGroup>
     <PackageReference Include="Avalonia" Version="12.1.3" />
     <PackageReference Include="Avalonia.Desktop" Version="12.1.3" />
     <PackageReference Include="Avalonia.Themes.Fluent" Version="12.1.3" />
     <PackageReference Include="Avalonia.Fonts.Inter" Version="12.1.3" />
   </ItemGroup>
-  
+
   <ItemGroup>
     <ProjectReference Include="..\Nodeheim.Editor\Nodeheim.Editor.csproj" />
     <ProjectReference Include="..\Nodeheim.Persistence.Json\Nodeheim.Persistence.Json.csproj" />
     <ProjectReference Include="..\Nodeheim.Persistence\Nodeheim.Persistence.csproj" />
   </ItemGroup>
-  
+
 </Project>

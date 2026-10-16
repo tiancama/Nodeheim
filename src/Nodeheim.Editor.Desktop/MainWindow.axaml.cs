@@ -4,6 +4,7 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Nodeheim.Domain;
+using Nodeheim.Issues;
 using Nodeheim.Persistence;
 using Nodeheim.Persistence.Json;
 
@@ -69,7 +70,10 @@ public partial class MainWindow : Window
 
     private void OnOpenClick(object? sender, RoutedEventArgs e)
     {
-        Graph graph = new DocumentRepository(new JsonDocumentStorage(@"C:\Testdatei\TestFile-OneNode.json")).Load();
+        IssueCollector collector = new();
+        Graph? graph =
+            new DocumentRepository(new JsonDocumentStorage(@"C:\Testdatei\TestFile-OneNode.json")).Load(collector);
+        if (graph is null) return;
         _shellViewModel.Open(graph);
     }
 }

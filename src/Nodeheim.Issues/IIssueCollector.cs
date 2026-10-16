@@ -5,5 +5,9 @@
 /// </summary>
 public interface IIssueCollector
 {
+    /// <summary>
+    /// Adds an issue.
+    /// </summary>
+    /// <param name="issue">The issue to add.</param>
     void Add(Issue issue);
 }

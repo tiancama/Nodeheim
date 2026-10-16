@@ -1,4 +1,5 @@
 ﻿using Nodeheim.Domain;
+using Nodeheim.Issues;
 using Nodeheim.Persistence.Documents;
 
 namespace Nodeheim.Persistence;
@@ -11,10 +12,26 @@ internal static class GraphMapper
     private const string NodesKey = "nodes";
     private const string ConnectionsKey = "connections";
 
-    internal static Graph Read(DocumentSection section)
+    private static readonly IssueDefinition UnsupportedContentVersionIssue =
+        new("core.graph.unsupportedContentVersion", IssueKind.Rejection);
+
+    /// <summary>
+    /// Reads a graph from the <c>core.graph</c> section.
+    /// </summary>
+    /// <param name="section">The section to read.</param>
+    /// <param name="issues">The collector that receives the issues found while reading.</param>
+    /// <returns>
+    /// The graph, or <see langword="null"/> if the section is rejected; the rejection is added to
+    /// <paramref name="issues"/>.
+    /// </returns>
+    internal static Graph? Read(DocumentSection section, IIssueCollector issues)
     {
         if (section.ContentVersion != SupportedContentVersion)
-            throw new InvalidOperationException($"Unsupported content version '{section.ContentVersion}'.");
+        {
+            issues.Add(new Issue(UnsupportedContentVersionIssue,
+                $"Unsupported content version '{section.ContentVersion}'.", null));
+            return null;
+        }
 
         IReadOnlyDictionary<string, DocumentValue> entries = ((CompoundValue)section.Content).Entries;
         Graph graph = new();

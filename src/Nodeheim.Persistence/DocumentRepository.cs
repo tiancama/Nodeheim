@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using Nodeheim.Domain;
+using Nodeheim.Issues;
 using Nodeheim.Persistence.Documents;
 
 namespace Nodeheim.Persistence;
@@ -13,7 +14,18 @@ public sealed class DocumentRepository
         _storage = storage;
     }
 
-    public Graph Load()
+    /// <summary>
+    /// Loads the graph from the document.
+    /// </summary>
+    /// <param name="issues">The collector that receives the issues found while loading.</param>
+    /// <returns>
+    /// The loaded graph, or <see langword="null"/> if the content version of the graph is rejected or the document
+    /// has no <c>core.graph</c> section.
+    /// </returns>
+    /// <exception cref="InvalidOperationException">
+    /// The adapter or the document mapper rejects the document.
+    /// </exception>
+    public Graph? Load(IIssueCollector issues)
     {
         DocumentValue root = _storage.Load() switch
         {
@@ -30,8 +42,8 @@ public sealed class DocumentRepository
         };
 
         if (!document.Sections.TryGetValue(GraphMapper.SectionType, out DocumentSection? section))
-            throw new InvalidOperationException($"The section '{GraphMapper.SectionType}' is missing.");
+            return null;
 
-        return GraphMapper.Read(section);
+        return GraphMapper.Read(section, issues);
     }
 }

@@ -111,7 +111,7 @@ public partial class MainWindow : Window
             WindowStartupLocation = WindowStartupLocation.CenterOwner,
             Content = new ScrollViewer
             {
-                Content = new TextBlock
+                Content = new SelectableTextBlock
                 {
                     Text = string.Join(Environment.NewLine, lines),
                     TextWrapping = TextWrapping.Wrap,

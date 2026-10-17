@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Text.Json;
+using Nodeheim.Issues;
 using Nodeheim.Persistence.Documents;
 
 namespace Nodeheim.Persistence.Json;
@@ -13,11 +14,12 @@ public sealed class JsonDocumentStorage : IDocumentStorage
         _path = path;
     }
 
-    public DocumentValueResult Load()
+    /// <inheritdoc />
+    public DocumentValue? Load(IIssueCollector issues)
     {
         byte[] bytes = File.ReadAllBytes(_path);
         Utf8JsonReader reader = new(bytes);
-        DocumentValueBuilder builder = new();
+        DocumentValueBuilder builder = new(issues);
 
         try
         {
@@ -42,10 +44,8 @@ public sealed class JsonDocumentStorage : IDocumentStorage
         }
         catch (JsonException exception)
         {
-            return builder.HasFailed
-                ? builder.GetResult()
-                : new DocumentValueFailure(
-                    new DocumentRejection(DocumentRejectionKind.InvalidSyntax, exception.Message));
+            issues.Add(new Issue(FormatIssues.InvalidSyntax, exception.Message, null));
+            return null;
         }
     }
 }

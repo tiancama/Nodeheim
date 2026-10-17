@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using Nodeheim.Domain;
+﻿using Nodeheim.Domain;
 using Nodeheim.Issues;
 using Nodeheim.Persistence.Documents;
 
@@ -14,32 +13,22 @@ public sealed class DocumentRepository
         _storage = storage;
     }
 
-    /// <summary>
-    /// Loads the graph from the document.
-    /// </summary>
-    /// <param name="issues">The collector that receives the issues found while loading.</param>
     /// <returns>
-    /// The loaded graph, or <see langword="null"/> if the content version of the graph is rejected or the document
-    /// has no <c>core.graph</c> section.
+    /// The loaded graph, or <see langword="null"/> if the document or the content version of the graph is rejected,
+    /// or the document has no <c>core.graph</c> section.
     /// </returns>
-    /// <exception cref="InvalidOperationException">
-    /// The adapter rejects the document.
-    /// </exception>
     /// <remarks>
     /// Sections of an unknown section type are skipped and reported as discrepancies.
     /// A return value of <see langword="null"/> alone does not indicate a failure, because no section is required.
     /// Only a rejection in <paramref name="issues"/> does. A graph is never returned together with a rejection.
     /// The structure of the document and the content of the graph are not yet checked; malformed input causes
+    /// exceptions. Errors of the environment, such as I/O errors, are not yet reported as issues and also cause
     /// exceptions.
     /// </remarks>
     public Graph? Load(IIssueCollector issues)
     {
-        DocumentValue root = _storage.Load() switch
-        {
-            DocumentValueSuccess success => success.Value,
-            DocumentValueFailure failure => throw new InvalidOperationException(failure.Rejection.Message),
-            _ => throw new UnreachableException()
-        };
+        DocumentValue? root = _storage.Load(issues);
+        if (root is null) return null;
 
         Document document = DocumentMapper.Read(root);
 

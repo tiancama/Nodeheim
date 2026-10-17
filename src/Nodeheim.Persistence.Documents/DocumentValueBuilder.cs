@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using Nodeheim.Issues;
 
 namespace Nodeheim.Persistence.Documents;
 
@@ -11,8 +12,8 @@ namespace Nodeheim.Persistence.Documents;
 /// <see cref="InvalidOperationException"/>.
 /// </para>
 /// <para>
-/// The first rejection is recorded, and all later write calls are ignored without checking the protocol;
-/// <see cref="ArgumentNullException"/> is still thrown. A write call that violates the protocol throws
+/// The first rejection is added to the collector, and all later write calls are ignored without checking the
+/// protocol; <see cref="ArgumentNullException"/> is still thrown. A write call that violates the protocol throws
 /// <see cref="InvalidOperationException"/>.
 /// </para>
 /// <para>
@@ -22,20 +23,25 @@ namespace Nodeheim.Persistence.Documents;
 public sealed class DocumentValueBuilder : IDocumentValueWriter
 {
     private DocumentValue? _root;
-    private DocumentRejection? _rejection;
+    private bool _hasFailed;
     private bool _isConsumed;
     private readonly Stack<Frame> _frames = new();
+    private readonly IIssueCollector _issues;
 
     /// <summary>
-    /// Gets a value indicating whether a rejection has been recorded.
+    /// Initializes a new instance of the <see cref="DocumentValueBuilder"/> class.
     /// </summary>
-    /// <value>
-    /// <see langword="true"/> if a rejection has been recorded; otherwise, <see langword="false"/>.
-    /// </value>
-    /// <remarks>
-    /// A director can use this value to stop reporting early.
-    /// </remarks>
-    public bool HasFailed => _rejection is not null;
+    /// <param name="issues">
+    /// The collector to which a rejection is added if a reported value violates the rules of the value model.
+    /// </param>
+    /// <exception cref="ArgumentNullException">
+    /// <paramref name="issues"/> is <see langword="null"/>.
+    /// </exception>
+    public DocumentValueBuilder(IIssueCollector issues)
+    {
+        ArgumentNullException.ThrowIfNull(issues);
+        _issues = issues;
+    }
 
     /// <inheritdoc />
     public void BeginCompound()
@@ -44,7 +50,7 @@ public sealed class DocumentValueBuilder : IDocumentValueWriter
 
         if (_frames.Count == DocumentValue.MaxNestingDepth)
         {
-            Fail(DocumentRejectionKind.MaxNestingDepthExceeded,
+            Fail(FormatIssues.MaxNestingDepthExceeded,
                 $"The maximum nesting depth of {DocumentValue.MaxNestingDepth} is exceeded.");
             return;
         }
@@ -66,14 +72,14 @@ public sealed class DocumentValueBuilder : IDocumentValueWriter
 
         if (!CompoundValue.IsValidKey(key))
         {
-            Fail(DocumentRejectionKind.InvalidCharacter,
+            Fail(FormatIssues.InvalidCharacter,
                 "A key is empty or contains a character that is not permitted.");
             return;
         }
 
         if (compound.Entries.ContainsKey(key))
         {
-            Fail(DocumentRejectionKind.DuplicateKey, "A key occurs more than once in a compound.");
+            Fail(FormatIssues.DuplicateKey, "A key occurs more than once in a compound.");
             return;
         }
 
@@ -101,7 +107,7 @@ public sealed class DocumentValueBuilder : IDocumentValueWriter
 
         if (_frames.Count == DocumentValue.MaxNestingDepth)
         {
-            Fail(DocumentRejectionKind.MaxNestingDepthExceeded,
+            Fail(FormatIssues.MaxNestingDepthExceeded,
                 $"The maximum nesting depth of {DocumentValue.MaxNestingDepth} is exceeded.");
             return;
         }
@@ -129,7 +135,7 @@ public sealed class DocumentValueBuilder : IDocumentValueWriter
 
         if (!TextValue.IsValid(value))
         {
-            Fail(DocumentRejectionKind.InvalidCharacter,
+            Fail(FormatIssues.InvalidCharacter,
                 "A text contains a character that XML 1.0 does not permit.");
             return;
         }
@@ -144,7 +150,7 @@ public sealed class DocumentValueBuilder : IDocumentValueWriter
 
         if (value is < IntegerValue.MinValue or > IntegerValue.MaxValue)
         {
-            Fail(DocumentRejectionKind.NumberNotRepresentable, "An integer is outside the range ±(2^53 − 1).");
+            Fail(FormatIssues.NumberNotRepresentable, "An integer is outside the range ±(2^53 − 1).");
             return;
         }
 
@@ -158,7 +164,7 @@ public sealed class DocumentValueBuilder : IDocumentValueWriter
 
         if (!double.IsFinite(value))
         {
-            Fail(DocumentRejectionKind.NumberNotRepresentable, "A real is not finite.");
+            Fail(FormatIssues.NumberNotRepresentable, "A real is not finite.");
             return;
         }
 
@@ -190,13 +196,13 @@ public sealed class DocumentValueBuilder : IDocumentValueWriter
 
         if (value.Length == 0)
         {
-            Fail(DocumentRejectionKind.EmptyReference, "A reference is empty.");
+            Fail(FormatIssues.EmptyReference, "A reference is empty.");
             return;
         }
 
         if (!TextValue.IsValid(value))
         {
-            Fail(DocumentRejectionKind.InvalidCharacter,
+            Fail(FormatIssues.InvalidCharacter,
                 "A reference contains a character that XML 1.0 does not permit.");
             return;
         }
@@ -205,30 +211,28 @@ public sealed class DocumentValueBuilder : IDocumentValueWriter
     }
 
     /// <summary>
-    /// Returns the result of the build.
+    /// Returns the built root value.
     /// </summary>
     /// <returns>
-    /// A <see cref="DocumentValueFailure"/> with the first rejection if one has been recorded; otherwise, a
-    /// <see cref="DocumentValueSuccess"/> with the root value.
+    /// The root value, or <see langword="null"/> if a rejection has been added to the collector.
     /// </returns>
     /// <exception cref="InvalidOperationException">
-    /// The result has already been retrieved, or no rejection has been recorded and no complete root value
-    /// has been reported.
+    /// The result has already been retrieved, or neither a rejection nor a complete root value has been reported.
     /// </exception>
-    public DocumentValueResult GetResult()
+    public DocumentValue? GetResult()
     {
         if (_isConsumed)
             throw new InvalidOperationException("The result has already been retrieved.");
 
         _isConsumed = true;
 
-        if (_rejection is not null)
-            return new DocumentValueFailure(_rejection);
+        if (_hasFailed)
+            return null;
 
         if (_root is null)
             throw new InvalidOperationException("No complete root value has been reported.");
 
-        return new DocumentValueSuccess(_root);
+        return _root;
     }
 
     private bool CanAcceptValue()
@@ -247,7 +251,7 @@ public sealed class DocumentValueBuilder : IDocumentValueWriter
         if (_isConsumed)
             throw new InvalidOperationException("The result has already been retrieved.");
 
-        if (HasFailed) return false;
+        if (_hasFailed) return false;
 
         if (_root is not null)
             throw new InvalidOperationException("The root value is already complete.");
@@ -278,7 +282,11 @@ public sealed class DocumentValueBuilder : IDocumentValueWriter
         }
     }
 
-    private void Fail(DocumentRejectionKind kind, string message) => _rejection = new DocumentRejection(kind, message);
+    private void Fail(IssueDefinition definition, string message)
+    {
+        _issues.Add(new Issue(definition, message, null));
+        _hasFailed = true;
+    }
 
     private T PeekFrame<T>(string containerName) where T : Frame
     {

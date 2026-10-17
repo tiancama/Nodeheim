@@ -4,6 +4,7 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Media;
+using Avalonia.Platform.Storage;
 using Nodeheim.Domain;
 using Nodeheim.Issues;
 using Nodeheim.Persistence;
@@ -69,11 +70,25 @@ public partial class MainWindow : Window
         dialog.ShowDialog(this);
     }
 
-    private void OnOpenClick(object? sender, RoutedEventArgs e)
+    private async void OnOpenClick(object? sender, RoutedEventArgs e)
     {
+        IStorageProvider? storageProvider = TopLevel.GetTopLevel(this)?.StorageProvider;
+        if (storageProvider is null)
+            return;
+
+        IReadOnlyList<IStorageFile> files = await storageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+        {
+            Title = "Open",
+            AllowMultiple = false,
+            FileTypeFilter = [new FilePickerFileType("JSON") { Patterns = ["*.json"] }],
+        });
+
+        if (files is not [{ } file] || file.TryGetLocalPath() is not { } path)
+            return;
+
         IssueCollector collector = new();
         Graph? graph =
-            new DocumentRepository(new JsonDocumentStorage(@"C:\Testdatei\TestFile-OneNode.json")).Load(collector);
+            new DocumentRepository(new JsonDocumentStorage(path)).Load(collector);
 
         if (collector.Issues.Count > 0)
             ShowIssues(collector.Issues);

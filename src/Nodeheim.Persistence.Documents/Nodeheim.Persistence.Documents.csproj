@@ -6,4 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Nodeheim.Issues\Nodeheim.Issues.csproj" />
+  </ItemGroup>
+
 </Project>

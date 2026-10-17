@@ -25,6 +25,12 @@ public sealed class DocumentRepository
     /// <exception cref="InvalidOperationException">
     /// The adapter or the document mapper rejects the document.
     /// </exception>
+    /// <remarks>
+    /// Sections of an unknown section type are skipped and reported as discrepancies.
+    /// A return value of <see langword="null"/> alone does not indicate a failure, because no section is required.
+    /// Only a rejection in <paramref name="issues"/> does. A graph is never returned together with a rejection.
+    /// The content of the graph is not yet checked; malformed content causes exceptions.
+    /// </remarks>
     public Graph? Load(IIssueCollector issues)
     {
         DocumentValue root = _storage.Load() switch
@@ -40,6 +46,13 @@ public sealed class DocumentRepository
             DocumentFailure failure => throw new InvalidOperationException(failure.Rejection.Message),
             _ => throw new UnreachableException()
         };
+
+        foreach (string key in document.Sections.Keys)
+        {
+            if (key != GraphMapper.SectionType)
+                issues.Add(new Issue(FormatIssues.UnknownSection,
+                    $"Unknown section '{key}' is skipped.", $"/sections/{key}"));
+        }
 
         if (!document.Sections.TryGetValue(GraphMapper.SectionType, out DocumentSection? section))
             return null;

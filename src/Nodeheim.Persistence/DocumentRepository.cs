@@ -23,13 +23,14 @@ public sealed class DocumentRepository
     /// has no <c>core.graph</c> section.
     /// </returns>
     /// <exception cref="InvalidOperationException">
-    /// The adapter or the document mapper rejects the document.
+    /// The adapter rejects the document.
     /// </exception>
     /// <remarks>
     /// Sections of an unknown section type are skipped and reported as discrepancies.
     /// A return value of <see langword="null"/> alone does not indicate a failure, because no section is required.
     /// Only a rejection in <paramref name="issues"/> does. A graph is never returned together with a rejection.
-    /// The content of the graph is not yet checked; malformed content causes exceptions.
+    /// The structure of the document and the content of the graph are not yet checked; malformed input causes
+    /// exceptions.
     /// </remarks>
     public Graph? Load(IIssueCollector issues)
     {
@@ -40,12 +41,7 @@ public sealed class DocumentRepository
             _ => throw new UnreachableException()
         };
 
-        Document document = DocumentMapper.Read(root) switch
-        {
-            DocumentSuccess success => success.Document,
-            DocumentFailure failure => throw new InvalidOperationException(failure.Rejection.Message),
-            _ => throw new UnreachableException()
-        };
+        Document document = DocumentMapper.Read(root);
 
         foreach (string key in document.Sections.Keys)
         {

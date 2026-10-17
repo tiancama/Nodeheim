@@ -9,7 +9,7 @@ public static class DocumentMapper
     private const string ContentVersionKey = "contentVersion";
     private const string ContentKey = "content";
 
-    public static DocumentResult Read(DocumentValue root)
+    public static Document Read(DocumentValue root)
     {
         IReadOnlyDictionary<string, DocumentValue> entries = ((CompoundValue)root).Entries;
         Guid stateId = Guid.Parse(((TextValue)entries[StateIdKey]).Value);
@@ -21,6 +21,6 @@ public static class DocumentMapper
             sections.Add(name, new DocumentSection(((TextValue)section[ContentVersionKey]).Value, section[ContentKey]));
         }
 
-        return new DocumentSuccess(new Document(stateId, sections));
+        return new Document(stateId, sections);
     }
 }

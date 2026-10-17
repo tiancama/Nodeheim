@@ -3,6 +3,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.Media;
 using Nodeheim.Domain;
 using Nodeheim.Issues;
 using Nodeheim.Persistence;
@@ -73,7 +74,36 @@ public partial class MainWindow : Window
         IssueCollector collector = new();
         Graph? graph =
             new DocumentRepository(new JsonDocumentStorage(@"C:\Testdatei\TestFile-OneNode.json")).Load(collector);
+
+        if (collector.Issues.Count > 0)
+            ShowIssues(collector.Issues);
+
         if (graph is null) return;
         _shellViewModel.Open(graph);
+    }
+
+    private void ShowIssues(IReadOnlyList<Issue> issues)
+    {
+        IEnumerable<string> lines = issues.Select(issue => issue.Path is null
+            ? $"[{issue.Kind}] {issue.Code}: {issue.Message}"
+            : $"[{issue.Kind}] {issue.Code}: {issue.Message} ({issue.Path})");
+
+        var window = new Window
+        {
+            Title = "Issues",
+            Width = 600,
+            Height = 300,
+            WindowStartupLocation = WindowStartupLocation.CenterOwner,
+            Content = new ScrollViewer
+            {
+                Content = new TextBlock
+                {
+                    Text = string.Join(Environment.NewLine, lines),
+                    TextWrapping = TextWrapping.Wrap,
+                    Margin = new Thickness(10)
+                }
+            }
+        };
+        window.Show(this);
     }
 }

@@ -2,7 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Nodeheim.Issues\Nodeheim.Issues.csproj" />
-    <ProjectReference Include="..\Nodeheim.Persistence.Documents\Nodeheim.Persistence.Documents.csproj" />
+    <ProjectReference Include="..\Nodeheim.Persistence.Documents\Nodeheim.Persistence.Documents.csproj" PrivateAssets="all" />
     <ProjectReference Include="..\Nodeheim.Domain\Nodeheim.Domain.csproj" />
   </ItemGroup>
 

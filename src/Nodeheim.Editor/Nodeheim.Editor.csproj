@@ -7,5 +7,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Nodeheim.Domain\Nodeheim.Domain.csproj" />
+    <ProjectReference Include="..\Nodeheim.Issues\Nodeheim.Issues.csproj" />
+    <ProjectReference Include="..\Nodeheim.Persistence\Nodeheim.Persistence.csproj" />
   </ItemGroup>
 </Project>

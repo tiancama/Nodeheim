@@ -18,7 +18,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Nodeheim.Editor\Nodeheim.Editor.csproj" />
-    <ProjectReference Include="..\Nodeheim.Issues\Nodeheim.Issues.csproj" />
     <ProjectReference Include="..\Nodeheim.Persistence.Json\Nodeheim.Persistence.Json.csproj" />
     <ProjectReference Include="..\Nodeheim.Persistence\Nodeheim.Persistence.csproj" />
   </ItemGroup>

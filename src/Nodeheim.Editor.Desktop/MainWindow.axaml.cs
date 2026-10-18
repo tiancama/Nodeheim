@@ -5,10 +5,6 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.Platform.Storage;
-using Nodeheim.Domain;
-using Nodeheim.Issues;
-using Nodeheim.Persistence;
-using Nodeheim.Persistence.Json;
 
 namespace Nodeheim.Editor.Desktop;
 
@@ -85,23 +81,13 @@ public partial class MainWindow : Window
         if (files is not [{ } file] || file.TryGetLocalPath() is not { } path)
             return;
 
-        IssueCollector collector = new();
-        Graph? graph = new DocumentRepository(new DocumentStorageDescriptor("JSON", [".json"]),
-            location => new JsonDocumentStorage(location)).Load(path, collector);
-
-        if (collector.Issues.Count > 0)
-            ShowIssues(collector.Issues);
-
-        if (graph is null) return;
-        Shell.Open(graph);
+        string? report = Shell.Load(path);
+        if (report is not null)
+            ShowIssues(report);
     }
 
-    private void ShowIssues(IReadOnlyList<Issue> issues)
+    private void ShowIssues(string report)
     {
-        IEnumerable<string> lines = issues.Select(issue => issue.Path is null
-            ? $"[{issue.Kind}] {issue.Code}: {issue.Message}"
-            : $"[{issue.Kind}] {issue.Code}: {issue.Message} ({issue.Path})");
-
         var window = new Window
         {
             Title = "Issues",
@@ -112,7 +98,7 @@ public partial class MainWindow : Window
             {
                 Content = new SelectableTextBlock
                 {
-                    Text = string.Join(Environment.NewLine, lines),
+                    Text = report,
                     TextWrapping = TextWrapping.Wrap,
                     Margin = new Thickness(10)
                 }

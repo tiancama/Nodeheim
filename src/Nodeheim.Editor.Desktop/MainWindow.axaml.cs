@@ -14,20 +14,19 @@ namespace Nodeheim.Editor.Desktop;
 
 public partial class MainWindow : Window
 {
-    private readonly ShellViewModel _shellViewModel;
-
     public MainWindow()
     {
         InitializeComponent();
-        _shellViewModel = new ShellViewModel();
-        DataContext = _shellViewModel;
     }
+
+    private ShellViewModel Shell =>
+        DataContext as ShellViewModel ?? throw new InvalidOperationException("DataContext must be a ShellViewModel.");
 
     protected override void OnKeyDown(KeyEventArgs e)
     {
         base.OnKeyDown(e);
 
-        InteractionController controller = _shellViewModel.ActiveDocument.InteractionController;
+        InteractionController controller = Shell.ActiveDocument.InteractionController;
 
         if (e.Key == Key.Delete)
         {
@@ -44,7 +43,7 @@ public partial class MainWindow : Window
         }
     }
 
-    private void OnNewClick(object? sender, RoutedEventArgs e) => _shellViewModel.New();
+    private void OnNewClick(object? sender, RoutedEventArgs e) => Shell.New();
 
     private void OnQuitClick(object? sender, RoutedEventArgs e) => Close();
 
@@ -94,7 +93,7 @@ public partial class MainWindow : Window
             ShowIssues(collector.Issues);
 
         if (graph is null) return;
-        _shellViewModel.Open(graph);
+        Shell.Open(graph);
     }
 
     private void ShowIssues(IReadOnlyList<Issue> issues)

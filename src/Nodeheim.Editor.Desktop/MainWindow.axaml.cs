@@ -86,8 +86,8 @@ public partial class MainWindow : Window
             return;
 
         IssueCollector collector = new();
-        Graph? graph =
-            new DocumentRepository(new JsonDocumentStorage(path)).Load(collector);
+        Graph? graph = new DocumentRepository(new DocumentStorageDescriptor("JSON", [".json"]),
+            location => new JsonDocumentStorage(location)).Load(path, collector);
 
         if (collector.Issues.Count > 0)
             ShowIssues(collector.Issues);

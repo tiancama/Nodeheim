@@ -4,30 +4,42 @@ using Nodeheim.Persistence.Documents;
 
 namespace Nodeheim.Persistence;
 
-public sealed class DocumentRepository
+/// <summary>
+/// Represents the coordinator that loads a document through a document storage and maps it to a graph.
+/// </summary>
+/// <remarks>
+/// The repository supports exactly one kind of document storage. Every location is passed to it, regardless of
+/// the file extensions in its descriptor.
+/// </remarks>
+public sealed class DocumentRepository : IDocumentRepository
 {
-    private readonly IDocumentStorage _storage;
+    private readonly Func<string, IDocumentStorage> _storageFactory;
 
-    public DocumentRepository(IDocumentStorage storage)
+    /// <summary>
+    /// Initializes a new instance of the <see cref="DocumentRepository"/> class.
+    /// </summary>
+    /// <param name="descriptor">The description of the kind of document storage that the factory creates.</param>
+    /// <param name="storageFactory">The function that creates a document storage for a location.</param>
+    public DocumentRepository(DocumentStorageDescriptor descriptor, Func<string, IDocumentStorage> storageFactory)
     {
-        _storage = storage;
+        _storageFactory = storageFactory;
+        StorageDescriptors = [descriptor];
     }
 
-    /// <returns>
-    /// The loaded graph, or <see langword="null"/> if the document or the content version of the graph is rejected,
-    /// or the document has no <c>core.graph</c> section.
-    /// </returns>
+    /// <inheritdoc />
+    public IReadOnlyList<DocumentStorageDescriptor> StorageDescriptors { get; }
+
+    /// <inheritdoc />
     /// <remarks>
-    /// Sections of an unknown section type are skipped and reported as discrepancies.
-    /// A return value of <see langword="null"/> alone does not indicate a failure, because no section is required.
-    /// Only a rejection in <paramref name="issues"/> does. A graph is never returned together with a rejection.
+    /// <inheritdoc path="/remarks/node()" />
     /// The structure of the document and the content of the graph are not yet checked; malformed input causes
     /// exceptions. Errors of the environment, such as I/O errors, are not yet reported as issues and also cause
     /// exceptions.
     /// </remarks>
-    public Graph? Load(IIssueCollector issues)
+    public Graph? Load(string location, IIssueCollector issues)
     {
-        DocumentValue? root = _storage.Load(issues);
+        IDocumentStorage storage = _storageFactory(location);
+        DocumentValue? root = storage.Load(issues);
         if (root is null) return null;
 
         Document document = DocumentMapper.Read(root);

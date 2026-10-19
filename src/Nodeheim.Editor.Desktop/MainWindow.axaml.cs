@@ -5,6 +5,7 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.Platform.Storage;
+using Nodeheim.Persistence;
 
 namespace Nodeheim.Editor.Desktop;
 
@@ -37,6 +38,32 @@ public partial class MainWindow : Window
         {
             controller.DisconnectNodes();
         }
+    }
+
+    private static List<FilePickerFileType> CreateFileTypeFilters(IReadOnlyList<DocumentStorageDescriptor> descriptors)
+    {
+        List<FilePickerFileType> filters =
+        [
+            new("All supported formats")
+            {
+                Patterns = descriptors.SelectMany(d => d.FileExtensions)
+                    .Select(e => "*" + e).ToList()
+            }
+        ];
+
+        foreach (DocumentStorageDescriptor descriptor in descriptors)
+        {
+            if (descriptor.FileExtensions.Count == 0)
+                continue;
+
+            filters.Add(new FilePickerFileType(descriptor.DisplayName)
+            {
+                Patterns = descriptor.FileExtensions.Select(e => "*" + e).ToList()
+            });
+        }
+
+        filters.Add(FilePickerFileTypes.All);
+        return filters;
     }
 
     private void OnNewClick(object? sender, RoutedEventArgs e) => Shell.New();
@@ -75,7 +102,7 @@ public partial class MainWindow : Window
         {
             Title = "Open",
             AllowMultiple = false,
-            FileTypeFilter = [new FilePickerFileType("JSON") { Patterns = ["*.json"] }],
+            FileTypeFilter = CreateFileTypeFilters(Shell.StorageDescriptors),
         });
 
         if (files is not [{ } file] || file.TryGetLocalPath() is not { } path)

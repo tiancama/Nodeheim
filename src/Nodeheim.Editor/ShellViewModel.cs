@@ -32,6 +32,8 @@ public class ShellViewModel : INotifyPropertyChanged
     /// </summary>
     public DocumentViewModel ActiveDocument { get; private set => SetProperty(ref field, value); }
 
+    public IReadOnlyList<DocumentStorageDescriptor> StorageDescriptors => _documentRepository.StorageDescriptors;
+
     [MemberNotNull(nameof(ActiveDocument))]
     public void Open(Graph graph) => ActiveDocument = new(graph);
 

@@ -49,4 +49,10 @@ public static class FormatIssues
     /// Represents the rejection that a compound contains the same key more than once.
     /// </summary>
     public static readonly IssueDefinition DuplicateKey = new("format.duplicateKey", IssueKind.Rejection);
+
+    /// <summary>
+    /// Represents the rejection that the input is not a Nodeheim document, because the root value is not a
+    /// compound or has no nodeheimFormat key.
+    /// </summary>
+    public static readonly IssueDefinition NotNodeheimDocument = new("format.notNodeheimDocument", IssueKind.Rejection);
 }

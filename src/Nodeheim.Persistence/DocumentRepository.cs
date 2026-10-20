@@ -32,9 +32,9 @@ public sealed class DocumentRepository : IDocumentRepository
     /// <inheritdoc />
     /// <remarks>
     /// <inheritdoc path="/remarks/node()" />
-    /// The structure of the document and the content of the graph are not yet checked; malformed input causes
-    /// exceptions. Errors of the environment, such as I/O errors, are not yet reported as issues and also cause
-    /// exceptions.
+    /// The structure of the document is only partly checked, and the content of the graph is not yet checked;
+    /// malformed input causes exceptions. Errors of the environment, such as I/O errors, are not yet reported as
+    /// issues and also cause exceptions.
     /// </remarks>
     public Graph? Load(string location, IIssueCollector issues)
     {
@@ -42,7 +42,8 @@ public sealed class DocumentRepository : IDocumentRepository
         DocumentValue? root = storage.Load(issues);
         if (root is null) return null;
 
-        Document document = DocumentMapper.Read(root);
+        Document? document = DocumentMapper.Read(root, issues);
+        if (document is null) return null;
 
         foreach (string key in document.Sections.Keys)
         {

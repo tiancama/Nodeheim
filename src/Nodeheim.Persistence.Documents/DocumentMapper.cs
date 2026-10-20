@@ -1,4 +1,6 @@
-﻿namespace Nodeheim.Persistence.Documents;
+﻿using Nodeheim.Issues;
+
+namespace Nodeheim.Persistence.Documents;
 
 public static class DocumentMapper
 {
@@ -9,9 +11,24 @@ public static class DocumentMapper
     private const string ContentVersionKey = "contentVersion";
     private const string ContentKey = "content";
 
-    public static Document Read(DocumentValue root)
+    public static Document? Read(DocumentValue root, IIssueCollector issues)
     {
-        IReadOnlyDictionary<string, DocumentValue> entries = ((CompoundValue)root).Entries;
+        if (root is not CompoundValue compound)
+        {
+            issues.Add(new Issue(FormatIssues.NotNodeheimDocument,
+                "Not a Nodeheim document: the root value is not a compound.", ""));
+            return null;
+        }
+
+        IReadOnlyDictionary<string, DocumentValue> entries = compound.Entries;
+
+        if (!entries.ContainsKey(FormatKey))
+        {
+            issues.Add(new Issue(FormatIssues.NotNodeheimDocument,
+                "Not a Nodeheim document: the key 'nodeheimFormat' is missing.", ""));
+            return null;
+        }
+
         Guid stateId = Guid.Parse(((TextValue)entries[StateIdKey]).Value);
 
         var sections = new Dictionary<string, DocumentSection>(StringComparer.Ordinal);

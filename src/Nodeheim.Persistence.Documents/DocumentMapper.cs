@@ -22,10 +22,24 @@ public static class DocumentMapper
 
         IReadOnlyDictionary<string, DocumentValue> entries = compound.Entries;
 
-        if (!entries.ContainsKey(FormatKey))
+        if (!entries.TryGetValue(FormatKey, out DocumentValue? format))
         {
             issues.Add(new Issue(FormatIssues.NotNodeheimDocument,
                 "Not a Nodeheim document: the key 'nodeheimFormat' is missing.", ""));
+            return null;
+        }
+
+        if (format is not TextValue formatText)
+        {
+            issues.Add(new Issue(FormatIssues.InvalidStructure,
+                "Invalid structure: the value of 'nodeheimFormat' is not a text.", "/nodeheimFormat"));
+            return null;
+        }
+
+        if (formatText.Value != SupportedFormat)
+        {
+            issues.Add(new Issue(FormatIssues.UnsupportedFormatVersion,
+                $"Unsupported format version '{formatText.Value}'.", "/nodeheimFormat"));
             return null;
         }
 

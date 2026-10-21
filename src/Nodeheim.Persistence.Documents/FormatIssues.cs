@@ -55,4 +55,17 @@ public static class FormatIssues
     /// compound or has no nodeheimFormat key.
     /// </summary>
     public static readonly IssueDefinition NotNodeheimDocument = new("format.notNodeheimDocument", IssueKind.Rejection);
+
+    /// <summary>
+    /// Represents the rejection that the document has a format version that is not supported.
+    /// </summary>
+    public static readonly IssueDefinition UnsupportedFormatVersion =
+        new("format.unsupportedFormatVersion", IssueKind.Rejection);
+
+    /// <summary>
+    /// Represents the rejection that the structure of the document does not match the format, such as a missing
+    /// key, an unexpected key, or a value of the wrong value kind.
+    /// </summary>
+    public static readonly IssueDefinition InvalidStructure =
+        new("format.invalidStructure", IssueKind.Rejection);
 }

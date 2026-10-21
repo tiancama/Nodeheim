@@ -10,6 +10,7 @@ public static class DocumentMapper
     private const string SectionsKey = "sections";
     private const string ContentVersionKey = "contentVersion";
     private const string ContentKey = "content";
+    private const int GuidLength = 36;
 
     public static Document? Read(DocumentValue root, IIssueCollector issues)
     {
@@ -43,7 +44,27 @@ public static class DocumentMapper
             return null;
         }
 
-        Guid stateId = Guid.Parse(((TextValue)entries[StateIdKey]).Value);
+        if (!entries.TryGetValue(StateIdKey, out DocumentValue? stateIdValue))
+        {
+            issues.Add(new Issue(FormatIssues.InvalidStructure,
+                "Invalid structure: the key 'stateId' is missing.", ""));
+            return null;
+        }
+
+        if (stateIdValue is not TextValue stateIdText)
+        {
+            issues.Add(new Issue(FormatIssues.InvalidStructure,
+                "Invalid structure: the value of 'stateId' is not a text.", "/stateId"));
+            return null;
+        }
+
+        if (stateIdText.Value.Length != GuidLength
+            || !Guid.TryParseExact(stateIdText.Value, "D", out Guid stateId))
+        {
+            issues.Add(new Issue(FormatIssues.InvalidStructure,
+                "Invalid structure: the value of 'stateId' is not a GUID in format D.", "/stateId"));
+            return null;
+        }
 
         var sections = new Dictionary<string, DocumentSection>(StringComparer.Ordinal);
         foreach ((string name, DocumentValue value) in ((CompoundValue)entries[SectionsKey]).Entries)

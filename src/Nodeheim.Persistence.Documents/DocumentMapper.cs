@@ -60,139 +60,97 @@ public static class DocumentMapper
         ArgumentNullException.ThrowIfNull(issues);
 
         if (root is not CompoundValue compound)
-        {
-            issues.Add(new Issue(FormatIssues.NotNodeheimDocument,
-                "Not a Nodeheim document: the root value is not a compound.", ""));
-            return null;
-        }
+            return Reject(issues, FormatIssues.NotNodeheimDocument,
+                "Not a Nodeheim document: the root value is not a compound.", "");
 
         IReadOnlyDictionary<string, DocumentValue> entries = compound.Entries;
 
         if (!entries.TryGetValue(FormatKey, out DocumentValue? format))
-        {
-            issues.Add(new Issue(FormatIssues.NotNodeheimDocument,
-                "Not a Nodeheim document: the key 'nodeheimFormat' is missing.", ""));
-            return null;
-        }
+            return Reject(issues, FormatIssues.NotNodeheimDocument,
+                "Not a Nodeheim document: the key 'nodeheimFormat' is missing.", "");
 
         if (format is not TextValue formatText)
-        {
-            issues.Add(new Issue(FormatIssues.InvalidStructure,
-                "Invalid structure: the value of 'nodeheimFormat' is not a text.", "/nodeheimFormat"));
-            return null;
-        }
+            return Reject(issues, FormatIssues.InvalidStructure,
+                "Invalid structure: the value of 'nodeheimFormat' is not a text.", "/nodeheimFormat");
 
         if (formatText.Value != SupportedFormat)
-        {
-            issues.Add(new Issue(FormatIssues.UnsupportedFormatVersion,
-                $"Unsupported format version '{formatText.Value}'.", "/nodeheimFormat"));
-            return null;
-        }
+            return Reject(issues, FormatIssues.UnsupportedFormatVersion,
+                $"Unsupported format version '{formatText.Value}'.", "/nodeheimFormat");
 
         if (!entries.TryGetValue(StateIdKey, out DocumentValue? stateIdValue))
-        {
-            issues.Add(new Issue(FormatIssues.InvalidStructure,
-                "Invalid structure: the key 'stateId' is missing.", ""));
-            return null;
-        }
+            return Reject(issues, FormatIssues.InvalidStructure,
+                "Invalid structure: the key 'stateId' is missing.", "");
 
         if (stateIdValue is not TextValue stateIdText)
-        {
-            issues.Add(new Issue(FormatIssues.InvalidStructure,
-                "Invalid structure: the value of 'stateId' is not a text.", "/stateId"));
-            return null;
-        }
+            return Reject(issues, FormatIssues.InvalidStructure,
+                "Invalid structure: the value of 'stateId' is not a text.", "/stateId");
 
         if (stateIdText.Value.Length != GuidLength
             || !Guid.TryParseExact(stateIdText.Value, "D", out Guid stateId))
-        {
-            issues.Add(new Issue(FormatIssues.InvalidStructure,
-                "Invalid structure: the value of 'stateId' is not a GUID in format D.", "/stateId"));
-            return null;
-        }
+            return Reject(issues, FormatIssues.InvalidStructure,
+                "Invalid structure: the value of 'stateId' is not a GUID in format D.", "/stateId");
 
         if (!entries.TryGetValue(SectionsKey, out DocumentValue? sectionsValue))
-        {
-            issues.Add(new Issue(FormatIssues.InvalidStructure,
-                "Invalid structure: the key 'sections' is missing.", ""));
-            return null;
-        }
+            return Reject(issues, FormatIssues.InvalidStructure,
+                "Invalid structure: the key 'sections' is missing.", "");
 
         foreach (string key in entries.Keys)
         {
             if (key is not (FormatKey or StateIdKey or SectionsKey))
-            {
-                issues.Add(new Issue(FormatIssues.InvalidStructure,
-                    $"Invalid structure: unexpected key '{key}'.", $"/{key}"));
-                return null;
-            }
+                return Reject(issues, FormatIssues.InvalidStructure,
+                    $"Invalid structure: unexpected key '{key}'.", $"/{key}");
         }
 
         if (sectionsValue is not CompoundValue sectionsCompound)
-        {
-            issues.Add(new Issue(FormatIssues.InvalidStructure,
-                "Invalid structure: the value of 'sections' is not a compound.", "/sections"));
-            return null;
-        }
+            return Reject(issues, FormatIssues.InvalidStructure,
+                "Invalid structure: the value of 'sections' is not a compound.", "/sections");
 
         if (sectionsCompound.Entries.Count == 0)
-        {
-            issues.Add(new Issue(FormatIssues.InvalidStructure,
-                "Invalid structure: 'sections' has no entries.", "/sections"));
-            return null;
-        }
+            return Reject(issues, FormatIssues.InvalidStructure,
+                "Invalid structure: 'sections' has no entries.", "/sections");
 
         var sections = new Dictionary<string, DocumentSection>(StringComparer.Ordinal);
         foreach ((string name, DocumentValue value) in sectionsCompound.Entries)
         {
             if (value is not CompoundValue sectionCompound)
-            {
-                issues.Add(new Issue(FormatIssues.InvalidStructure,
+                return Reject(issues, FormatIssues.InvalidStructure,
                     $"Invalid structure: the value of section '{name}' is not a compound.",
-                    $"/sections/{name}"));
-                return null;
-            }
+                    $"/sections/{name}");
 
             IReadOnlyDictionary<string, DocumentValue> section = sectionCompound.Entries;
 
             if (!section.TryGetValue(ContentVersionKey, out DocumentValue? contentVersionValue))
-            {
-                issues.Add(new Issue(FormatIssues.InvalidStructure,
+                return Reject(issues, FormatIssues.InvalidStructure,
                     $"Invalid structure: the key 'contentVersion' is missing in section '{name}'.",
-                    $"/sections/{name}"));
-                return null;
-            }
+                    $"/sections/{name}");
 
             if (!section.TryGetValue(ContentKey, out DocumentValue? content))
-            {
-                issues.Add(new Issue(FormatIssues.InvalidStructure,
+                return Reject(issues, FormatIssues.InvalidStructure,
                     $"Invalid structure: the key 'content' is missing in section '{name}'.",
-                    $"/sections/{name}"));
-                return null;
-            }
+                    $"/sections/{name}");
 
             foreach (string key in section.Keys)
             {
                 if (key is not (ContentVersionKey or ContentKey))
-                {
-                    issues.Add(new Issue(FormatIssues.InvalidStructure,
+                    return Reject(issues, FormatIssues.InvalidStructure,
                         $"Invalid structure: unexpected key '{key}' in section '{name}'.",
-                        $"/sections/{name}/{key}"));
-                    return null;
-                }
+                        $"/sections/{name}/{key}");
             }
 
             if (contentVersionValue is not TextValue contentVersionText)
-            {
-                issues.Add(new Issue(FormatIssues.InvalidStructure,
+                return Reject(issues, FormatIssues.InvalidStructure,
                     $"Invalid structure: the value of 'contentVersion' in section '{name}' is not a text.",
-                    $"/sections/{name}/contentVersion"));
-                return null;
-            }
+                    $"/sections/{name}/contentVersion");
 
             sections.Add(name, new DocumentSection(contentVersionText.Value, content));
         }
 
         return new Document(stateId, sections);
+    }
+
+    private static Document? Reject(IIssueCollector issues, IssueDefinition definition, string message, string path)
+    {
+        issues.Add(new Issue(definition, message, path));
+        return null;
     }
 }

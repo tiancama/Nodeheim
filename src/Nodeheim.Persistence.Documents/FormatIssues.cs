@@ -21,8 +21,8 @@ public static class FormatIssues
     public static readonly IssueDefinition InvalidSyntax = new("format.invalidSyntax", IssueKind.Rejection);
 
     /// <summary>
-    /// Represents the rejection that a text value, a reference value, or a key contains a character that is not
-    /// permitted, or that a key is empty.
+    /// Represents the rejection that a text value, a reference value, or a key contains invalid UTF-8 or a
+    /// character that is not permitted, or that a key is empty.
     /// </summary>
     public static readonly IssueDefinition InvalidCharacter = new("format.invalidCharacter", IssueKind.Rejection);
 

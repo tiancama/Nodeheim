@@ -21,15 +21,15 @@ public sealed class JsonDocumentStorage : IDocumentStorage
     /// </para>
     /// <para>
     /// Besides the rejections of <see cref="DocumentValueBuilder"/>, this method adds
-    /// <see cref="FormatIssues.InvalidSyntax"/> and <see cref="FormatIssues.NumberNotRepresentable"/>. After either
-    /// of them, it stops reading and returns <see langword="null"/>.
+    /// <see cref="FormatIssues.InvalidSyntax"/>, <see cref="FormatIssues.NumberNotRepresentable"/>, and
+    /// <see cref="FormatIssues.InvalidCharacter"/>.
     /// </para>
     /// <para>
-    /// Format contract: The lexical form of a JSON number determines its value kind. A number without <c>.</c>,
-    /// <c>e</c>, and <c>E</c> is an integer, such as <c>-0</c>; every other number is a real, such as <c>1.0</c> or
-    /// <c>1e3</c>. An integer outside the range of <see cref="long"/> is rejected and never read as a real. A real
-    /// is rounded to the nearest <see cref="double"/>. The range of the value model is checked by
-    /// <see cref="DocumentValueBuilder"/>.
+    /// Format contract: A JSON number without <c>.</c>, <c>e</c>, and <c>E</c> is an integer, such as <c>-0</c>;
+    /// every other number is a real, such as <c>1.0</c> or <c>1e3</c>. An integer outside the range of
+    /// <see cref="long"/> is rejected; a real is rounded to the nearest <see cref="double"/>. A lone surrogate, also
+    /// as an escape sequence such as <c>\uD800</c>, or invalid UTF-8 in a text or a key is rejected with
+    /// <see cref="FormatIssues.InvalidCharacter"/>.
     /// </para>
     /// </remarks>
     public DocumentValue? Load(IIssueCollector issues)
@@ -48,8 +48,13 @@ public sealed class JsonDocumentStorage : IDocumentStorage
                     case JsonTokenType.EndObject: builder.EndCompound(); break;
                     case JsonTokenType.StartArray: builder.BeginList(); break;
                     case JsonTokenType.EndArray: builder.EndList(); break;
-                    case JsonTokenType.PropertyName: builder.Key(reader.GetString()!); break;
-                    case JsonTokenType.String: builder.Text(reader.GetString()!); break;
+                    case JsonTokenType.PropertyName:
+                        if (!TryGetString(ref reader, issues, out string key)) return null;
+                        builder.Key(key); break;
+                    case JsonTokenType.String:
+                        if (!TryGetString(ref reader, issues, out string text)) return null;
+                        builder.Text(text);
+                        break;
                     case JsonTokenType.True: builder.Boolean(true); break;
                     case JsonTokenType.False: builder.Boolean(false); break;
                     case JsonTokenType.Null: builder.Null(); break;
@@ -105,5 +110,33 @@ public sealed class JsonDocumentStorage : IDocumentStorage
 
         builder.Real(real);
         return true;
+    }
+
+    /// <summary>
+    /// Decodes the current JSON string token or property name token.
+    /// </summary>
+    /// <returns>
+    /// <see langword="true"/> if the token has been decoded; otherwise, <see langword="false"/>, and a rejection
+    /// has been added to <paramref name="issues"/>.
+    /// </returns>
+    /// <remarks>
+    /// Only <see cref="Utf8JsonReader.GetString"/> is enclosed in the <see langword="try"/> block, not the write
+    /// call to the builder: <see cref="DocumentValueBuilder"/> also throws <see cref="InvalidOperationException"/>,
+    /// and there it indicates a contract violation, not a rejection.
+    /// </remarks>
+    private static bool TryGetString(ref Utf8JsonReader reader, IIssueCollector issues, out string value)
+    {
+        try
+        {
+            value = reader.GetString()!;
+            return true;
+        }
+        catch (InvalidOperationException)
+        {
+            issues.Add(new Issue(FormatIssues.InvalidCharacter,
+                "A text or key contains a lone surrogate or invalid UTF-8.", null));
+            value = "";
+            return false;
+        }
     }
 }

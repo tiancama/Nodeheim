@@ -8,6 +8,7 @@ namespace Nodeheim.Persistence.Json;
 public sealed class JsonDocumentStorage : IDocumentStorage
 {
     private readonly string _path;
+    private static ReadOnlySpan<byte> Utf8Bom => [0xEF, 0xBB, 0xBF];
 
     public JsonDocumentStorage(string path)
     {
@@ -25,17 +26,16 @@ public sealed class JsonDocumentStorage : IDocumentStorage
     /// <see cref="FormatIssues.InvalidCharacter"/>.
     /// </para>
     /// <para>
-    /// Format contract: A JSON number without <c>.</c>, <c>e</c>, and <c>E</c> is an integer, such as <c>-0</c>;
-    /// every other number is a real, such as <c>1.0</c> or <c>1e3</c>. An integer outside the range of
-    /// <see cref="long"/> is rejected; a real is rounded to the nearest <see cref="double"/>. A lone surrogate, also
-    /// as an escape sequence such as <c>\uD800</c>, or invalid UTF-8 in a text or a key is rejected with
-    /// <see cref="FormatIssues.InvalidCharacter"/>.
+    /// Format contract: The input is UTF-8; a byte order mark at the beginning is ignored. A number with <c>.</c>,
+    /// <c>e</c>, or <c>E</c> is a real, such as <c>1.0</c>; every other number is an integer.
     /// </para>
     /// </remarks>
     public DocumentValue? Load(IIssueCollector issues)
     {
         byte[] bytes = File.ReadAllBytes(_path);
-        Utf8JsonReader reader = new(bytes);
+        ReadOnlySpan<byte> json = bytes;
+        if (json.StartsWith(Utf8Bom)) json = json[Utf8Bom.Length..];
+        Utf8JsonReader reader = new(json);
         DocumentValueBuilder builder = new(issues);
 
         try

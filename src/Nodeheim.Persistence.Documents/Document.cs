@@ -10,8 +10,9 @@ namespace Nodeheim.Persistence.Documents;
 /// </remarks>
 public sealed class Document
 {
-    public Document(Guid stateId, IReadOnlyDictionary<string, DocumentSection> sections)
+    public Document(string stateId, IReadOnlyDictionary<string, DocumentSection> sections)
     {
+        ArgumentNullException.ThrowIfNull(stateId);
         ArgumentNullException.ThrowIfNull(sections);
 
         StateId = stateId;
@@ -19,7 +20,7 @@ public sealed class Document
             new Dictionary<string, DocumentSection>(sections, StringComparer.Ordinal));
     }
 
-    public Guid StateId { get; }
+    public string StateId { get; }
 
     public IReadOnlyDictionary<string, DocumentSection> Sections { get; }
 }

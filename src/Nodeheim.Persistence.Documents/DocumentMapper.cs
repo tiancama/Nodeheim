@@ -15,15 +15,6 @@ public static class DocumentMapper
     private const string ContentKey = "content";
 
     /// <summary>
-    /// Represents the length of a GUID in the format <c>00000000-0000-0000-0000-000000000000</c>.
-    /// </summary>
-    /// <remarks>
-    /// <see cref="Guid.TryParseExact(string, string, out Guid)"/> ignores leading and trailing white space; the
-    /// length check rejects it.
-    /// </remarks>
-    private const int GuidLength = 36;
-
-    /// <summary>
     /// Reads a document from the root value of the input.
     /// </summary>
     /// <param name="root">The root value of the input.</param>
@@ -48,10 +39,9 @@ public static class DocumentMapper
     /// Format contract: The root value is a compound with exactly the entries <c>nodeheimFormat</c>,
     /// <c>stateId</c>, and <c>sections</c>. The value of <c>nodeheimFormat</c> is the text <c>0.1</c>. It is
     /// checked before everything else, because another format version may structure the document differently.
-    /// The value of <c>stateId</c> is a text with a GUID in the format <c>00000000-0000-0000-0000-000000000000</c>;
-    /// letter case is ignored. The value of <c>sections</c> is a compound with at least one entry; no section type
-    /// is required. Each section is a compound with exactly the entries <c>contentVersion</c>, whose value is a
-    /// text, and <c>content</c>, whose value can be of any value kind.
+    /// The value of <c>stateId</c> is a text. The value of <c>sections</c> is a compound with at least one entry;
+    /// no section type is required. Each section is a compound with exactly the entries <c>contentVersion</c>,
+    /// whose value is a text, and <c>content</c>, whose value can be of any value kind.
     /// </para>
     /// </remarks>
     public static Document? Read(DocumentValue root, IIssueCollector issues)
@@ -84,11 +74,6 @@ public static class DocumentMapper
         if (stateIdValue is not TextValue stateIdText)
             return Reject(issues, FormatIssues.InvalidStructure,
                 "Invalid structure: the value of 'stateId' is not a text.", "/stateId");
-
-        if (stateIdText.Value.Length != GuidLength
-            || !Guid.TryParseExact(stateIdText.Value, "D", out Guid stateId))
-            return Reject(issues, FormatIssues.InvalidStructure,
-                "Invalid structure: the value of 'stateId' is not a GUID in format D.", "/stateId");
 
         if (!entries.TryGetValue(SectionsKey, out DocumentValue? sectionsValue))
             return Reject(issues, FormatIssues.InvalidStructure,
@@ -145,7 +130,7 @@ public static class DocumentMapper
             sections.Add(name, new DocumentSection(contentVersionText.Value, content));
         }
 
-        return new Document(stateId, sections);
+        return new Document(stateIdText.Value, sections);
     }
 
     private static Document? Reject(IIssueCollector issues, IssueDefinition definition, string message, string path)

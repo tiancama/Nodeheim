@@ -32,8 +32,7 @@ public sealed class DocumentRepository : IDocumentRepository
     /// <inheritdoc />
     /// <remarks>
     /// <inheritdoc path="/remarks/node()" />
-    /// The content of the <c>core.graph</c> section is not yet checked; malformed content causes exceptions.
-    /// Errors of the environment, such as I/O errors, are not yet reported as issues and also cause exceptions.
+    /// Errors of the environment, such as I/O errors, are not yet reported as issues and cause exceptions.
     /// </remarks>
     public Graph? Load(string location, IIssueCollector issues)
     {

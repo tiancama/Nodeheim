@@ -15,6 +15,12 @@ internal static class GraphMapper
     private static readonly IssueDefinition UnsupportedContentVersionIssue =
         new("core.graph.unsupportedContentVersion", IssueKind.Rejection);
 
+    private static readonly IssueDefinition InvalidStructureIssue =
+        new("core.graph.invalidStructure", IssueKind.Rejection);
+
+    private static readonly IssueDefinition InvalidItemIssue =
+        new("core.graph.invalidItem", IssueKind.Discrepancy);
+
     /// <summary>
     /// Reads a graph from the <c>core.graph</c> section.
     /// </summary>
@@ -24,6 +30,14 @@ internal static class GraphMapper
     /// The graph, or <see langword="null"/> if the section is rejected; the rejection is added to
     /// <paramref name="issues"/>.
     /// </returns>
+    /// <remarks>
+    /// Format contract: The content is a compound with exactly the entries <c>nodes</c> and <c>connections</c>,
+    /// both lists. Each item of <c>nodes</c> is a text with a GUID in any format that
+    /// <see cref="Guid.TryParse(string, out Guid)"/> accepts. Each item of <c>connections</c> is a list of two
+    /// different IDs from <c>nodes</c>; <c>[a, b]</c> and <c>[b, a]</c> are the same connection. An invalid or
+    /// duplicate item is skipped and reported as <c>core.graph.invalidItem</c>; any other deviation rejects the
+    /// section with <c>core.graph.invalidStructure</c>.
+    /// </remarks>
     internal static Graph? Read(DocumentSection section, IIssueCollector issues)
     {
         if (section.ContentVersion != SupportedContentVersion)
@@ -33,25 +47,111 @@ internal static class GraphMapper
             return null;
         }
 
-        IReadOnlyDictionary<string, DocumentValue> entries = ((CompoundValue)section.Content).Entries;
+        if (section.Content is not CompoundValue content)
+            return Reject(issues, "Invalid structure: the content is not a compound.");
+
+        IReadOnlyDictionary<string, DocumentValue> entries = content.Entries;
+
+        if (!entries.TryGetValue(NodesKey, out DocumentValue? nodesValue))
+            return Reject(issues, "Invalid structure: the key 'nodes' is missing.");
+
+        if (!entries.TryGetValue(ConnectionsKey, out DocumentValue? connectionsValue))
+            return Reject(issues, "Invalid structure: the key 'connections' is missing.");
+
+        foreach (string key in entries.Keys)
+        {
+            if (key is not (NodesKey or ConnectionsKey))
+                return Reject(issues, $"Invalid structure: unexpected key '{key}'.");
+        }
+
+        if (nodesValue is not ListValue nodes)
+            return Reject(issues, "Invalid structure: the value of 'nodes' is not a list.");
+
+        if (connectionsValue is not ListValue connections)
+            return Reject(issues, "Invalid structure: the value of 'connections' is not a list.");
+
         Graph graph = new();
         Dictionary<Guid, Node> nodesById = new();
 
-        foreach (DocumentValue item in ((ListValue)entries[NodesKey]).Items)
+        for (int i = 0; i < nodes.Items.Count; i++)
         {
-            Node node = new() { Id = ReadId(item) };
+            if (!TryReadId(nodes.Items[i], out Guid id))
+            {
+                issues.Add(new Issue(InvalidItemIssue,
+                    $"Invalid item: 'nodes' item {i} is not a GUID.", null));
+                continue;
+            }
+
+            Node node = new() { Id = id };
+            if (!nodesById.TryAdd(id, node))
+            {
+                issues.Add(new Issue(InvalidItemIssue,
+                    $"Invalid item: 'nodes' item {i} duplicates an earlier item.", null));
+                continue;
+            }
+
             graph.AddNode(node);
-            nodesById.Add(node.Id, node);
         }
 
-        foreach (DocumentValue item in ((ListValue)entries[ConnectionsKey]).Items)
+        for (int i = 0; i < connections.Items.Count; i++)
         {
-            IReadOnlyList<DocumentValue> pair = ((ListValue)item).Items;
-            graph.Connect(nodesById[ReadId(pair[0])], nodesById[ReadId(pair[1])]);
+            if (connections.Items[i] is not ListValue pair)
+            {
+                issues.Add(new Issue(InvalidItemIssue,
+                    $"Invalid item: 'connections' item {i} is not a list.", null));
+                continue;
+            }
+
+            if (pair.Items.Count != 2)
+            {
+                issues.Add(new Issue(InvalidItemIssue,
+                    $"Invalid item: 'connections' item {i} does not have exactly two items.", null));
+                continue;
+            }
+
+            if (!TryReadId(pair.Items[0], out Guid idA) || !TryReadId(pair.Items[1], out Guid idB))
+            {
+                issues.Add(new Issue(InvalidItemIssue,
+                    $"Invalid item: 'connections' item {i} has an invalid ID.", null));
+                continue;
+            }
+
+            if (!nodesById.TryGetValue(idA, out Node? nodeA) || !nodesById.TryGetValue(idB, out Node? nodeB))
+            {
+                issues.Add(new Issue(InvalidItemIssue,
+                    $"Invalid item: 'connections' item {i} refers to a node that is not in 'nodes'.", null));
+                continue;
+            }
+
+            if (nodeA.Id == nodeB.Id)
+            {
+                issues.Add(new Issue(InvalidItemIssue,
+                    $"Invalid item: 'connections' item {i} connects a node to itself.", null));
+                continue;
+            }
+
+            if (!graph.Connect(nodeA, nodeB))
+            {
+                issues.Add(new Issue(InvalidItemIssue,
+                    $"Invalid item: 'connections' item {i} duplicates an earlier item.", null));
+            }
         }
 
         return graph;
     }
 
-    private static Guid ReadId(DocumentValue item) => Guid.Parse(((TextValue)item).Value);
+    private static bool TryReadId(DocumentValue item, out Guid id)
+    {
+        if (item is TextValue text && Guid.TryParse(text.Value, out id))
+            return true;
+
+        id = Guid.Empty;
+        return false;
+    }
+
+    private static Graph? Reject(IIssueCollector issues, string message)
+    {
+        issues.Add(new Issue(InvalidStructureIssue, message, null));
+        return null;
+    }
 }

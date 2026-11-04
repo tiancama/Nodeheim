@@ -28,6 +28,9 @@ public sealed class DocumentEntryBuilder : IDocumentEntryWriter
     {
         ArgumentNullException.ThrowIfNull(name);
 
+        if (_root is not null)
+            throw new InvalidOperationException("The root entry is already complete.");
+
         Frame frame = new(name);
         _frames.Push(frame);
     }
@@ -37,13 +40,20 @@ public sealed class DocumentEntryBuilder : IDocumentEntryWriter
     {
         ArgumentNullException.ThrowIfNull(text);
 
-        _frames.Peek().Text = text;
+        if (!_frames.TryPeek(out Frame? frame))
+            throw new InvalidOperationException("No entry is open.");
+
+        if (frame.Text is not null)
+            throw new InvalidOperationException("The open entry already has text.");
+
+        frame.Text = text;
     }
 
     /// <inheritdoc />
     public void EndEntry()
     {
-        Frame frame = _frames.Pop();
+        if (!_frames.TryPop(out Frame? frame))
+            throw new InvalidOperationException("No entry is open.");
 
         DocumentEntry entry = frame.Children.Count > 0
             ? DocumentEntry.CreateBranch(frame.Name, frame.Children)
@@ -62,8 +72,15 @@ public sealed class DocumentEntryBuilder : IDocumentEntryWriter
     /// <summary>
     /// Returns the root entry.
     /// </summary>
-    /// <returns>The root entry, or <see langword="null"/> if no root entry has been completed.</returns>
-    public DocumentEntry? GetResult() => _root;
+    /// <returns>The root entry.</returns>
+    /// <exception cref="InvalidOperationException">The root entry is not complete.</exception>
+    public DocumentEntry GetResult()
+    {
+        if (_root is null)
+            throw new InvalidOperationException("The root entry is not complete.");
+
+        return _root;
+    }
 
     private sealed class Frame
     {

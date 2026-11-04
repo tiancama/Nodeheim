@@ -7,6 +7,11 @@ namespace Nodeheim.Persistence.Documents;
 /// </summary>
 public sealed class DocumentEntry
 {
+    /// <summary>
+    /// Represents the maximum number of levels of a document tree.
+    /// </summary>
+    public const int MaxLevels = 32;
+
     private DocumentEntry(string name, string text, IReadOnlyList<DocumentEntry> children)
     {
         ArgumentException.ThrowIfNullOrEmpty(name);

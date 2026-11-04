@@ -39,8 +39,7 @@ public static class FormatIssues
         new("format.numberNotRepresentable", IssueKind.Rejection);
 
     /// <summary>
-    /// Represents the rejection that a value exceeds the maximum nesting depth,
-    /// <see cref="DocumentValue.MaxNestingDepth"/>.
+    /// Represents the rejection that the document is nested too deeply.
     /// </summary>
     public static readonly IssueDefinition MaxNestingDepthExceeded =
         new("format.maxNestingDepthExceeded", IssueKind.Rejection);

@@ -10,6 +10,7 @@ public sealed class DocumentEntryBuilder : IDocumentEntryWriter
     private DocumentEntry? _root;
     private readonly IIssueCollector _issues;
     private readonly Stack<Frame> _frames = new();
+    private bool _hasFailed;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="DocumentEntryBuilder"/> class.
@@ -28,17 +29,29 @@ public sealed class DocumentEntryBuilder : IDocumentEntryWriter
     {
         ArgumentNullException.ThrowIfNull(name);
 
+        if (_hasFailed) return;
+
         if (_root is not null)
             throw new InvalidOperationException("The root entry is already complete.");
 
-        Frame frame = new(name);
-        _frames.Push(frame);
+        int depth = _frames.Count;
+
+        if (depth >= DocumentEntry.MaxLevels)
+        {
+            Fail(FormatIssues.MaxNestingDepthExceeded,
+                $"The document tree has more than {DocumentEntry.MaxLevels} levels.");
+            return;
+        }
+
+        _frames.Push(new Frame(name));
     }
 
     /// <inheritdoc />
     public void Text(string text)
     {
         ArgumentNullException.ThrowIfNull(text);
+
+        if (_hasFailed) return;
 
         if (!_frames.TryPeek(out Frame? frame))
             throw new InvalidOperationException("No entry is open.");
@@ -52,6 +65,8 @@ public sealed class DocumentEntryBuilder : IDocumentEntryWriter
     /// <inheritdoc />
     public void EndEntry()
     {
+        if (_hasFailed) return;
+
         if (!_frames.TryPop(out Frame? frame))
             throw new InvalidOperationException("No entry is open.");
 
@@ -72,14 +87,26 @@ public sealed class DocumentEntryBuilder : IDocumentEntryWriter
     /// <summary>
     /// Returns the root entry.
     /// </summary>
-    /// <returns>The root entry.</returns>
-    /// <exception cref="InvalidOperationException">The root entry is not complete.</exception>
-    public DocumentEntry GetResult()
+    /// <returns>
+    /// The root entry, or <see langword="null"/> if the document tree is rejected.
+    /// </returns>
+    /// <exception cref="InvalidOperationException">
+    /// The document tree is neither complete nor rejected.
+    /// </exception>
+    public DocumentEntry? GetResult()
     {
+        if (_hasFailed) return null;
+
         if (_root is null)
             throw new InvalidOperationException("The root entry is not complete.");
 
         return _root;
+    }
+
+    private void Fail(IssueDefinition definition, string message)
+    {
+        _issues.Add(new Issue(definition, message, null));
+        _hasFailed = true;
     }
 
     private sealed class Frame

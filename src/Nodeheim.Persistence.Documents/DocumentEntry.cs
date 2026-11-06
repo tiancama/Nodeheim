@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Buffers;
+using System.Collections.ObjectModel;
 
 namespace Nodeheim.Persistence.Documents;
 
@@ -12,9 +13,15 @@ public sealed class DocumentEntry
     /// </summary>
     public const int MaxLevels = 32;
 
+    private static readonly SearchValues<char> NameCharacters =
+        SearchValues.Create("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.-_");
+
     private DocumentEntry(string name, string text, IReadOnlyList<DocumentEntry> children)
     {
-        ArgumentException.ThrowIfNullOrEmpty(name);
+        ArgumentNullException.ThrowIfNull(name);
+        if (!IsValidName(name))
+            throw new ArgumentException("The name is not valid.", nameof(name));
+
         ArgumentNullException.ThrowIfNull(text);
 
         Name = name;
@@ -72,5 +79,13 @@ public sealed class DocumentEntry
             throw new ArgumentException("The children must not contain null.", nameof(children));
 
         return new DocumentEntry(name, string.Empty, Array.AsReadOnly(copy));
+    }
+
+    internal static bool IsValidName(string? name)
+    {
+        if (string.IsNullOrEmpty(name)) return false;
+        if (name.AsSpan().ContainsAnyExcept(NameCharacters)) return false;
+        if (!(char.IsAsciiLetter(name[0]) || name[0] == '_')) return false;
+        return !name.StartsWith("xml", StringComparison.OrdinalIgnoreCase);
     }
 }

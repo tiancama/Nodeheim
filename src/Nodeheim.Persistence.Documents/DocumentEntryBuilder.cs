@@ -34,6 +34,12 @@ public sealed class DocumentEntryBuilder : IDocumentEntryWriter
         if (_root is not null)
             throw new InvalidOperationException("The root entry is already complete.");
 
+        if (!DocumentEntry.IsValidName(name))
+        {
+            Fail(FormatIssues.InvalidEntryName, "An entry name is not valid.");
+            return;
+        }
+
         int depth = _frames.Count;
 
         if (depth >= DocumentEntry.MaxLevels)

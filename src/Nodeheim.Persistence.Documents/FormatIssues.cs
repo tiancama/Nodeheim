@@ -67,4 +67,10 @@ public static class FormatIssues
     /// </summary>
     public static readonly IssueDefinition InvalidStructure =
         new("format.invalidStructure", IssueKind.Rejection);
+
+    /// <summary>
+    /// Represents the rejection that the name of an entry is not permitted.
+    /// </summary>
+    public static readonly IssueDefinition InvalidEntryName =
+        new("format.invalidEntryName", IssueKind.Rejection);
 }

@@ -35,6 +35,9 @@ public sealed class DocumentEntryBuilder : IDocumentEntryWriter
         if (_root is not null)
             throw new InvalidOperationException("The root entry is already complete.");
 
+        if (_frames.TryPeek(out Frame? parent) && parent.Text is not null)
+            throw new InvalidOperationException("The open entry already has text.");
+
         if (!DocumentEntry.IsValidName(name))
         {
             Fail(FormatIssues.InvalidEntryName, "An entry name is not valid.");
@@ -71,6 +74,9 @@ public sealed class DocumentEntryBuilder : IDocumentEntryWriter
 
         if (frame.Text is not null)
             throw new InvalidOperationException("The open entry already has text.");
+
+        if (frame.Children.Count > 0)
+            throw new InvalidOperationException("The open entry already has children.");
 
         if (!DocumentEntry.IsValidText(text))
         {

@@ -10,6 +10,7 @@ public sealed class DocumentEntryBuilder : IDocumentEntryWriter
     private DocumentEntry? _root;
     private readonly IIssueCollector _issues;
     private readonly Stack<Frame> _frames = new();
+    private readonly HashSet<string> _names = new(StringComparer.Ordinal);
     private bool _hasFailed;
 
     /// <summary>
@@ -49,7 +50,13 @@ public sealed class DocumentEntryBuilder : IDocumentEntryWriter
             return;
         }
 
-        _frames.Push(new Frame(name));
+        if (!_names.TryGetValue(name, out string? shared))
+        {
+            _names.Add(name);
+            shared = name;
+        }
+
+        _frames.Push(new Frame(shared));
     }
 
     /// <inheritdoc />

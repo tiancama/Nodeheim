@@ -6,6 +6,7 @@
     <Project Path="src/Nodeheim.Issues/Nodeheim.Issues.csproj" />
     <Project Path="src/Nodeheim.Persistence.Documents/Nodeheim.Persistence.Documents.csproj" />
     <Project Path="src/Nodeheim.Persistence.Json/Nodeheim.Persistence.Json.csproj" />
+    <Project Path="src/Nodeheim.Persistence.Xml/Nodeheim.Persistence.Xml.csproj" />
     <Project Path="src/Nodeheim.Persistence/Nodeheim.Persistence.csproj" />
   </Folder>
   <Folder Name="/tests/">

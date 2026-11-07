@@ -1,5 +1,6 @@
 ﻿using System.Buffers;
 using System.Collections.ObjectModel;
+using System.Xml;
 
 namespace Nodeheim.Persistence.Documents;
 
@@ -23,6 +24,9 @@ public sealed class DocumentEntry
             throw new ArgumentException("The name is not valid.", nameof(name));
 
         ArgumentNullException.ThrowIfNull(text);
+
+        if (!IsValidText(text))
+            throw new ArgumentException("The text contains a character that XML 1.0 does not permit.", nameof(text));
 
         Name = name;
         Text = text;
@@ -87,5 +91,24 @@ public sealed class DocumentEntry
         if (name.AsSpan().ContainsAnyExcept(NameCharacters)) return false;
         if (!(char.IsAsciiLetter(name[0]) || name[0] == '_')) return false;
         return !name.StartsWith("xml", StringComparison.OrdinalIgnoreCase);
+    }
+
+    internal static bool IsValidText(string text)
+    {
+        for (int i = 0; i < text.Length; i++)
+        {
+            if (XmlConvert.IsXmlChar(text[i]))
+                continue;
+
+            if (i + 1 < text.Length && XmlConvert.IsXmlSurrogatePair(text[i + 1], text[i]))
+            {
+                i++;
+                continue;
+            }
+
+            return false;
+        }
+
+        return true;
     }
 }

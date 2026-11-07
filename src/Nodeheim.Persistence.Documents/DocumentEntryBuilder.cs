@@ -65,6 +65,13 @@ public sealed class DocumentEntryBuilder : IDocumentEntryWriter
         if (frame.Text is not null)
             throw new InvalidOperationException("The open entry already has text.");
 
+        if (!DocumentEntry.IsValidText(text))
+        {
+            Fail(FormatIssues.InvalidCharacter,
+                "A text contains a character that XML 1.0 does not permit.");
+            return;
+        }
+
         frame.Text = text;
     }
 

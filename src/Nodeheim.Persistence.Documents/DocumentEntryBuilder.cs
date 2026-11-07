@@ -44,7 +44,7 @@ public sealed class DocumentEntryBuilder : IDocumentEntryWriter
 
         if (depth >= DocumentEntry.MaxLevels)
         {
-            Fail(FormatIssues.MaxNestingDepthExceeded,
+            Fail(FormatIssues.MaxLevelsExceeded,
                 $"The document tree has more than {DocumentEntry.MaxLevels} levels.");
             return;
         }

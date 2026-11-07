@@ -41,8 +41,8 @@ public static class FormatIssues
     /// <summary>
     /// Represents the rejection that the document is nested too deeply.
     /// </summary>
-    public static readonly IssueDefinition MaxNestingDepthExceeded =
-        new("format.maxNestingDepthExceeded", IssueKind.Rejection);
+    public static readonly IssueDefinition MaxLevelsExceeded =
+        new("format.maxLevelsExceeded", IssueKind.Rejection);
 
     /// <summary>
     /// Represents the rejection that a compound contains the same key more than once.

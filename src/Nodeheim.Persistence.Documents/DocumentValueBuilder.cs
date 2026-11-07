@@ -50,7 +50,7 @@ public sealed class DocumentValueBuilder : IDocumentValueWriter
 
         if (_frames.Count == DocumentValue.MaxNestingDepth)
         {
-            Fail(FormatIssues.MaxNestingDepthExceeded,
+            Fail(FormatIssues.MaxLevelsExceeded,
                 $"The maximum nesting depth of {DocumentValue.MaxNestingDepth} is exceeded.");
             return;
         }
@@ -107,7 +107,7 @@ public sealed class DocumentValueBuilder : IDocumentValueWriter
 
         if (_frames.Count == DocumentValue.MaxNestingDepth)
         {
-            Fail(FormatIssues.MaxNestingDepthExceeded,
+            Fail(FormatIssues.MaxLevelsExceeded,
                 $"The maximum nesting depth of {DocumentValue.MaxNestingDepth} is exceeded.");
             return;
         }

@@ -1,6 +1,6 @@
 # Nodeheim
 
-A pure, platform-agnostic graph engine in C# / .NET — a network of **nodes** that **agents** traverse, wrapped by interchangeable frontends and persistence adapters.
+A pure, platform-agnostic graph engine. A network of **nodes** that **agents** traverse, wrapped by interchangeable frontends and persistence adapters.
 
 ![.NET](https://img.shields.io/badge/.NET-10-512BD4?logo=dotnet&logoColor=white)
 ![C#](https://img.shields.io/badge/C%23-14-239120?logo=csharp&logoColor=white)
@@ -9,41 +9,41 @@ A pure, platform-agnostic graph engine in C# / .NET — a network of **nodes** t
 
 ## Overview
 
-Nodeheim is an **engine**, not an application. Its heart is a clean domain core: a graph of nodes, where each node holds references to its neighbors, traversed by agents that move across it. The core knows nothing about the outside world — user interfaces, databases, and file formats are attached as interchangeable adapters (hexagonal architecture / ports & adapters).
+Nodeheim is an **engine**, not an application. Its heart is a clean domain core: a graph of nodes, where each node holds references to its neighbors, traversed by agents that move across it. The project follows hexagonal architecture / ports & adapters.
 
 Because the core is domain-agnostic, a logistics simulation, a game world, or a story-driven engine are all just applications built on the same foundation.
 
-> Nodeheim is the successor to *LogSim*, an earlier project, rebuilt from the ground up around platform purity and swappable frontends.
-
 ## Architecture
 
-Every dependency points inward. The domain core references nothing; every other project depends on it, never the reverse — a boundary the compiler enforces physically.
+All dependencies point inward (the dependency rule). The domain core references nothing; every other project depends on it, never the reverse.
 
 ```mermaid
 flowchart LR
-    Desktop["Nodeheim.Editor.Desktop<br/>(Avalonia)"] --> Editor["Nodeheim.Editor<br/>(view models)"] --> Domain["Nodeheim.Domain<br/>(pure core)"]
-    DomainTests["Nodeheim.Domain.Tests<br/>(xUnit v3)"] --> Domain
-    EditorTests["Nodeheim.Editor.Tests<br/>(xUnit v3)"] --> Editor
+    Root["composition root<br/>Editor.Desktop"] --> Frontend["frontend<br/>Editor"]
+    Root --> Adapter["adapters<br/>Persistence.Json · .Xml · .Files"]
+    Frontend --> App["application service<br/>Persistence"]
+    Frontend --> Domain["domain<br/>Domain"]
+    App --> Domain
+    App --> Contract["persistence contract<br/>Persistence.Documents"]
+    Adapter --> Contract
 ```
 
-Guiding principles:
-
-- **Hexagonal (ports & adapters)** — the domain is a pure core; UI and persistence live in outer adapters.
-- **Composition over inheritance** — capabilities are attached via interfaces and composition, not base-class hierarchies.
-- **References inside, IDs at the boundaries** — the live in-memory graph uses direct object references; IDs appear only when crossing a boundary (persistence, or an agent's inner map).
-- **Topology ≠ position** — the core is pure topology (nodes and neighbors); geometry is an optional, attached aspect.
+`Nodeheim.Issues` is a cross-cutting library of domain-free types that every role may use.
 
 ## Project structure
 
 ```
 Nodeheim/
-├── src/
-│   ├── Nodeheim.Domain/          # pure domain core — references nothing
-│   ├── Nodeheim.Editor/          # framework-free view models → Domain
-│   └── Nodeheim.Editor.Desktop/  # Avalonia frontend → Editor
-└── tests/
-    ├── Nodeheim.Domain.Tests/    # xUnit v3 → Domain
-    └── Nodeheim.Editor.Tests/    # xUnit v3 → Editor
+└── src/
+    ├── Nodeheim.Domain/                 # domain: pure core, references nothing
+    ├── Nodeheim.Issues/                 # cross-cutting: issues reported by any stage
+    ├── Nodeheim.Persistence.Documents/  # persistence contract: document tree, ports
+    ├── Nodeheim.Persistence/            # application service: loading, mapping to the graph
+    ├── Nodeheim.Persistence.Files/      # adapter: file storage
+    ├── Nodeheim.Persistence.Json/       # adapter: JSON syntax
+    ├── Nodeheim.Persistence.Xml/        # adapter: XML syntax
+    ├── Nodeheim.Editor/                 # frontend: framework-free view models
+    └── Nodeheim.Editor.Desktop/         # composition root and Avalonia views
 ```
 
 ## Getting started
@@ -85,13 +85,19 @@ Clicking a connection selects both of its endpoints; dragging it moves both.
 - **Language / runtime:** C# 14 on .NET 10 (LTS)
 - **UI:** Avalonia (MVVM), cross-platform
 - **Tests:** xUnit v3
-- **Persistence** *(planned)*: SQLite first, then PostgreSQL; JSON and XML as export/import formats
+- **Persistence:** JSON and XML documents; database support planned (SQLite, PostgreSQL)
 
 ## Status
 
-Early development. The domain core (nodes, neighbors, and the `Graph` manager) and an Avalonia editor exist and are covered by tests. The editor supports creating, selecting, moving, connecting, disconnecting, and deleting nodes. Persistence is the next milestone, followed by agent movement. The API is expected to change.
+Early development. The domain core (nodes, neighbors, and the `Graph` manager) and an Avalonia editor exist. The editor supports creating, selecting, moving, connecting, disconnecting, and deleting nodes.
+
+**Next milestone, in progress:** loading and saving documents as JSON and XML. Agent movement follows. The API is expected to change.
 
 This is primarily a personal learning project; issues and feedback are welcome.
+
+## How this project is built
+
+Nodeheim is developed through AI pair programming. AI is a tool here, not the author: I set the direction, make the design decisions, and review every change that goes into the code, whether I typed it or an assistant suggested it.
 
 ## License
 

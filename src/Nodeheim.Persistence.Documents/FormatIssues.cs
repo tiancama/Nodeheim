@@ -63,6 +63,12 @@ public static class FormatIssues
     public static readonly IssueDefinition ForeignElement = new("format.foreignElement", IssueKind.Rejection);
 
     /// <summary>
+    /// Represents the rejection that the bytes of a document are not valid UTF-8, or that the XML declaration
+    /// names an encoding other than UTF-8.
+    /// </summary>
+    public static readonly IssueDefinition InvalidEncoding = new("format.invalidEncoding", IssueKind.Rejection);
+
+    /// <summary>
     /// Represents the rejection that the document has a format version that is not supported.
     /// </summary>
     public static readonly IssueDefinition UnsupportedFormatVersion =

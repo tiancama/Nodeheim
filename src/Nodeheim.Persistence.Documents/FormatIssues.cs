@@ -21,22 +21,10 @@ public static class FormatIssues
     public static readonly IssueDefinition InvalidSyntax = new("format.invalidSyntax", IssueKind.Rejection);
 
     /// <summary>
-    /// Represents the rejection that a text value, a reference value, or a key contains invalid UTF-8 or a
-    /// character that is not permitted, or that a key is empty.
+    /// Represents the rejection that a text contains a character that is not permitted, such as a character that
+    /// XML 1.0 does not permit.
     /// </summary>
     public static readonly IssueDefinition InvalidCharacter = new("format.invalidCharacter", IssueKind.Rejection);
-
-    /// <summary>
-    /// Represents the rejection that a reference value is empty.
-    /// </summary>
-    public static readonly IssueDefinition EmptyReference = new("format.emptyReference", IssueKind.Rejection);
-
-    /// <summary>
-    /// Represents the rejection that a number cannot be represented in the value model, such as an integer outside
-    /// the permitted range, not a number (NaN), or infinity.
-    /// </summary>
-    public static readonly IssueDefinition NumberNotRepresentable =
-        new("format.numberNotRepresentable", IssueKind.Rejection);
 
     /// <summary>
     /// Represents the rejection that the document is nested too deeply.
@@ -45,13 +33,13 @@ public static class FormatIssues
         new("format.maxLevelsExceeded", IssueKind.Rejection);
 
     /// <summary>
-    /// Represents the rejection that a compound contains the same key more than once.
+    /// Represents the rejection that a JSON object contains the same name more than once.
     /// </summary>
     public static readonly IssueDefinition DuplicateKey = new("format.duplicateKey", IssueKind.Rejection);
 
     /// <summary>
-    /// Represents the rejection that the input is not a Nodeheim document, because the root value is not a
-    /// compound or has no nodeheimFormat key.
+    /// Represents the rejection that the input is not a Nodeheim document, because the root entry is not named
+    /// <c>nodeheim</c> or has no single child named <c>nodeheimFormat</c>.
     /// </summary>
     public static readonly IssueDefinition NotNodeheimDocument = new("format.notNodeheimDocument", IssueKind.Rejection);
 
@@ -62,8 +50,8 @@ public static class FormatIssues
         new("format.unsupportedFormatVersion", IssueKind.Rejection);
 
     /// <summary>
-    /// Represents the rejection that the structure of the document does not match the format, such as a missing
-    /// key, an unexpected key, or a value of the wrong value kind.
+    /// Represents the rejection that the structure of the document does not match the format, such as a missing,
+    /// repeated, or unexpected entry, or a branch where a text is expected.
     /// </summary>
     public static readonly IssueDefinition InvalidStructure =
         new("format.invalidStructure", IssueKind.Rejection);

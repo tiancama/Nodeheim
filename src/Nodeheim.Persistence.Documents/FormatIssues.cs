@@ -38,6 +38,12 @@ public static class FormatIssues
     public static readonly IssueDefinition DuplicateKey = new("format.duplicateKey", IssueKind.Rejection);
 
     /// <summary>
+    /// Represents the rejection that a JSON array cannot be mapped to the document tree, because it is empty or is
+    /// not the value of a property.
+    /// </summary>
+    public static readonly IssueDefinition UnmappableArray = new("format.unmappableArray", IssueKind.Rejection);
+
+    /// <summary>
     /// Represents the rejection that the input is not a Nodeheim document, because the root entry is not named
     /// <c>nodeheim</c> or has no single child named <c>nodeheimFormat</c>.
     /// </summary>

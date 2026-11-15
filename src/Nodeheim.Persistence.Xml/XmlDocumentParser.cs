@@ -77,6 +77,7 @@ public sealed class XmlDocumentParser : IDocumentParser
 
                         entryBuilder.EndEntry();
                         hasChildren = true;
+                        hasPendingContent = false;
                         break;
                     case XmlNodeType.Text:
                     case XmlNodeType.CDATA:

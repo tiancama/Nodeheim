@@ -28,48 +28,57 @@ public sealed class XmlDocumentParser : IDocumentParser
             IgnoreProcessingInstructions = true,
         };
 
-        using XmlReader reader = XmlReader.Create(stream, settings);
-
-        StringBuilder pendingText = new();
-        bool hasChildren = false;
-
-        while (reader.Read())
+        try
         {
-            switch (reader.NodeType)
+            using XmlReader reader = XmlReader.Create(stream, settings);
+
+            StringBuilder pendingText = new();
+            bool hasChildren = false;
+
+            while (reader.Read())
             {
-                case XmlNodeType.Element:
-                    pendingText.Clear();
-                    hasChildren = false;
-                    entryBuilder.BeginEntry(reader.LocalName);
-                    if (reader.IsEmptyElement)
-                    {
+                switch (reader.NodeType)
+                {
+                    case XmlNodeType.Element:
+                        pendingText.Clear();
+                        hasChildren = false;
+                        entryBuilder.BeginEntry(reader.LocalName);
+                        if (reader.IsEmptyElement)
+                        {
+                            entryBuilder.EndEntry();
+                            hasChildren = true;
+                        }
+
+                        break;
+                    case XmlNodeType.EndElement:
+                        if (!hasChildren)
+                        {
+                            entryBuilder.Text(pendingText.ToString());
+                        }
+
                         entryBuilder.EndEntry();
                         hasChildren = true;
-                    }
+                        break;
+                    case XmlNodeType.Text:
+                    case XmlNodeType.CDATA:
+                    case XmlNodeType.Whitespace:
+                    case XmlNodeType.SignificantWhitespace:
+                        if (!hasChildren)
+                        {
+                            pendingText.Append(reader.Value);
+                        }
 
-                    break;
-                case XmlNodeType.EndElement:
-                    if (!hasChildren)
-                    {
-                        entryBuilder.Text(pendingText.ToString());
-                    }
-
-                    entryBuilder.EndEntry();
-                    hasChildren = true;
-                    break;
-                case XmlNodeType.Text:
-                case XmlNodeType.CDATA:
-                case XmlNodeType.Whitespace:
-                case XmlNodeType.SignificantWhitespace:
-                    if (!hasChildren)
-                    {
-                        pendingText.Append(reader.Value);
-                    }
-
-                    break;
-                default:
-                    break;
+                        break;
+                    default:
+                        break;
+                }
             }
+        }
+        catch (XmlException)
+        {
+            issues.Add(new Issue(FormatIssues.InvalidSyntax,
+                "Invalid syntax: the input is not well-formed XML.", null));
+            return null;
         }
 
         return entryBuilder.GetResult();

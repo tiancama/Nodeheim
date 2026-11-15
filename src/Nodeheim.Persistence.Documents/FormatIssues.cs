@@ -45,9 +45,16 @@ public static class FormatIssues
 
     /// <summary>
     /// Represents the rejection that the input is not a Nodeheim document, because the root entry is not named
-    /// <c>nodeheim</c> or has no single child named <c>nodeheimFormat</c>.
+    /// <c>nodeheim</c> or has no single child named <c>nodeheimFormat</c>, or because the root element of an XML
+    /// document is not in the Nodeheim namespace.
     /// </summary>
     public static readonly IssueDefinition NotNodeheimDocument = new("format.notNodeheimDocument", IssueKind.Rejection);
+
+    /// <summary>
+    /// Represents the rejection that an element below the root element of an XML document is in a foreign namespace
+    /// or in no namespace.
+    /// </summary>
+    public static readonly IssueDefinition ForeignElement = new("format.foreignElement", IssueKind.Rejection);
 
     /// <summary>
     /// Represents the rejection that the document has a format version that is not supported.

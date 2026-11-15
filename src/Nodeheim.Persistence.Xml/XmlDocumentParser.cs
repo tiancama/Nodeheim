@@ -11,6 +11,8 @@ namespace Nodeheim.Persistence.Xml;
 /// </summary>
 public sealed class XmlDocumentParser : IDocumentParser
 {
+    private const string NodeheimNamespace = "https://schemas.nodeheim.net/2026/anthology";
+
     /// <inheritdoc />
     public DocumentEntry? Parse(ReadOnlyMemory<byte> bytes, IIssueCollector issues)
     {
@@ -40,6 +42,15 @@ public sealed class XmlDocumentParser : IDocumentParser
                 switch (reader.NodeType)
                 {
                     case XmlNodeType.Element:
+                        if (reader.NamespaceURI != NodeheimNamespace)
+                        {
+                            if (reader.Depth == 0)
+                                return Reject(issues, FormatIssues.NotNodeheimDocument,
+                                    "Not a Nodeheim document: the root element is not in the Nodeheim namespace.", "");
+
+                            return Reject(issues, FormatIssues.ForeignElement,
+                                "Foreign element: an element below the root is not in the Nodeheim namespace.", null);
+                        }
                         pendingText.Clear();
                         hasChildren = false;
                         entryBuilder.BeginEntry(reader.LocalName);
@@ -76,11 +87,17 @@ public sealed class XmlDocumentParser : IDocumentParser
         }
         catch (XmlException)
         {
-            issues.Add(new Issue(FormatIssues.InvalidSyntax,
-                "Invalid syntax: the input is not well-formed XML.", null));
-            return null;
+            return Reject(issues, FormatIssues.InvalidSyntax,
+                "Invalid syntax: the input is not well-formed XML.", null);
         }
 
         return entryBuilder.GetResult();
+    }
+
+    private static DocumentEntry? Reject(IIssueCollector issues, IssueDefinition definition, string message,
+        string? path)
+    {
+        issues.Add(new Issue(definition, message, path));
+        return null;
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Buffers;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Xml;
 using Nodeheim.Issues;
@@ -12,6 +13,8 @@ namespace Nodeheim.Persistence.Xml;
 public sealed class XmlDocumentParser : IDocumentParser
 {
     private const string NodeheimNamespace = "https://schemas.nodeheim.net/2026/anthology";
+
+    private static readonly SearchValues<char> XmlWhitespace = SearchValues.Create(" \t\n\r");
 
     /// <inheritdoc />
     public DocumentEntry? Parse(ReadOnlyMemory<byte> bytes, IIssueCollector issues)
@@ -36,6 +39,7 @@ public sealed class XmlDocumentParser : IDocumentParser
 
             StringBuilder pendingText = new();
             bool hasChildren = false;
+            bool hasPendingContent = false;
 
             while (reader.Read())
             {
@@ -51,7 +55,11 @@ public sealed class XmlDocumentParser : IDocumentParser
                             return Reject(issues, FormatIssues.ForeignElement,
                                 "Foreign element: an element below the root is not in the Nodeheim namespace.", null);
                         }
+                        if (hasPendingContent)
+                            return RejectMixedContent(issues);
+
                         pendingText.Clear();
+                        hasPendingContent = false;
                         hasChildren = false;
                         entryBuilder.BeginEntry(reader.LocalName);
                         if (reader.IsEmptyElement)
@@ -74,9 +82,16 @@ public sealed class XmlDocumentParser : IDocumentParser
                     case XmlNodeType.CDATA:
                     case XmlNodeType.Whitespace:
                     case XmlNodeType.SignificantWhitespace:
+                        string value = reader.Value;
+                        bool isWhitespace = !value.AsSpan().ContainsAnyExcept(XmlWhitespace);
+
+                        if (hasChildren && !isWhitespace)
+                            return RejectMixedContent(issues);
+
                         if (!hasChildren)
                         {
-                            pendingText.Append(reader.Value);
+                            pendingText.Append(value);
+                            hasPendingContent |= !isWhitespace;
                         }
 
                         break;
@@ -100,4 +115,8 @@ public sealed class XmlDocumentParser : IDocumentParser
         issues.Add(new Issue(definition, message, path));
         return null;
     }
+
+    private static DocumentEntry? RejectMixedContent(IIssueCollector issues) =>
+        Reject(issues, FormatIssues.MixedContent,
+            "Mixed content: an element contains both child elements and text that is not only whitespace.", null);
 }

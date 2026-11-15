@@ -38,6 +38,12 @@ public static class FormatIssues
     public static readonly IssueDefinition DuplicateKey = new("format.duplicateKey", IssueKind.Rejection);
 
     /// <summary>
+    /// Represents the rejection that an element of an XML document contains both child elements and text that is
+    /// not only whitespace.
+    /// </summary>
+    public static readonly IssueDefinition MixedContent = new("format.mixedContent", IssueKind.Rejection);
+
+    /// <summary>
     /// Represents the rejection that a JSON array cannot be mapped to the document tree, because it is empty or is
     /// not the value of a property.
     /// </summary>

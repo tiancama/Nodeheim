@@ -2,7 +2,8 @@ using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Nodeheim.Persistence;
-using Nodeheim.Persistence.Json;
+using Nodeheim.Persistence.Files;
+using Nodeheim.Persistence.Xml;
 
 namespace Nodeheim.Editor.Desktop;
 
@@ -18,8 +19,8 @@ public partial class App : Application
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             DocumentRepository documentRepository =
-                new(new DocumentStorageDescriptor("JSON", [".json"]),
-                    location => new JsonDocumentStorage(location));
+                new(new DocumentStorageDescriptor("XML", [".xml"]),
+                    location => new FileDocumentStorage(location, new XmlDocumentParser()));
             ShellViewModel shell = new(documentRepository);
             desktop.MainWindow = new MainWindow() { DataContext = shell };
         }

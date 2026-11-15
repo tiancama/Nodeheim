@@ -37,7 +37,7 @@ public sealed class DocumentRepository : IDocumentRepository
     public Graph? Load(string location, IIssueCollector issues)
     {
         IDocumentStorage storage = _storageFactory(location);
-        DocumentValue? root = storage.Load(issues);
+        DocumentEntry? root = storage.Load(issues);
         if (root is null) return null;
 
         Document? document = DocumentMapper.Read(root, issues);

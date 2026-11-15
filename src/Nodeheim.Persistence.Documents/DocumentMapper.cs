@@ -3,21 +3,29 @@
 namespace Nodeheim.Persistence.Documents;
 
 /// <summary>
-/// Provides the mapping from the root value of a document to a <see cref="Document"/>.
+/// Provides the mapping from the root entry of a document to a <see cref="Document"/>.
 /// </summary>
 public static class DocumentMapper
 {
-    private const string FormatKey = "nodeheimFormat";
-    private const string SupportedFormat = "0.1";
-    private const string StateIdKey = "stateId";
-    private const string SectionsKey = "sections";
-    private const string ContentVersionKey = "contentVersion";
-    private const string ContentKey = "content";
+    /// <summary>
+    /// Represents the name of the root entry of every document.
+    /// </summary>
+    /// <remarks>
+    /// Format contract: An adapter whose syntax carries no name at the root uses this name.
+    /// </remarks>
+    public const string RootName = "nodeheim";
+
+    private const string FormatName = "nodeheimFormat";
+    private const string SupportedFormat = "0.2";
+    private const string StateIdName = "stateId";
+    private const string SectionsName = "sections";
+    private const string ContentVersionName = "contentVersion";
+    private const string ContentName = "content";
 
     /// <summary>
-    /// Reads a document from the root value of the input.
+    /// Reads a document from the root entry of the input.
     /// </summary>
-    /// <param name="root">The root value of the input.</param>
+    /// <param name="root">The root entry of the input.</param>
     /// <param name="issues">
     /// The collector that receives the rejection if <paramref name="root"/> is not a valid document.
     /// </param>
@@ -36,101 +44,95 @@ public static class DocumentMapper
     /// are not checked; that is up to the caller.
     /// </para>
     /// <para>
-    /// Format contract: The root value is a compound with exactly the entries <c>nodeheimFormat</c>,
-    /// <c>stateId</c>, and <c>sections</c>. The value of <c>nodeheimFormat</c> is the text <c>0.1</c>. It is
-    /// checked before everything else, because another format version may structure the document differently.
-    /// The value of <c>stateId</c> is a text. The value of <c>sections</c> is a compound with at least one entry;
-    /// no section type is required. Each section is a compound with exactly the entries <c>contentVersion</c>,
-    /// whose value is a text, and <c>content</c>, whose value can be of any value kind.
+    /// Format contract: The root entry is named <c>nodeheim</c> and has exactly one child each named
+    /// <c>nodeheimFormat</c>, <c>stateId</c>, and <c>sections</c>, and no other children. The text of
+    /// <c>nodeheimFormat</c> is <c>0.2</c>; it is checked right after the name of the root entry, because another
+    /// format version may structure the document differently. <c>stateId</c> is a leaf with any text.
+    /// <c>sections</c> has at least one child; the name of each child is its section type, and each section type
+    /// occurs only once. Each section has exactly one child each named <c>contentVersion</c>, a leaf, and
+    /// <c>content</c>, an entry of any form, and no other children.
     /// </para>
     /// </remarks>
-    public static Document? Read(DocumentValue root, IIssueCollector issues)
+    public static Document? Read(DocumentEntry root, IIssueCollector issues)
     {
         ArgumentNullException.ThrowIfNull(root);
         ArgumentNullException.ThrowIfNull(issues);
 
-        if (root is not CompoundValue compound)
+        if (root.Name != RootName)
             return Reject(issues, FormatIssues.NotNodeheimDocument,
-                "Not a Nodeheim document: the root value is not a compound.", "");
+                $"Not a Nodeheim document: the root entry is not named '{RootName}'.", "");
 
-        IReadOnlyDictionary<string, DocumentValue> entries = compound.Entries;
-
-        if (!entries.TryGetValue(FormatKey, out DocumentValue? format))
+        DocumentEntry? format = DocumentEntryReader.GetChild(root, FormatName);
+        if (format is null)
             return Reject(issues, FormatIssues.NotNodeheimDocument,
-                "Not a Nodeheim document: the key 'nodeheimFormat' is missing.", "");
+                "Not a Nodeheim document: 'nodeheimFormat' is missing or occurs more than once.", "");
 
-        if (format is not TextValue formatText)
+        string? formatText = DocumentEntryReader.GetText(format);
+        if (formatText is null)
             return Reject(issues, FormatIssues.InvalidStructure,
-                "Invalid structure: the value of 'nodeheimFormat' is not a text.", "/nodeheimFormat");
+                "Invalid structure: 'nodeheimFormat' is not a text.", "/nodeheimFormat");
 
-        if (formatText.Value != SupportedFormat)
+        if (formatText != SupportedFormat)
             return Reject(issues, FormatIssues.UnsupportedFormatVersion,
-                $"Unsupported format version '{formatText.Value}'.", "/nodeheimFormat");
+                "Unsupported format version.", "/nodeheimFormat");
 
-        if (!entries.TryGetValue(StateIdKey, out DocumentValue? stateIdValue))
+        DocumentEntry? stateIdEntry = DocumentEntryReader.GetChild(root, StateIdName);
+        string? stateId = stateIdEntry is null ? null : DocumentEntryReader.GetText(stateIdEntry);
+        if (stateId is null)
             return Reject(issues, FormatIssues.InvalidStructure,
-                "Invalid structure: the key 'stateId' is missing.", "");
+                "Invalid structure: 'stateId' is missing, occurs more than once, or is not a text.", "/stateId");
 
-        if (stateIdValue is not TextValue stateIdText)
+        DocumentEntry? sectionsEntry = DocumentEntryReader.GetChild(root, SectionsName);
+        if (sectionsEntry is null)
             return Reject(issues, FormatIssues.InvalidStructure,
-                "Invalid structure: the value of 'stateId' is not a text.", "/stateId");
+                "Invalid structure: 'sections' is missing or occurs more than once.", "/sections");
 
-        if (!entries.TryGetValue(SectionsKey, out DocumentValue? sectionsValue))
-            return Reject(issues, FormatIssues.InvalidStructure,
-                "Invalid structure: the key 'sections' is missing.", "");
-
-        foreach (string key in entries.Keys)
+        foreach (DocumentEntry child in root.Children)
         {
-            if (key is not (FormatKey or StateIdKey or SectionsKey))
+            if (child.Name is not (FormatName or StateIdName or SectionsName))
                 return Reject(issues, FormatIssues.InvalidStructure,
-                    $"Invalid structure: unexpected key '{key}'.", $"/{key}");
+                    $"Invalid structure: unexpected entry '{child.Name}'.", $"/{child.Name}");
         }
 
-        if (sectionsValue is not CompoundValue sectionsCompound)
+        if (sectionsEntry.Children.Count == 0)
             return Reject(issues, FormatIssues.InvalidStructure,
-                "Invalid structure: the value of 'sections' is not a compound.", "/sections");
+                "Invalid structure: 'sections' has no sections.", "/sections");
 
-        if (sectionsCompound.Entries.Count == 0)
-            return Reject(issues, FormatIssues.InvalidStructure,
-                "Invalid structure: 'sections' has no entries.", "/sections");
+        Dictionary<string, DocumentSection> sections = new(StringComparer.Ordinal);
 
-        var sections = new Dictionary<string, DocumentSection>(StringComparer.Ordinal);
-        foreach ((string name, DocumentValue value) in sectionsCompound.Entries)
+        foreach (DocumentEntry sectionEntry in sectionsEntry.Children)
         {
-            if (value is not CompoundValue sectionCompound)
+            string name = sectionEntry.Name;
+            string path = $"/sections/{name}";
+
+            DocumentEntry? contentVersionEntry = DocumentEntryReader.GetChild(sectionEntry, ContentVersionName);
+            string? contentVersion = contentVersionEntry is null
+                ? null
+                : DocumentEntryReader.GetText(contentVersionEntry);
+            if (contentVersion is null)
                 return Reject(issues, FormatIssues.InvalidStructure,
-                    $"Invalid structure: the value of section '{name}' is not a compound.",
-                    $"/sections/{name}");
+                    $"Invalid structure: 'contentVersion' in section '{name}' is missing, occurs more than once, " +
+                    "or is not a text.", path);
 
-            IReadOnlyDictionary<string, DocumentValue> section = sectionCompound.Entries;
-
-            if (!section.TryGetValue(ContentVersionKey, out DocumentValue? contentVersionValue))
+            DocumentEntry? content = DocumentEntryReader.GetChild(sectionEntry, ContentName);
+            if (content is null)
                 return Reject(issues, FormatIssues.InvalidStructure,
-                    $"Invalid structure: the key 'contentVersion' is missing in section '{name}'.",
-                    $"/sections/{name}");
+                    $"Invalid structure: 'content' in section '{name}' is missing or occurs more than once.", path);
 
-            if (!section.TryGetValue(ContentKey, out DocumentValue? content))
-                return Reject(issues, FormatIssues.InvalidStructure,
-                    $"Invalid structure: the key 'content' is missing in section '{name}'.",
-                    $"/sections/{name}");
-
-            foreach (string key in section.Keys)
+            foreach (DocumentEntry child in sectionEntry.Children)
             {
-                if (key is not (ContentVersionKey or ContentKey))
+                if (child.Name is not (ContentVersionName or ContentName))
                     return Reject(issues, FormatIssues.InvalidStructure,
-                        $"Invalid structure: unexpected key '{key}' in section '{name}'.",
-                        $"/sections/{name}/{key}");
+                        $"Invalid structure: unexpected entry '{child.Name}' in section '{name}'.",
+                        $"{path}/{child.Name}");
             }
 
-            if (contentVersionValue is not TextValue contentVersionText)
+            if (!sections.TryAdd(name, new DocumentSection(contentVersion, content)))
                 return Reject(issues, FormatIssues.InvalidStructure,
-                    $"Invalid structure: the value of 'contentVersion' in section '{name}' is not a text.",
-                    $"/sections/{name}/contentVersion");
-
-            sections.Add(name, new DocumentSection(contentVersionText.Value, content));
+                    $"Invalid structure: section '{name}' occurs more than once.", path);
         }
 
-        return new Document(stateIdText.Value, sections);
+        return new Document(stateId, sections);
     }
 
     private static Document? Reject(IIssueCollector issues, IssueDefinition definition, string message, string path)

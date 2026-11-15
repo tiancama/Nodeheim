@@ -5,4 +5,4 @@
 /// </summary>
 /// <param name="ContentVersion">The version of the content.</param>
 /// <param name="Content">The content.</param>
-public sealed record DocumentSection(string ContentVersion, DocumentValue Content);
+public sealed record DocumentSection(string ContentVersion, DocumentEntry Content);

@@ -3,11 +3,8 @@ using Nodeheim.Persistence.Documents;
 
 namespace Nodeheim.Persistence.Files;
 
-/// <summary>
-/// Represents a document storage that reads a document from a file and parses it with an
-/// <see cref="IDocumentParser"/>.
-/// </summary>
-public sealed class FileDocumentStorage
+/// <inheritdoc />
+public sealed class FileDocumentStorage : IDocumentStorage
 {
     private readonly string _path;
     private readonly IDocumentParser _parser;

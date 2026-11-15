@@ -8,9 +8,11 @@ internal static class GraphMapper
 {
     internal const string SectionType = "core.graph";
 
-    private const string SupportedContentVersion = "0.1";
-    private const string NodesKey = "nodes";
-    private const string ConnectionsKey = "connections";
+    private const string SupportedContentVersion = "0.2";
+    private const string NodesName = "nodes";
+    private const string ConnectionsName = "connections";
+    private const string ConnectionName = "connection";
+    private const string IdName = "id";
 
     private static readonly IssueDefinition UnsupportedContentVersionIssue =
         new("core.graph.unsupportedContentVersion", IssueKind.Rejection);
@@ -31,51 +33,53 @@ internal static class GraphMapper
     /// <paramref name="issues"/>.
     /// </returns>
     /// <remarks>
-    /// Format contract: The content is a compound with exactly the entries <c>nodes</c> and <c>connections</c>,
-    /// both lists. Each item of <c>nodes</c> is a text with a GUID in any format that
-    /// <see cref="Guid.TryParse(string, out Guid)"/> accepts. Each item of <c>connections</c> is a list of two
-    /// different IDs from <c>nodes</c>; <c>[a, b]</c> and <c>[b, a]</c> are the same connection. An invalid or
-    /// duplicate item is skipped and reported as <c>core.graph.invalidItem</c>; any other deviation rejects the
-    /// section with <c>core.graph.invalidStructure</c>.
+    /// Format contract: The content version is <c>0.2</c>. The content has exactly one child each named
+    /// <c>nodes</c> and <c>connections</c>, and no other children. All children of <c>nodes</c> are named
+    /// <c>id</c>; all children of <c>connections</c> are named <c>connection</c>. A leaf whose text is empty or
+    /// only whitespace counts as no children. Each <c>id</c> is a leaf with a GUID in any format that
+    /// <see cref="Guid.TryParse(string, out Guid)"/> accepts. Each <c>connection</c> has exactly two children
+    /// named <c>id</c> with different IDs from <c>nodes</c>; <c>a, b</c> and <c>b, a</c> are the same
+    /// connection. An invalid or duplicate item is skipped and reported as <c>core.graph.invalidItem</c>; any
+    /// other deviation rejects the section with <c>core.graph.invalidStructure</c>.
     /// </remarks>
     internal static Graph? Read(DocumentSection section, IIssueCollector issues)
     {
         if (section.ContentVersion != SupportedContentVersion)
         {
-            issues.Add(new Issue(UnsupportedContentVersionIssue,
-                $"Unsupported content version '{section.ContentVersion}'.", null));
+            issues.Add(new Issue(UnsupportedContentVersionIssue, "Unsupported content version.", null));
             return null;
         }
 
-        if (section.Content is not CompoundValue content)
-            return Reject(issues, "Invalid structure: the content is not a compound.");
+        DocumentEntry content = section.Content;
 
-        IReadOnlyDictionary<string, DocumentValue> entries = content.Entries;
+        DocumentEntry? nodesEntry = DocumentEntryReader.GetChild(content, NodesName);
+        if (nodesEntry is null)
+            return Reject(issues, "Invalid structure: 'nodes' is missing or occurs more than once.");
 
-        if (!entries.TryGetValue(NodesKey, out DocumentValue? nodesValue))
-            return Reject(issues, "Invalid structure: the key 'nodes' is missing.");
+        DocumentEntry? connectionsEntry = DocumentEntryReader.GetChild(content, ConnectionsName);
+        if (connectionsEntry is null)
+            return Reject(issues, "Invalid structure: 'connections' is missing or occurs more than once.");
 
-        if (!entries.TryGetValue(ConnectionsKey, out DocumentValue? connectionsValue))
-            return Reject(issues, "Invalid structure: the key 'connections' is missing.");
-
-        foreach (string key in entries.Keys)
+        foreach (DocumentEntry child in content.Children)
         {
-            if (key is not (NodesKey or ConnectionsKey))
-                return Reject(issues, $"Invalid structure: unexpected key '{key}'.");
+            if (child.Name is not (NodesName or ConnectionsName))
+                return Reject(issues, $"Invalid structure: unexpected entry '{child.Name}'.");
         }
 
-        if (nodesValue is not ListValue nodes)
-            return Reject(issues, "Invalid structure: the value of 'nodes' is not a list.");
+        IReadOnlyList<DocumentEntry>? ids = GetItems(nodesEntry, IdName);
+        if (ids is null)
+            return Reject(issues, "Invalid structure: 'nodes' is not a list of 'id' entries.");
 
-        if (connectionsValue is not ListValue connections)
-            return Reject(issues, "Invalid structure: the value of 'connections' is not a list.");
+        IReadOnlyList<DocumentEntry>? connections = GetItems(connectionsEntry, ConnectionName);
+        if (connections is null)
+            return Reject(issues, "Invalid structure: 'connections' is not a list of 'connection' entries.");
 
         Graph graph = new();
         Dictionary<Guid, Node> nodesById = new();
 
-        for (int i = 0; i < nodes.Items.Count; i++)
+        for (int i = 0; i < ids.Count; i++)
         {
-            if (!TryReadId(nodes.Items[i], out Guid id))
+            if (!TryReadId(ids[i], out Guid id))
             {
                 issues.Add(new Issue(InvalidItemIssue,
                     $"Invalid item: 'nodes' item {i} is not a GUID.", null));
@@ -93,23 +97,17 @@ internal static class GraphMapper
             graph.AddNode(node);
         }
 
-        for (int i = 0; i < connections.Items.Count; i++)
+        for (int i = 0; i < connections.Count; i++)
         {
-            if (connections.Items[i] is not ListValue pair)
+            IReadOnlyList<DocumentEntry>? pair = GetItems(connections[i], IdName);
+            if (pair is null || pair.Count != 2)
             {
                 issues.Add(new Issue(InvalidItemIssue,
-                    $"Invalid item: 'connections' item {i} is not a list.", null));
+                    $"Invalid item: 'connections' item {i} does not consist of exactly two 'id' entries.", null));
                 continue;
             }
 
-            if (pair.Items.Count != 2)
-            {
-                issues.Add(new Issue(InvalidItemIssue,
-                    $"Invalid item: 'connections' item {i} does not have exactly two items.", null));
-                continue;
-            }
-
-            if (!TryReadId(pair.Items[0], out Guid idA) || !TryReadId(pair.Items[1], out Guid idB))
+            if (!TryReadId(pair[0], out Guid idA) || !TryReadId(pair[1], out Guid idB))
             {
                 issues.Add(new Issue(InvalidItemIssue,
                     $"Invalid item: 'connections' item {i} has an invalid ID.", null));
@@ -140,9 +138,19 @@ internal static class GraphMapper
         return graph;
     }
 
-    private static bool TryReadId(DocumentValue item, out Guid id)
+    private static IReadOnlyList<DocumentEntry>? GetItems(DocumentEntry list, string itemName)
     {
-        if (item is TextValue text && Guid.TryParse(text.Value, out id))
+        IReadOnlyList<DocumentEntry>? items = DocumentEntryReader.GetChildren(list, itemName);
+        if (items is null || items.Count != list.Children.Count)
+            return null;
+
+        return items;
+    }
+
+    private static bool TryReadId(DocumentEntry entry, out Guid id)
+    {
+        string? text = DocumentEntryReader.GetText(entry);
+        if (text is not null && Guid.TryParse(text, out id))
             return true;
 
         id = Guid.Empty;

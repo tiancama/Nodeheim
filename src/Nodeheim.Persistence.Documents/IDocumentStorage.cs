@@ -11,16 +11,17 @@ namespace Nodeheim.Persistence.Documents;
 public interface IDocumentStorage
 {
     /// <summary>
-    /// Loads the root value of the document.
+    /// Loads the root entry of the document.
     /// </summary>
     /// <param name="issues">The collector that receives the issues found while loading.</param>
     /// <returns>
-    /// The root value, or <see langword="null"/> if the document is rejected; the rejection is added to
+    /// The root entry, or <see langword="null"/> if the document is rejected; the rejection is added to
     /// <paramref name="issues"/>.
     /// </returns>
     /// <remarks>
-    /// An implementation checks the syntax of its format and the rules of the value model, not the structure of
-    /// the document.
+    /// An implementation checks the syntax of its format and the rules of the document tree, not the structure of
+    /// the document. Format contract: An implementation whose syntax carries no name at the root uses
+    /// <see cref="DocumentMapper.RootName"/>.
     /// </remarks>
-    DocumentValue? Load(IIssueCollector issues);
+    DocumentEntry? Load(IIssueCollector issues);
 }

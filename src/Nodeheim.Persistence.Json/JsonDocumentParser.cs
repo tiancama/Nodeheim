@@ -60,10 +60,16 @@ public sealed class JsonDocumentParser : IDocumentParser
         switch (reader.TokenType)
         {
             case JsonTokenType.StartObject:
+                HashSet<string> names = new(StringComparer.Ordinal);
+
                 while (reader.Read() && reader.TokenType == JsonTokenType.PropertyName)
                 {
                     if (!TryGetString(ref reader, out string childName))
                         return RejectInvalidString(issues);
+
+                    if (!names.Add(childName))
+                        return Reject(issues, FormatIssues.DuplicateKey,
+                            "Duplicate key: an object contains the same name more than once.");
 
                     reader.Read();
                     if (!ReadProperty(ref reader, childName, entryBuilder, issues))

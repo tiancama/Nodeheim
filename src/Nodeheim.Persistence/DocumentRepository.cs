@@ -18,12 +18,13 @@ public sealed class DocumentRepository : IDocumentRepository
     /// <summary>
     /// Initializes a new instance of the <see cref="DocumentRepository"/> class.
     /// </summary>
-    /// <param name="descriptor">The description of the kind of document storage that the factory creates.</param>
-    /// <param name="storageFactory">The function that creates a document storage for a location.</param>
-    public DocumentRepository(DocumentStorageDescriptor descriptor, Func<string, IDocumentStorage> storageFactory)
+    /// <param name="descriptors">The descriptions of the storage formats that can be loaded.</param>
+    /// <param name="storageFactory">The function that creates the document storage for a location.</param>
+    public DocumentRepository(IReadOnlyList<DocumentStorageDescriptor> descriptors,
+        Func<string, IDocumentStorage> storageFactory)
     {
         _storageFactory = storageFactory;
-        StorageDescriptors = [descriptor];
+        StorageDescriptors = [.. descriptors];
     }
 
     /// <inheritdoc />

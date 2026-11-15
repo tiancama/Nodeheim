@@ -7,10 +7,6 @@ namespace Nodeheim.Persistence;
 /// <summary>
 /// Represents the coordinator that loads a document through a document storage and maps it to a graph.
 /// </summary>
-/// <remarks>
-/// The repository supports exactly one kind of document storage. Every location is passed to it, regardless of
-/// the file extensions in its descriptor.
-/// </remarks>
 public sealed class DocumentRepository : IDocumentRepository
 {
     private readonly Func<string, IDocumentStorage> _storageFactory;
@@ -18,7 +14,7 @@ public sealed class DocumentRepository : IDocumentRepository
     /// <summary>
     /// Initializes a new instance of the <see cref="DocumentRepository"/> class.
     /// </summary>
-    /// <param name="descriptors">The descriptions of the storage formats that can be loaded.</param>
+    /// <param name="descriptors">The descriptions of the supported kinds of document storage.</param>
     /// <param name="storageFactory">The function that creates the document storage for a location.</param>
     public DocumentRepository(IReadOnlyList<DocumentStorageDescriptor> descriptors,
         Func<string, IDocumentStorage> storageFactory)

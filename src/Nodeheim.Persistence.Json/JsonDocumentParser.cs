@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
+using System.Text.Unicode;
 using Nodeheim.Issues;
 using Nodeheim.Persistence.Documents;
 
@@ -27,6 +28,12 @@ public sealed class JsonDocumentParser : IDocumentParser
         ReadOnlySpan<byte> json = bytes.Span;
         if (json.StartsWith(Utf8Bom))
             json = json[Utf8Bom.Length..];
+
+        if (!Utf8.IsValid(json))
+        {
+            issues.Add(new Issue(FormatIssues.InvalidEncoding, "Invalid encoding: the input is not valid UTF-8.", null));
+            return null;
+        }
 
         Utf8JsonReader reader = new(json, ReaderOptions);
 
@@ -65,7 +72,7 @@ public sealed class JsonDocumentParser : IDocumentParser
                 while (reader.Read() && reader.TokenType == JsonTokenType.PropertyName)
                 {
                     if (!TryGetString(ref reader, out string childName))
-                        return RejectInvalidString(issues);
+                        return RejectLoneSurrogate(issues);
 
                     if (!names.Add(childName))
                         return Reject(issues, FormatIssues.DuplicateKey,
@@ -79,7 +86,7 @@ public sealed class JsonDocumentParser : IDocumentParser
                 break;
             case JsonTokenType.String:
                 if (!TryGetString(ref reader, out string text))
-                    return RejectInvalidString(issues);
+                    return RejectLoneSurrogate(issues);
 
                 entryBuilder.Text(text);
                 break;
@@ -137,9 +144,9 @@ public sealed class JsonDocumentParser : IDocumentParser
         }
     }
 
-    private static bool RejectInvalidString(IIssueCollector issues) =>
+    private static bool RejectLoneSurrogate(IIssueCollector issues) =>
         Reject(issues, FormatIssues.InvalidCharacter,
-            "Invalid character: a string contains invalid UTF-8 or a lone surrogate.");
+            "Invalid character: a string contains a lone surrogate.");
 
     private static bool Reject(IIssueCollector issues, IssueDefinition definition, string message)
     {

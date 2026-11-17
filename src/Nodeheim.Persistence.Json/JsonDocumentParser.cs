@@ -115,17 +115,11 @@ public sealed class JsonDocumentParser : IDocumentParser
         if (reader.TokenType != JsonTokenType.StartArray)
             return ReadValue(ref reader, name, entryBuilder, issues);
 
-        reader.Read();
-        if (reader.TokenType == JsonTokenType.EndArray)
-            return Reject(issues, FormatIssues.UnmappableArray,
-                "Unmappable array: an array must not be empty.");
-
-        do
+        while (reader.Read() && reader.TokenType != JsonTokenType.EndArray)
         {
             if (!ReadValue(ref reader, name, entryBuilder, issues))
                 return false;
         }
-        while (reader.Read() && reader.TokenType != JsonTokenType.EndArray);
 
         return true;
     }

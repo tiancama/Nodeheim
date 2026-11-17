@@ -44,8 +44,8 @@ public static class FormatIssues
     public static readonly IssueDefinition MixedContent = new("format.mixedContent", IssueKind.Rejection);
 
     /// <summary>
-    /// Represents the rejection that a JSON array cannot be mapped to the document tree, because it is empty or is
-    /// not the value of a property.
+    /// Represents the rejection that a JSON array cannot be mapped to the document tree, because it is not the value
+    /// of a property.
     /// </summary>
     public static readonly IssueDefinition UnmappableArray = new("format.unmappableArray", IssueKind.Rejection);
 

@@ -138,6 +138,79 @@ internal static class GraphMapper
         return graph;
     }
 
+    /// <summary>
+    /// Writes the content of the <c>core.graph</c> section.
+    /// </summary>
+    /// <param name="graph">The graph to write.</param>
+    /// <param name="writer">The writer that receives the content as the value of <c>content</c>.</param>
+    /// <remarks>
+    /// Format contract: Node IDs are written in ascending order of their text. Each connection is written
+    /// once, with the smaller ID first; connections are ordered by their first, then their second ID.
+    /// </remarks>
+    internal static void Write(Graph graph, IDocumentWriter writer)
+    {
+        List<string> ids = [];
+        List<(string A, string B)> connections = [];
+
+        foreach (Node node in graph.Nodes)
+        {
+            string id = NodeIdText.Format(node.Id);
+            ids.Add(id);
+
+            foreach (Node neighbor in node.Neighbors)
+            {
+                string neighborId = NodeIdText.Format(neighbor.Id);
+                if (NodeIdText.Comparer.Compare(id, neighborId) < 0)
+                {
+                    connections.Add((id, neighborId));
+                }
+            }
+        }
+
+        ids.Sort(NodeIdText.Comparer);
+        connections.Sort(CompareConnections);
+
+        writer.BeginGroup();
+
+        writer.Name(NodesName);
+        writer.BeginGroup();
+        writer.Name(IdName);
+        writer.BeginRepeated();
+        foreach (string id in ids)
+        {
+            writer.Text(id);
+        }
+
+        writer.EndRepeated();
+        writer.EndGroup();
+
+        writer.Name(ConnectionsName);
+        writer.BeginGroup();
+        writer.Name(ConnectionName);
+        writer.BeginRepeated();
+        foreach ((string a, string b) in connections)
+        {
+            writer.BeginGroup();
+            writer.Name(IdName);
+            writer.BeginRepeated();
+            writer.Text(a);
+            writer.Text(b);
+            writer.EndRepeated();
+            writer.EndGroup();
+        }
+
+        writer.EndRepeated();
+        writer.EndGroup();
+
+        writer.EndGroup();
+    }
+
+    private static int CompareConnections((string A, string B) x, (string A, string B) y)
+    {
+        int result = NodeIdText.Comparer.Compare(x.A, y.A);
+        return result != 0 ? result : NodeIdText.Comparer.Compare(x.B, y.B);
+    }
+
     private static IReadOnlyList<DocumentEntry>? GetItems(DocumentEntry list, string itemName)
     {
         IReadOnlyList<DocumentEntry>? items = DocumentEntryReader.GetChildren(list, itemName);

@@ -135,6 +135,42 @@ public static class DocumentMapper
         return new Document(stateId, sections);
     }
 
+    private static void WritePass(IDocumentWriter writer,
+        IReadOnlyList<DocumentSectionContribution> contributions, string? stateId)
+    {
+        writer.Name(RootName);
+        writer.BeginGroup();
+
+        writer.Name(FormatName);
+        writer.Text(SupportedFormat);
+
+        if (stateId is not null)
+        {
+            writer.Name(StateIdName);
+            writer.Text(stateId);
+        }
+
+        writer.Name(SectionsName);
+        writer.BeginGroup();
+        foreach (DocumentSectionContribution contribution in contributions)
+        {
+            writer.Name(contribution.SectionType);
+            writer.BeginGroup();
+
+            writer.Name(ContentVersionName);
+            writer.Text(contribution.ContentVersion);
+
+            writer.Name(ContentName);
+            contribution.WriteContent(writer);
+
+            writer.EndGroup();
+        }
+
+        writer.EndGroup();
+
+        writer.EndGroup();
+    }
+
     private static Document? Reject(IIssueCollector issues, IssueDefinition definition, string message, string path)
     {
         issues.Add(new Issue(definition, message, path));

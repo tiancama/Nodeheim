@@ -17,6 +17,8 @@ public sealed class DocumentEntry
     private static readonly SearchValues<char> NameCharacters =
         SearchValues.Create("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.-_");
 
+    private readonly int _height;
+
     private DocumentEntry(string name, string text, IReadOnlyList<DocumentEntry> children)
     {
         ArgumentNullException.ThrowIfNull(name);
@@ -28,9 +30,19 @@ public sealed class DocumentEntry
         if (!IsValidText(text))
             throw new ArgumentException("The text contains a character that XML 1.0 does not permit.", nameof(text));
 
+        int height = 1;
+        foreach (DocumentEntry child in children)
+        {
+            height = Math.Max(height, child._height + 1);
+        }
+
+        if (height > MaxLevels)
+            throw new ArgumentException($"The entry has more than {MaxLevels} levels.", nameof(children));
+
         Name = name;
         Text = text;
         Children = children;
+        _height = height;
     }
 
     /// <summary>
@@ -69,7 +81,8 @@ public sealed class DocumentEntry
     /// <returns>The branch.</returns>
     /// <exception cref="ArgumentException">
     /// <paramref name="name"/> is <see langword="null"/> or empty, or <paramref name="children"/> is
-    /// <see langword="null"/>, empty, or contains <see langword="null"/>.
+    /// <see langword="null"/>, empty, or contains <see langword="null"/>, or the branch would have more than
+    /// <see cref="MaxLevels"/> levels.
     /// </exception>
     public static DocumentEntry CreateBranch(string name, IEnumerable<DocumentEntry> children)
     {

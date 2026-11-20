@@ -66,6 +66,15 @@ public partial class MainWindow : Window
         return filters;
     }
 
+    private static List<FilePickerFileType> CreateSaveFileTypes(IReadOnlyList<DocumentStorageDescriptor> descriptors) =>
+        descriptors
+            .Where(descriptor => descriptor.FileExtensions.Count > 0)
+            .Select(descriptor => new FilePickerFileType(descriptor.DisplayName)
+            {
+                Patterns = descriptor.FileExtensions.Select(e => "*" + e).ToList()
+            })
+            .ToList();
+
     private void OnNewClick(object? sender, RoutedEventArgs e) => Shell.New();
 
     private void OnQuitClick(object? sender, RoutedEventArgs e) => Close();
@@ -109,6 +118,28 @@ public partial class MainWindow : Window
             return;
 
         string? report = Shell.Load(path);
+        if (report is not null)
+            ShowIssues(report);
+    }
+
+    private async void OnSaveAsClick(object? sender, RoutedEventArgs e)
+    {
+        IStorageProvider? storageProvider = TopLevel.GetTopLevel(this)?.StorageProvider;
+        if (storageProvider is null)
+            return;
+
+        IStorageFile? file = await storageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
+        {
+            Title = "Save As",
+            DefaultExtension = ".json",
+            FileTypeChoices = CreateSaveFileTypes(Shell.StorageDescriptors),
+            ShowOverwritePrompt = true,
+        });
+
+        if (file?.TryGetLocalPath() is not { } path)
+            return;
+
+        string? report = Shell.Save(path);
         if (report is not null)
             ShowIssues(report);
     }

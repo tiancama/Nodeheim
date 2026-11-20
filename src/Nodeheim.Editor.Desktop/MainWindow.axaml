@@ -13,6 +13,7 @@
             <MenuItem Header="_File">
                 <MenuItem Header="_New" Click="OnNewClick" />
                 <MenuItem Header="_Open File" Click="OnOpenClick" />
+                <MenuItem Header="Save _As" Click="OnSaveAsClick" />
                 <Separator />
                 <MenuItem Header="_Quit" Click="OnQuitClick" />
             </MenuItem>

@@ -43,6 +43,6 @@ public partial class App : Application
     // Provisional until the format is detected from the content.
     private static Func<Stream, IDocumentWriter> CreateWriterFactory(string location) =>
         Path.GetExtension(location).Equals(".xml", StringComparison.OrdinalIgnoreCase)
-            ? _ => throw new NotImplementedException("Saving as XML is not implemented yet.")
+            ? stream => new XmlDocumentWriter(stream)
             : stream => new JsonDocumentWriter(stream);
 }

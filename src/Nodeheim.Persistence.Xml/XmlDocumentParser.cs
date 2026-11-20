@@ -11,8 +11,6 @@ namespace Nodeheim.Persistence.Xml;
 /// </summary>
 public sealed class XmlDocumentParser : IDocumentParser
 {
-    private const string NodeheimNamespace = "https://schemas.nodeheim.net/2026/anthology";
-
     private static readonly SearchValues<char> XmlWhitespace = SearchValues.Create(" \t\n\r");
 
     private static readonly UTF8Encoding StrictUtf8 =
@@ -68,7 +66,7 @@ public sealed class XmlDocumentParser : IDocumentParser
 
                         break;
                     case XmlNodeType.Element:
-                        if (reader.NamespaceURI != NodeheimNamespace)
+                        if (reader.NamespaceURI != XmlNamespaces.Nodeheim)
                         {
                             if (reader.Depth == 0)
                                 return Reject(issues, FormatIssues.NotNodeheimDocument,

@@ -14,10 +14,10 @@ public static class DocumentMapper
     /// Format contract: An adapter whose syntax carries no name at the root uses this name.
     /// </remarks>
     public const string RootName = "nodeheim";
+    internal const string StateIdName = "stateId";
 
     private const string FormatName = "nodeheimFormat";
     private const string SupportedFormat = "0.2";
-    private const string StateIdName = "stateId";
     private const string SectionsName = "sections";
     private const string ContentVersionName = "contentVersion";
     private const string ContentName = "content";

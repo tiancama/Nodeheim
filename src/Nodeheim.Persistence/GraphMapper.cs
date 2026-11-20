@@ -205,6 +205,18 @@ internal static class GraphMapper
         writer.EndGroup();
     }
 
+    /// <summary>
+    /// Creates the contribution of the <c>core.graph</c> section for a graph.
+    /// </summary>
+    /// <param name="graph">The graph to write.</param>
+    /// <returns>The contribution.</returns>
+    /// <remarks>
+    /// The contribution reads <paramref name="graph"/> each time it writes its content, so the graph must not
+    /// change while the document is saved.
+    /// </remarks>
+    internal static DocumentSectionContribution CreateContribution(Graph graph) =>
+        new(SectionType, SupportedContentVersion, writer => Write(graph, writer));
+
     private static int CompareConnections((string A, string B) x, (string A, string B) y)
     {
         int result = NodeIdText.Comparer.Compare(x.A, y.A);

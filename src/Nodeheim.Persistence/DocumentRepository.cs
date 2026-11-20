@@ -5,7 +5,7 @@ using Nodeheim.Persistence.Documents;
 namespace Nodeheim.Persistence;
 
 /// <summary>
-/// Represents the coordinator that loads a document through a document storage and maps it to a graph.
+/// Represents the coordinator that loads and saves a graph as a document through a document storage.
 /// </summary>
 public sealed class DocumentRepository : IDocumentRepository
 {
@@ -51,5 +51,21 @@ public sealed class DocumentRepository : IDocumentRepository
             return null;
 
         return GraphMapper.Read(section, issues);
+    }
+
+    /// <inheritdoc />
+    /// <remarks>
+    /// <inheritdoc path="/remarks/node()" />
+    /// Errors of the environment, such as I/O errors, are not yet reported as issues and cause exceptions.
+    /// </remarks>
+    public void Save(string location, Graph graph)
+    {
+        ArgumentNullException.ThrowIfNull(location);
+        ArgumentNullException.ThrowIfNull(graph);
+
+        IDocumentStorage storage = _storageFactory(location);
+        DocumentSectionContribution[] contributions = [GraphMapper.CreateContribution(graph)];
+
+        storage.Save(writer => DocumentMapper.Write(writer, contributions));
     }
 }

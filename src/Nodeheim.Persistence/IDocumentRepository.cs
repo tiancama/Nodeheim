@@ -4,7 +4,7 @@ using Nodeheim.Issues;
 namespace Nodeheim.Persistence;
 
 /// <summary>
-/// Defines the port through which the application loads documents.
+/// Defines the port through which the application loads and saves documents.
 /// </summary>
 public interface IDocumentRepository
 {
@@ -28,4 +28,18 @@ public interface IDocumentRepository
     /// Only a rejection in <paramref name="issues"/> does. A graph is never returned together with a rejection.
     /// </remarks>
     Graph? Load(string location, IIssueCollector issues);
+
+    /// <summary>
+    /// Saves the graph to the document at the specified location.
+    /// </summary>
+    /// <param name="location">The storage location of the document, such as a file path.</param>
+    /// <param name="graph">The graph to save.</param>
+    /// <exception cref="ArgumentNullException">
+    /// <paramref name="location"/> or <paramref name="graph"/> is <see langword="null"/>.
+    /// </exception>
+    /// <remarks>
+    /// The document is written in the format of the storage at <paramref name="location"/> and replaces the
+    /// document stored there.
+    /// </remarks>
+    void Save(string location, Graph graph);
 }

@@ -8,22 +8,27 @@ public sealed class FileDocumentStorage : IDocumentStorage
 {
     private readonly string _path;
     private readonly IDocumentParser _parser;
+    private readonly Func<Stream, IDocumentWriter> _writerFactory;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="FileDocumentStorage"/> class.
     /// </summary>
     /// <param name="path">The path of the file.</param>
     /// <param name="parser">The parser for the format of the file.</param>
+    /// <param name="writerFactory">The function that creates the writer for the format of the file.</param>
     /// <exception cref="ArgumentNullException">
-    /// <paramref name="path"/> or <paramref name="parser"/> is <see langword="null"/>.
+    /// <paramref name="path"/>, <paramref name="parser"/>, or <paramref name="writerFactory"/> is
+    /// <see langword="null"/>.
     /// </exception>
-    public FileDocumentStorage(string path, IDocumentParser parser)
+    public FileDocumentStorage(string path, IDocumentParser parser, Func<Stream, IDocumentWriter> writerFactory)
     {
         ArgumentNullException.ThrowIfNull(path);
         ArgumentNullException.ThrowIfNull(parser);
+        ArgumentNullException.ThrowIfNull(writerFactory);
 
         _path = path;
         _parser = parser;
+        _writerFactory = writerFactory;
     }
 
     /// <summary>
@@ -39,5 +44,17 @@ public sealed class FileDocumentStorage : IDocumentStorage
         byte[] bytes = File.ReadAllBytes(_path);
 
         return _parser.Parse(bytes, issues);
+    }
+
+    /// <inheritdoc />
+    public void Save(Action<IDocumentWriter> write)
+    {
+        ArgumentNullException.ThrowIfNull(write);
+
+        using MemoryStream buffer = new();
+        write(_writerFactory(buffer));
+
+        using FileStream file = File.Create(_path);
+        buffer.WriteTo(file);
     }
 }

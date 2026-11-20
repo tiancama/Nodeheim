@@ -25,7 +25,8 @@ public partial class App : Application
                     new DocumentStorageDescriptor("JSON", [".json"]),
                     new DocumentStorageDescriptor("XML", [".xml"]),
                 ],
-                location => new FileDocumentStorage(location, CreateParser(location)));
+                location => new FileDocumentStorage(
+                    location, CreateParser(location), CreateWriterFactory(location)));
             ShellViewModel shell = new(documentRepository);
             desktop.MainWindow = new MainWindow() { DataContext = shell };
         }
@@ -38,4 +39,10 @@ public partial class App : Application
         Path.GetExtension(location).Equals(".xml", StringComparison.OrdinalIgnoreCase)
             ? new XmlDocumentParser()
             : new JsonDocumentParser();
+
+    // Provisional until the format is detected from the content.
+    private static Func<Stream, IDocumentWriter> CreateWriterFactory(string location) =>
+        Path.GetExtension(location).Equals(".xml", StringComparison.OrdinalIgnoreCase)
+            ? _ => throw new NotImplementedException("Saving as XML is not implemented yet.")
+            : stream => new JsonDocumentWriter(stream);
 }

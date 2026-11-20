@@ -3,7 +3,7 @@
 namespace Nodeheim.Persistence.Documents;
 
 /// <summary>
-/// Defines a port that reads a document from its storage location.
+/// Defines a port that reads and writes a document at its storage location.
 /// </summary>
 /// <remarks>
 /// The storage location is part of the configuration of an implementation, not a parameter.
@@ -24,4 +24,15 @@ public interface IDocumentStorage
     /// <see cref="DocumentMapper.RootName"/>.
     /// </remarks>
     DocumentEntry? Load(IIssueCollector issues);
+
+    /// <summary>
+    /// Saves a document.
+    /// </summary>
+    /// <param name="write">The function that writes the document to the given writer.</param>
+    /// <exception cref="ArgumentNullException"><paramref name="write"/> is <see langword="null"/>.</exception>
+    /// <remarks>
+    /// An implementation creates the writer for its format and invokes <paramref name="write"/> once. It changes
+    /// the stored document only after <paramref name="write"/> has completed.
+    /// </remarks>
+    void Save(Action<IDocumentWriter> write);
 }

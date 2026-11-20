@@ -67,6 +67,24 @@ public class ShellViewModel : INotifyPropertyChanged
         return collector.Issues.Count == 0 ? null : FormatIssues(collector.Issues);
     }
 
+    /// <summary>
+    /// Saves the graph of the active document to the specified location.
+    /// </summary>
+    /// <param name="location">The storage location of the document, such as a file path.</param>
+    /// <returns>
+    /// A report of the issues found while saving, one line per issue, or <see langword="null"/> if there are none.
+    /// </returns>
+    /// <remarks>
+    /// Exceptions from the document repository are not caught.
+    /// </remarks>
+    public string? Save(string location)
+    {
+        IssueCollector collector = new();
+        _documentRepository.Save(location, ActiveDocument.Graph, collector);
+
+        return collector.Issues.Count == 0 ? null : FormatIssues(collector.Issues);
+    }
+
     private static string FormatIssues(IReadOnlyList<Issue> issues)
     {
         IEnumerable<string> lines = issues.Select(issue => issue.Path is null

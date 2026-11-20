@@ -13,6 +13,7 @@ public class DocumentViewModel
     /// <param name="graph">The graph of the world the document represents.</param>
     public DocumentViewModel(Graph graph)
     {
+        Graph = graph;
         Surface = new(graph);
         InteractionController = new(Surface);
     }
@@ -26,4 +27,9 @@ public class DocumentViewModel
     /// Gets the controller that interprets pointer input on the surface.
     /// </summary>
     public InteractionController InteractionController { get; }
+
+    /// <summary>
+    /// Gets the graph that the document represents and the surface edits.
+    /// </summary>
+    internal Graph Graph { get; }
 }

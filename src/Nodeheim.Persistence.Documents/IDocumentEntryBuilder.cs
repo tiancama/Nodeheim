@@ -7,7 +7,7 @@
 /// An entry is reported as <see cref="BeginEntry"/>, followed by its text or its children, and the matching
 /// <see cref="EndEntry"/>. A caller reports exactly one root entry.
 /// </remarks>
-public interface IDocumentEntryWriter
+public interface IDocumentEntryBuilder
 {
     /// <summary>
     /// Reports the beginning of an entry.
@@ -23,6 +23,6 @@ public interface IDocumentEntryWriter
 
     /// <summary>
     /// Reports the end of the innermost open entry.
-    /// </summary>s
+    /// </summary>
     void EndEntry();
 }

@@ -5,7 +5,7 @@ namespace Nodeheim.Persistence.Documents;
 /// <summary>
 /// Represents a receiver that builds a document tree from the reported entries.
 /// </summary>
-public sealed class DocumentEntryBuilder : IDocumentEntryWriter
+public sealed class DocumentEntryBuilder : IDocumentEntryBuilder
 {
     private DocumentEntry? _root;
     private readonly IIssueCollector _issues;

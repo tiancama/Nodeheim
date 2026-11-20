@@ -135,6 +135,53 @@ public static class DocumentMapper
         return new Document(stateId, sections);
     }
 
+        /// <summary>
+    /// Writes a document with the given contributions.
+    /// </summary>
+    /// <param name="writer">The writer that receives the document.</param>
+    /// <param name="contributions">The contributions; at least one, each with a different section type.</param>
+    /// <exception cref="ArgumentNullException">
+    /// <paramref name="writer"/> or <paramref name="contributions"/> is <see langword="null"/>.
+    /// </exception>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="contributions"/> is empty, contains <see langword="null"/>, or contains a section type
+    /// more than once.
+    /// </exception>
+    /// <remarks>
+    /// Format contract: Sections are written in ordinal order of their section type. The state ID is a hash of
+    /// the document without the state ID. To compute it, the document is written twice: first to a
+    /// <see cref="DocumentTreeWriter"/> without the state ID, whose tree yields the state ID, then to
+    /// <paramref name="writer"/> with it. Each contribution therefore writes its content twice.
+    /// </remarks>
+    public static void Write(IDocumentWriter writer, IReadOnlyList<DocumentSectionContribution> contributions)
+    {
+        ArgumentNullException.ThrowIfNull(writer);
+        ArgumentNullException.ThrowIfNull(contributions);
+
+        if (contributions.Count == 0)
+            throw new ArgumentException("At least one contribution is required.", nameof(contributions));
+
+        if (contributions.Any(contribution => contribution is null))
+            throw new ArgumentException("The contributions must not contain null.", nameof(contributions));
+
+        DocumentSectionContribution[] ordered = contributions
+            .OrderBy(contribution => contribution.SectionType, StringComparer.Ordinal)
+            .ToArray();
+
+        for (int i = 1; i < ordered.Length; i++)
+        {
+            if (ordered[i].SectionType == ordered[i - 1].SectionType)
+                throw new ArgumentException(
+                    $"The section type '{ordered[i].SectionType}' occurs more than once.", nameof(contributions));
+        }
+
+        DocumentTreeWriter treeWriter = new();
+        WritePass(treeWriter, ordered, stateId: null);
+        string stateId = DocumentStateId.Compute(treeWriter.GetResult());
+
+        WritePass(writer, ordered, stateId);
+    }
+
     private static void WritePass(IDocumentWriter writer,
         IReadOnlyList<DocumentSectionContribution> contributions, string? stateId)
     {

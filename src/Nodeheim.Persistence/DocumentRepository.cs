@@ -58,14 +58,15 @@ public sealed class DocumentRepository : IDocumentRepository
     /// <inheritdoc path="/remarks/node()" />
     /// Errors of the environment, such as I/O errors, are not yet reported as issues and cause exceptions.
     /// </remarks>
-    public void Save(string location, Graph graph)
+    public void Save(string location, Graph graph, IIssueCollector issues)
     {
         ArgumentNullException.ThrowIfNull(location);
         ArgumentNullException.ThrowIfNull(graph);
+        ArgumentNullException.ThrowIfNull(issues);
 
         IDocumentStorage storage = _storageFactory(location);
         DocumentSectionContribution[] contributions = [GraphMapper.CreateContribution(graph)];
 
-        storage.Save(writer => DocumentMapper.Write(writer, contributions));
+        storage.Save(writer => DocumentMapper.Write(writer, contributions), issues);
     }
 }

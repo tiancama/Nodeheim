@@ -29,10 +29,13 @@ public interface IDocumentStorage
     /// Saves a document.
     /// </summary>
     /// <param name="write">The function that writes the document to the given writer.</param>
-    /// <exception cref="ArgumentNullException"><paramref name="write"/> is <see langword="null"/>.</exception>
+    /// <param name="issues">The collector that receives the issues found while saving.</param>
+    /// <exception cref="ArgumentNullException">
+    /// <paramref name="write"/> or <paramref name="issues"/> is <see langword="null"/>.
+    /// </exception>
     /// <remarks>
     /// An implementation creates the writer for its format and invokes <paramref name="write"/> once. It changes
     /// the stored document only after <paramref name="write"/> has completed.
     /// </remarks>
-    void Save(Action<IDocumentWriter> write);
+    void Save(Action<IDocumentWriter> write, IIssueCollector issues);
 }

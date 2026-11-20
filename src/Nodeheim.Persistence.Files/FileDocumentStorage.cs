@@ -47,9 +47,14 @@ public sealed class FileDocumentStorage : IDocumentStorage
     }
 
     /// <inheritdoc />
-    public void Save(Action<IDocumentWriter> write)
+    /// <remarks>
+    /// <inheritdoc path="/remarks/node()" />
+    /// Errors of the environment, such as I/O errors, are not yet reported as issues and cause exceptions.
+    /// </remarks>
+    public void Save(Action<IDocumentWriter> write, IIssueCollector issues)
     {
         ArgumentNullException.ThrowIfNull(write);
+        ArgumentNullException.ThrowIfNull(issues);
 
         using MemoryStream buffer = new();
         write(_writerFactory(buffer));

@@ -34,12 +34,14 @@ public interface IDocumentRepository
     /// </summary>
     /// <param name="location">The storage location of the document, such as a file path.</param>
     /// <param name="graph">The graph to save.</param>
+    /// <param name="issues">The collector that receives the issues found while saving.</param>
     /// <exception cref="ArgumentNullException">
-    /// <paramref name="location"/> or <paramref name="graph"/> is <see langword="null"/>.
+    /// <paramref name="location"/>, <paramref name="graph"/>, or <paramref name="issues"/> is
+    /// <see langword="null"/>.
     /// </exception>
     /// <remarks>
     /// The document is written in the format of the storage at <paramref name="location"/> and replaces the
     /// document stored there.
     /// </remarks>
-    void Save(string location, Graph graph);
+    void Save(string location, Graph graph, IIssueCollector issues);
 }

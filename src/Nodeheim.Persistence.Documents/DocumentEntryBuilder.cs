@@ -96,9 +96,9 @@ public sealed class DocumentEntryBuilder : IDocumentEntryBuilder
         if (!_frames.TryPop(out Frame? frame))
             throw new InvalidOperationException("No entry is open.");
 
-        DocumentEntry entry = frame.Children.Count > 0
-            ? DocumentEntry.CreateBranch(frame.Name, frame.Children)
-            : DocumentEntry.CreateLeaf(frame.Name, frame.Text ?? string.Empty);
+        DocumentEntry entry = frame.Text is not null
+            ? DocumentEntry.CreateLeaf(frame.Name, frame.Text)
+            : DocumentEntry.CreateBranchOrEmpty(frame.Name, frame.Children);
 
         if (_frames.TryPeek(out Frame? parent))
         {

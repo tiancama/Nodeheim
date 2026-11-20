@@ -98,6 +98,32 @@ public sealed class DocumentEntry
         return new DocumentEntry(name, string.Empty, Array.AsReadOnly(copy));
     }
 
+    /// <summary>
+    /// Creates a branch, or the empty entry if there are no children.
+    /// </summary>
+    /// <param name="name">The name.</param>
+    /// <param name="children">The children; may be empty.</param>
+    /// <returns>
+    /// A branch with <paramref name="children"/>, or a leaf with the text <see cref="string.Empty"/> if
+    /// <paramref name="children"/> is empty.
+    /// </returns>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="name"/> is not valid, <paramref name="children"/> is <see langword="null"/> or contains
+    /// <see langword="null"/>, or the branch would have more than <see cref="MaxLevels"/> levels.
+    /// </exception>
+    /// <remarks>
+    /// Format contract: The empty entry is a leaf with the text <see cref="string.Empty"/>. An entry without
+    /// children cannot be told apart from an empty text, so <c>{}</c>, <c>""</c> and <c>null</c> in JSON,
+    /// <c>&lt;x /&gt;</c> in XML and an empty repeated field all result in this entry.
+    /// </remarks>
+    internal static DocumentEntry CreateBranchOrEmpty(string name, IEnumerable<DocumentEntry> children)
+    {
+        ArgumentNullException.ThrowIfNull(children);
+
+        DocumentEntry[] copy = children.ToArray();
+        return copy.Length == 0 ? CreateLeaf(name, string.Empty) : CreateBranch(name, copy);
+    }
+
     internal static bool IsValidName(string? name)
     {
         if (string.IsNullOrEmpty(name)) return false;

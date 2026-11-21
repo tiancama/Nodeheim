@@ -38,7 +38,7 @@ Nodeheim/
     ├── Nodeheim.Domain/                 # domain: pure core, references nothing
     ├── Nodeheim.Issues/                 # cross-cutting: issues reported by any stage
     ├── Nodeheim.Persistence.Documents/  # persistence contract: document tree, ports
-    ├── Nodeheim.Persistence/            # application service: loading, mapping to the graph
+    ├── Nodeheim.Persistence/            # application service: loading and saving documents
     ├── Nodeheim.Persistence.Files/      # adapter: file storage
     ├── Nodeheim.Persistence.Json/       # adapter: JSON syntax
     ├── Nodeheim.Persistence.Xml/        # adapter: XML syntax
@@ -91,7 +91,7 @@ Clicking a connection selects both of its endpoints; dragging it moves both.
 
 Early development. The domain core (nodes, neighbors, and the `Graph` manager) and an Avalonia editor exist. The editor supports creating, selecting, moving, connecting, disconnecting, and deleting nodes.
 
-**Next milestone, in progress:** loading and saving documents as JSON and XML. Agent movement follows. The API is expected to change.
+Documents can be loaded and saved as JSON and XML. **Next milestone:** saving node positions and sizes from the editor. The API is expected to change.
 
 This is primarily a personal learning project; issues and feedback are welcome.
 

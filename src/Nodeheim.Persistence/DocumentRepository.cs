@@ -44,7 +44,7 @@ public sealed class DocumentRepository : IDocumentRepository
     /// <inheritdoc path="/remarks/node()" />
     /// Errors of the environment, such as I/O errors, are not yet reported as issues and cause exceptions.
     /// </remarks>
-    public Graph? Load(string location, IIssueCollector issues)
+    public LoadedDocument? Load(string location, IIssueCollector issues)
     {
         IDocumentStorage storage = _storageFactory(location);
         DocumentEntry? root = storage.Load(issues);
@@ -60,7 +60,7 @@ public sealed class DocumentRepository : IDocumentRepository
                     $"Unknown section '{sectionType}' is skipped.", $"/sections/{sectionType}"));
         }
 
-        OwnerModelCollection models = new();
+        LoadedDocument loaded = new();
 
         foreach (ISectionMapper mapper in _mappers)
         {
@@ -77,10 +77,10 @@ public sealed class DocumentRepository : IDocumentRepository
             if (model is null)
                 return null;
 
-            models.Set(mapper.ModelType, model);
+            loaded.Models.Set(mapper.ModelType, model);
         }
 
-        return models.Get<Graph>();
+        return loaded;
     }
 
     /// <inheritdoc />
@@ -88,19 +88,16 @@ public sealed class DocumentRepository : IDocumentRepository
     /// <inheritdoc path="/remarks/node()" />
     /// Errors of the environment, such as I/O errors, are not yet reported as issues and cause exceptions.
     /// </remarks>
-    public void Save(string location, Graph graph, IIssueCollector issues)
+    public void Save(string location, LoadedDocument document, IIssueCollector issues)
     {
         ArgumentNullException.ThrowIfNull(location);
-        ArgumentNullException.ThrowIfNull(graph);
+        ArgumentNullException.ThrowIfNull(document);
         ArgumentNullException.ThrowIfNull(issues);
-
-        OwnerModelCollection models = new();
-        models.Set(graph);
 
         List<DocumentSectionContribution> contributions = [];
         foreach (ISectionMapper mapper in _mappers)
         {
-            object? model = models.Get(mapper.ModelType);
+            object? model = document.Models.Get(mapper.ModelType);
             if (model is not null)
                 contributions.AddRange(mapper.Contribute(model));
         }

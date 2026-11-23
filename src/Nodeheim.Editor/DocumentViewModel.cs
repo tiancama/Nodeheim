@@ -1,4 +1,5 @@
 ﻿using Nodeheim.Domain;
+using Nodeheim.Persistence;
 
 namespace Nodeheim.Editor;
 
@@ -10,11 +11,17 @@ public class DocumentViewModel
     /// <summary>
     /// Initializes a new instance of the <see cref="DocumentViewModel"/> class.
     /// </summary>
-    /// <param name="graph">The graph of the world the document represents.</param>
-    public DocumentViewModel(Graph graph)
+    /// <param name="document">
+    /// The document to edit; if it holds no graph, an empty graph is added to it.
+    /// </param>
+    public DocumentViewModel(LoadedDocument document)
     {
-        Graph = graph;
-        Surface = new(graph);
+        LoadedDocument = document;
+
+        Graph = document.Models.Get<Graph>() ?? new Graph();
+        document.Models.Set(Graph);
+
+        Surface = new(Graph);
         InteractionController = new(Surface);
     }
 
@@ -27,6 +34,11 @@ public class DocumentViewModel
     /// Gets the controller that interprets pointer input on the surface.
     /// </summary>
     public InteractionController InteractionController { get; }
+
+    /// <summary>
+    /// Gets the document that is edited and passed back when saving.
+    /// </summary>
+    internal LoadedDocument LoadedDocument { get; }
 
     /// <summary>
     /// Gets the graph that the document represents and the surface edits.

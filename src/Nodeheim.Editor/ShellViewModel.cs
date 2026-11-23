@@ -1,7 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
-using Nodeheim.Domain;
 using Nodeheim.Issues;
 using Nodeheim.Persistence;
 
@@ -35,39 +34,39 @@ public class ShellViewModel : INotifyPropertyChanged
     public IReadOnlyList<DocumentStorageDescriptor> StorageDescriptors => _documentRepository.StorageDescriptors;
 
     [MemberNotNull(nameof(ActiveDocument))]
-    public void Open(Graph graph) => ActiveDocument = new(graph);
+    public void Open(LoadedDocument document) => ActiveDocument = new(document);
 
     /// <summary>
-    /// Replaces the active document with a new document containing an empty graph.
+    /// Replaces the active document with a new, empty document.
     /// </summary>
     [MemberNotNull(nameof(ActiveDocument))]
-    public void New() => Open(new Graph());
+    public void New() => Open(new LoadedDocument());
 
     /// <summary>
-    /// Loads the document at the specified location and opens its graph as the active document.
+    /// Loads the document at the specified location and opens it as the active document.
     /// </summary>
     /// <param name="location">The storage location of the document, such as a file path.</param>
     /// <returns>
     /// A report of the issues found while loading, one line per issue, or <see langword="null"/> if there are none.
     /// </returns>
     /// <remarks>
-    /// If no graph is loaded, the active document remains unchanged. A report alone does not indicate a failure,
-    /// because it can consist of discrepancies only. Exceptions from the document repository are not
+    /// If the document is rejected, the active document remains unchanged. A report alone does not indicate a
+    /// failure, because it can consist of discrepancies only. Exceptions from the document repository are not
     /// caught.
     /// </remarks>
     public string? Load(string location)
     {
         IssueCollector collector = new();
-        Graph? graph = _documentRepository.Load(location, collector);
+        LoadedDocument? document = _documentRepository.Load(location, collector);
 
-        if (graph is not null)
-            Open(graph);
+        if (document is not null)
+            Open(document);
 
         return collector.Issues.Count == 0 ? null : FormatIssues(collector.Issues);
     }
 
     /// <summary>
-    /// Saves the graph of the active document to the specified location.
+    /// Saves the active document to the specified location.
     /// </summary>
     /// <param name="location">The storage location of the document, such as a file path.</param>
     /// <returns>
@@ -79,7 +78,7 @@ public class ShellViewModel : INotifyPropertyChanged
     public string? Save(string location)
     {
         IssueCollector collector = new();
-        _documentRepository.Save(location, ActiveDocument.Graph, collector);
+        _documentRepository.Save(location, ActiveDocument.LoadedDocument, collector);
 
         return collector.Issues.Count == 0 ? null : FormatIssues(collector.Issues);
     }

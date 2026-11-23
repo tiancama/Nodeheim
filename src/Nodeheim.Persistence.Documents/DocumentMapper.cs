@@ -62,12 +62,12 @@ public static class DocumentMapper
             return Reject(issues, FormatIssues.NotNodeheimDocument,
                 $"Not a Nodeheim document: the root entry is not named '{RootName}'.", "");
 
-        DocumentEntry? format = DocumentEntryReader.GetChild(root, FormatName);
+        DocumentEntry? format = root.GetSingleChild(FormatName);
         if (format is null)
             return Reject(issues, FormatIssues.NotNodeheimDocument,
                 "Not a Nodeheim document: 'nodeheimFormat' is missing or occurs more than once.", "");
 
-        string? formatText = DocumentEntryReader.GetText(format);
+        string? formatText = format.GetLeafText();
         if (formatText is null)
             return Reject(issues, FormatIssues.InvalidStructure,
                 "Invalid structure: 'nodeheimFormat' is not a text.", "/nodeheimFormat");
@@ -76,13 +76,12 @@ public static class DocumentMapper
             return Reject(issues, FormatIssues.UnsupportedFormatVersion,
                 "Unsupported format version.", "/nodeheimFormat");
 
-        DocumentEntry? stateIdEntry = DocumentEntryReader.GetChild(root, StateIdName);
-        string? stateId = stateIdEntry is null ? null : DocumentEntryReader.GetText(stateIdEntry);
+        string? stateId = root.GetSingleChild(StateIdName)?.GetLeafText();
         if (stateId is null)
             return Reject(issues, FormatIssues.InvalidStructure,
                 "Invalid structure: 'stateId' is missing, occurs more than once, or is not a text.", "/stateId");
 
-        DocumentEntry? sectionsEntry = DocumentEntryReader.GetChild(root, SectionsName);
+        DocumentEntry? sectionsEntry = root.GetSingleChild(SectionsName);
         if (sectionsEntry is null)
             return Reject(issues, FormatIssues.InvalidStructure,
                 "Invalid structure: 'sections' is missing or occurs more than once.", "/sections");
@@ -105,16 +104,13 @@ public static class DocumentMapper
             string name = sectionEntry.Name;
             string path = $"/sections/{name}";
 
-            DocumentEntry? contentVersionEntry = DocumentEntryReader.GetChild(sectionEntry, ContentVersionName);
-            string? contentVersion = contentVersionEntry is null
-                ? null
-                : DocumentEntryReader.GetText(contentVersionEntry);
+            string? contentVersion = sectionEntry.GetSingleChild(ContentVersionName)?.GetLeafText();
             if (contentVersion is null)
                 return Reject(issues, FormatIssues.InvalidStructure,
                     $"Invalid structure: 'contentVersion' in section '{name}' is missing, occurs more than once, " +
                     "or is not a text.", path);
 
-            DocumentEntry? content = DocumentEntryReader.GetChild(sectionEntry, ContentName);
+            DocumentEntry? content = DocumentEntryExtensions.GetSingleChild(sectionEntry, ContentName);
             if (content is null)
                 return Reject(issues, FormatIssues.InvalidStructure,
                     $"Invalid structure: 'content' in section '{name}' is missing or occurs more than once.", path);

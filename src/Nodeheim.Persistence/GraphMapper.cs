@@ -52,11 +52,11 @@ internal static class GraphMapper
 
         DocumentEntry content = section.Content;
 
-        DocumentEntry? nodesEntry = DocumentEntryReader.GetChild(content, NodesName);
+        DocumentEntry? nodesEntry = content.GetSingleChild(NodesName);
         if (nodesEntry is null)
             return Reject(issues, "Invalid structure: 'nodes' is missing or occurs more than once.");
 
-        DocumentEntry? connectionsEntry = DocumentEntryReader.GetChild(content, ConnectionsName);
+        DocumentEntry? connectionsEntry = content.GetSingleChild(ConnectionsName);
         if (connectionsEntry is null)
             return Reject(issues, "Invalid structure: 'connections' is missing or occurs more than once.");
 
@@ -225,7 +225,7 @@ internal static class GraphMapper
 
     private static IReadOnlyList<DocumentEntry>? GetItems(DocumentEntry list, string itemName)
     {
-        IReadOnlyList<DocumentEntry>? items = DocumentEntryReader.GetChildren(list, itemName);
+        IReadOnlyList<DocumentEntry>? items = list.GetChildrenNamed(itemName);
         if (items is null || items.Count != list.Children.Count)
             return null;
 
@@ -234,7 +234,7 @@ internal static class GraphMapper
 
     private static bool TryReadId(DocumentEntry entry, out Guid id)
     {
-        string? text = DocumentEntryReader.GetText(entry);
+        string? text = entry.GetLeafText();
         if (text is not null && Guid.TryParse(text, out id))
             return true;
 

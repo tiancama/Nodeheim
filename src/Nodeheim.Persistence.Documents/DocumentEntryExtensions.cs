@@ -8,12 +8,14 @@ namespace Nodeheim.Persistence.Documents;
 /// <remarks>
 /// The methods report a mismatch only through their return value; the caller decides whether and how to report it.
 /// </remarks>
-public static class DocumentEntryReader
+public static class DocumentEntryExtensions
 {
     private static readonly SearchValues<char> Whitespace = SearchValues.Create(" \t\n\r");
 
     /// <summary>
-    /// Gets the only child with the specified name.
+    /// Gets the only child with the specified name, or <see langword="null"/> if the child is missing or occurs
+    /// more than once. Unlike <see cref="Enumerable.SingleOrDefault{TSource}(IEnumerable{TSource})"/>, the method
+    /// does not throw if the child occurs more than once.
     /// </summary>
     /// <param name="entry">The entry whose children are searched.</param>
     /// <param name="name">The name of the child.</param>
@@ -27,7 +29,7 @@ public static class DocumentEntryReader
     /// <remarks>
     /// Names are compared ordinally.
     /// </remarks>
-    public static DocumentEntry? GetChild(DocumentEntry entry, string name)
+    public static DocumentEntry? GetSingleChild(this DocumentEntry entry, string name)
     {
         ArgumentNullException.ThrowIfNull(entry);
         ArgumentNullException.ThrowIfNull(name);
@@ -49,7 +51,8 @@ public static class DocumentEntryReader
     }
 
     /// <summary>
-    /// Gets the children with the specified name, in their order.
+    /// Gets the children with the specified name, in their order. A leaf whose text is empty or consists only of
+    /// whitespace has no children.
     /// </summary>
     /// <param name="entry">The entry whose children are read.</param>
     /// <param name="name">The name of the children.</param>
@@ -70,7 +73,7 @@ public static class DocumentEntryReader
     /// invalid.
     /// </para>
     /// </remarks>
-    public static IReadOnlyList<DocumentEntry>? GetChildren(DocumentEntry entry, string name)
+    public static IReadOnlyList<DocumentEntry>? GetChildrenNamed(this DocumentEntry entry, string name)
     {
         ArgumentNullException.ThrowIfNull(entry);
         ArgumentNullException.ThrowIfNull(name);
@@ -92,7 +95,7 @@ public static class DocumentEntryReader
     /// The text, unchanged; or <see langword="null"/> if <paramref name="entry"/> is a branch.
     /// </returns>
     /// <exception cref="ArgumentNullException"><paramref name="entry"/> is <see langword="null"/>.</exception>
-    public static string? GetText(DocumentEntry entry)
+    public static string? GetLeafText(this DocumentEntry entry)
     {
         ArgumentNullException.ThrowIfNull(entry);
 

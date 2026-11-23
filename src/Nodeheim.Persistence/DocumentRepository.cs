@@ -9,6 +9,8 @@ namespace Nodeheim.Persistence;
 /// </summary>
 public sealed class DocumentRepository : IDocumentRepository
 {
+    private static readonly CoreSectionMapper CoreMapper = new();
+
     private readonly Func<string, IDocumentStorage> _storageFactory;
 
     /// <summary>
@@ -42,15 +44,15 @@ public sealed class DocumentRepository : IDocumentRepository
 
         foreach (string key in document.Sections.Keys)
         {
-            if (key != GraphMapper.SectionType)
+            if (key != CoreSectionMapper.GraphSectionType)
                 issues.Add(new Issue(FormatIssues.UnknownSection,
                     $"Unknown section '{key}' is skipped.", $"/sections/{key}"));
         }
 
-        if (!document.Sections.TryGetValue(GraphMapper.SectionType, out DocumentSection? section))
+        if (!document.Sections.ContainsKey(CoreSectionMapper.GraphSectionType))
             return null;
 
-        return GraphMapper.Read(section, issues);
+        return CoreMapper.Read(document.Sections, issues);
     }
 
     /// <inheritdoc />
@@ -65,7 +67,7 @@ public sealed class DocumentRepository : IDocumentRepository
         ArgumentNullException.ThrowIfNull(issues);
 
         IDocumentStorage storage = _storageFactory(location);
-        DocumentSectionContribution[] contributions = [GraphMapper.CreateContribution(graph)];
+        IReadOnlyList<DocumentSectionContribution> contributions = CoreMapper.Contribute(graph);
 
         storage.Save(writer => DocumentMapper.Write(writer, contributions), issues);
     }

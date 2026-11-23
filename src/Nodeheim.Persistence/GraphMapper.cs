@@ -6,16 +6,10 @@ namespace Nodeheim.Persistence;
 
 internal static class GraphMapper
 {
-    internal const string SectionType = "core.graph";
-
-    private const string SupportedContentVersion = "0.2";
     private const string NodesName = "nodes";
     private const string ConnectionsName = "connections";
     private const string ConnectionName = "connection";
     private const string IdName = "id";
-
-    private static readonly IssueDefinition UnsupportedContentVersionIssue =
-        new("core.graph.unsupportedContentVersion", IssueKind.Rejection);
 
     private static readonly IssueDefinition InvalidStructureIssue =
         new("core.graph.invalidStructure", IssueKind.Rejection);
@@ -24,35 +18,28 @@ internal static class GraphMapper
         new("core.graph.invalidItem", IssueKind.Discrepancy);
 
     /// <summary>
-    /// Reads a graph from the <c>core.graph</c> section.
+    /// Reads a graph from the content of a section.
     /// </summary>
-    /// <param name="section">The section to read.</param>
+    /// <param name="content">The content to read.</param>
     /// <param name="issues">The collector that receives the issues found while reading.</param>
     /// <returns>
-    /// The graph, or <see langword="null"/> if the section is rejected; the rejection is added to
+    /// The graph, or <see langword="null"/> if the content is rejected; the rejection is added to
     /// <paramref name="issues"/>.
     /// </returns>
     /// <remarks>
-    /// Format contract: The content version is <c>0.2</c>. The content has exactly one child each named
-    /// <c>nodes</c> and <c>connections</c>, and no other children. All children of <c>nodes</c> are named
-    /// <c>id</c>; all children of <c>connections</c> are named <c>connection</c>. A leaf whose text is empty or
-    /// only whitespace counts as no children. Each <c>id</c> is a leaf with a GUID in any format that
-    /// <see cref="Guid.TryParse(string, out Guid)"/> accepts. Each <c>connection</c> has exactly two children
-    /// named <c>id</c> with different IDs from <c>nodes</c>; <c>a, b</c> and <c>b, a</c> are the same
-    /// connection. An invalid or duplicate item is skipped and reported as <c>core.graph.invalidItem</c>; any
-    /// other deviation rejects the section with <c>core.graph.invalidStructure</c>.
+    /// Format contract: The content has exactly one child each named <c>nodes</c> and <c>connections</c>, and
+    /// no other children. All children of <c>nodes</c> are named <c>id</c>; all children of <c>connections</c>
+    /// are named <c>connection</c>. A leaf whose text is empty or only whitespace counts as no children. Each
+    /// <c>id</c> is a leaf with a GUID in any format that <see cref="Guid.TryParse(string, out Guid)"/> accepts.
+    /// Each <c>connection</c> has exactly two children named <c>id</c> with different IDs from <c>nodes</c>;
+    /// <c>a, b</c> and <c>b, a</c> are the same connection. An invalid or duplicate item is skipped and reported
+    /// as <c>core.graph.invalidItem</c>; any other deviation rejects the content with
+    /// <c>core.graph.invalidStructure</c>.
     /// </remarks>
-    internal static Graph? Read(DocumentSection section, IIssueCollector issues)
+    internal static Graph? Read(DocumentEntry content, IIssueCollector issues)
     {
-        if (section.ContentVersion != SupportedContentVersion)
-        {
-            issues.Add(new Issue(UnsupportedContentVersionIssue, "Unsupported content version.", null));
-            return null;
-        }
-
-        DocumentEntry content = section.Content;
-
         DocumentEntry? nodesEntry = content.GetSingleChild(NodesName);
+
         if (nodesEntry is null)
             return Reject(issues, "Invalid structure: 'nodes' is missing or occurs more than once.");
 
@@ -204,18 +191,6 @@ internal static class GraphMapper
 
         writer.EndGroup();
     }
-
-    /// <summary>
-    /// Creates the contribution of the <c>core.graph</c> section for a graph.
-    /// </summary>
-    /// <param name="graph">The graph to write.</param>
-    /// <returns>The contribution.</returns>
-    /// <remarks>
-    /// The contribution reads <paramref name="graph"/> each time it writes its content, so the graph must not
-    /// change while the document is saved.
-    /// </remarks>
-    internal static DocumentSectionContribution CreateContribution(Graph graph) =>
-        new(SectionType, SupportedContentVersion, writer => Write(graph, writer));
 
     private static int CompareConnections((string A, string B) x, (string A, string B) y)
     {

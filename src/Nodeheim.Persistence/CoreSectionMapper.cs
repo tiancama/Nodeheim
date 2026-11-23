@@ -14,7 +14,7 @@ namespace Nodeheim.Persistence;
 /// </remarks>
 public sealed class CoreSectionMapper : ISectionMapper<Graph>
 {
-    internal const string GraphSectionType = "core.graph";
+    private const string GraphSectionType = "core.graph";
 
     private const string SupportedContentVersion = "0.2";
 

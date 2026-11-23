@@ -5,23 +5,34 @@ using Nodeheim.Persistence.Documents;
 namespace Nodeheim.Persistence;
 
 /// <summary>
-/// Represents the coordinator that loads and saves a graph as a document through a document storage.
+/// Represents the coordinator that loads and saves documents through a document storage and the registered
+/// section mappers.
 /// </summary>
 public sealed class DocumentRepository : IDocumentRepository
 {
-    private static readonly CoreSectionMapper CoreMapper = new();
-
     private readonly Func<string, IDocumentStorage> _storageFactory;
+    private readonly IReadOnlyList<ISectionMapper> _mappers;
+    private readonly HashSet<string> _knownSectionTypes;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="DocumentRepository"/> class.
     /// </summary>
     /// <param name="descriptors">The descriptions of the supported kinds of document storage.</param>
     /// <param name="storageFactory">The function that creates the document storage for a location.</param>
+    /// <param name="sectionMappers">
+    /// The registered section mappers; later registrations are not taken into account.
+    /// </param>
+    /// <exception cref="ArgumentNullException"><paramref name="sectionMappers"/> is <see langword="null"/>.</exception>
     public DocumentRepository(IReadOnlyList<DocumentStorageDescriptor> descriptors,
-        Func<string, IDocumentStorage> storageFactory)
+        Func<string, IDocumentStorage> storageFactory, SectionMapperRegistry sectionMappers)
     {
+        ArgumentNullException.ThrowIfNull(sectionMappers);
+
         _storageFactory = storageFactory;
+        _mappers = [.. sectionMappers.Mappers];
+        _knownSectionTypes = new HashSet<string>(
+            _mappers.SelectMany(mapper => mapper.SectionTypes).Select(descriptor => descriptor.SectionType),
+            StringComparer.Ordinal);
         StorageDescriptors = [.. descriptors];
     }
 
@@ -42,17 +53,34 @@ public sealed class DocumentRepository : IDocumentRepository
         Document? document = DocumentMapper.Read(root, issues);
         if (document is null) return null;
 
-        foreach (string key in document.Sections.Keys)
+        foreach (string sectionType in document.Sections.Keys)
         {
-            if (key != CoreSectionMapper.GraphSectionType)
+            if (!_knownSectionTypes.Contains(sectionType))
                 issues.Add(new Issue(FormatIssues.UnknownSection,
-                    $"Unknown section '{key}' is skipped.", $"/sections/{key}"));
+                    $"Unknown section '{sectionType}' is skipped.", $"/sections/{sectionType}"));
         }
 
-        if (!document.Sections.ContainsKey(CoreSectionMapper.GraphSectionType))
-            return null;
+        OwnerModelCollection models = new();
 
-        return CoreMapper.Read(document.Sections, issues);
+        foreach (ISectionMapper mapper in _mappers)
+        {
+            Dictionary<string, DocumentSection> sections = new(StringComparer.Ordinal);
+            foreach (SectionTypeDescriptor descriptor in mapper.SectionTypes)
+            {
+                if (document.Sections.TryGetValue(descriptor.SectionType, out DocumentSection? section))
+                    sections.Add(descriptor.SectionType, section);
+            }
+
+            object? model = mapper.Read(sections, issues);
+
+            // Provisional until the memento keeps the sections of a mapper that fails.
+            if (model is null)
+                return null;
+
+            models.Set(mapper.ModelType, model);
+        }
+
+        return models.Get<Graph>();
     }
 
     /// <inheritdoc />
@@ -66,9 +94,18 @@ public sealed class DocumentRepository : IDocumentRepository
         ArgumentNullException.ThrowIfNull(graph);
         ArgumentNullException.ThrowIfNull(issues);
 
-        IDocumentStorage storage = _storageFactory(location);
-        IReadOnlyList<DocumentSectionContribution> contributions = CoreMapper.Contribute(graph);
+        OwnerModelCollection models = new();
+        models.Set(graph);
 
+        List<DocumentSectionContribution> contributions = [];
+        foreach (ISectionMapper mapper in _mappers)
+        {
+            object? model = models.Get(mapper.ModelType);
+            if (model is not null)
+                contributions.AddRange(mapper.Contribute(model));
+        }
+
+        IDocumentStorage storage = _storageFactory(location);
         storage.Save(writer => DocumentMapper.Write(writer, contributions), issues);
     }
 }

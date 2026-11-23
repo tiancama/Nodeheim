@@ -52,8 +52,7 @@ public class ShellViewModel : INotifyPropertyChanged
     /// </returns>
     /// <remarks>
     /// If no graph is loaded, the active document remains unchanged. A report alone does not indicate a failure,
-    /// because it can consist of discrepancies only. If the document contains no graph and no issues are found,
-    /// nothing is opened and <see langword="null"/> is returned. Exceptions from the document repository are not
+    /// because it can consist of discrepancies only. Exceptions from the document repository are not
     /// caught.
     /// </remarks>
     public string? Load(string location)

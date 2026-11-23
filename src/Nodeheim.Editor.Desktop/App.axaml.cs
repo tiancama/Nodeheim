@@ -20,13 +20,17 @@ public partial class App : Application
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
+            SectionMapperRegistry sectionMappers = new();
+            sectionMappers.Register(new CoreSectionMapper());
+
             DocumentRepository documentRepository = new(
                 [
                     new DocumentStorageDescriptor("JSON", [".json"]),
                     new DocumentStorageDescriptor("XML", [".xml"]),
                 ],
                 location => new FileDocumentStorage(
-                    location, CreateParser(location), CreateWriterFactory(location)));
+                    location, CreateParser(location), CreateWriterFactory(location)),
+                sectionMappers);
             ShellViewModel shell = new(documentRepository);
             desktop.MainWindow = new MainWindow() { DataContext = shell };
         }

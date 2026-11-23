@@ -176,10 +176,10 @@ public static class DocumentMapper
         }
 
         DocumentTreeWriter treeWriter = new();
-        WritePass(treeWriter, ordered, stateId: null);
+        WritePass(new ValidatingDocumentWriter(treeWriter), ordered, stateId: null);
         string stateId = DocumentStateId.Compute(treeWriter.GetResult());
 
-        WritePass(writer, ordered, stateId);
+        WritePass(new ValidatingDocumentWriter(writer), ordered, stateId);
     }
 
     private static void WritePass(IDocumentWriter writer,

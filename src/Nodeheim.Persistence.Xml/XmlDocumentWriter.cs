@@ -35,8 +35,7 @@ public sealed class XmlDocumentWriter : IDocumentWriter
 
     private readonly Stream _stream;
     private readonly XmlWriter _xml;
-    private readonly Stack<string?> _repeatedNames = new();
-    private string? _pendingName;
+    private readonly DocumentWriterProtocol _protocol = new();
 
     /// <summary>
     /// Initializes a new instance of the <see cref="XmlDocumentWriter"/> class.
@@ -52,12 +51,13 @@ public sealed class XmlDocumentWriter : IDocumentWriter
     }
 
     /// <inheritdoc />
-    public void Name(string name) => _pendingName = name;
+    public void Name(string name) => _protocol.Name(name);
 
     /// <inheritdoc />
     public void Text(string text)
     {
-        _xml.WriteStartElement(TakeName(), XmlNamespaces.Nodeheim);
+        string name = _protocol.Text();
+        _xml.WriteStartElement(name, XmlNamespaces.Nodeheim);
 
         // An empty string counts as content for XmlWriter and would give <x></x> instead of <x />.
         if (text.Length > 0)
@@ -69,49 +69,30 @@ public sealed class XmlDocumentWriter : IDocumentWriter
     /// <inheritdoc />
     public void BeginGroup()
     {
-        string name = TakeName();
+        bool isRoot = _protocol.OpenGroupCount == 0;
+        string name = _protocol.BeginGroup();
 
-        if (_repeatedNames.Count == 0)
+        if (isRoot)
             _xml.WriteStartDocument();
 
         _xml.WriteStartElement(name, XmlNamespaces.Nodeheim);
-        _repeatedNames.Push(null);
     }
 
     /// <inheritdoc />
     public void EndGroup()
     {
-        _repeatedNames.Pop();
+        _protocol.EndGroup();
         _xml.WriteEndElement();
 
-        if (_repeatedNames.Count == 0)
+        if (_protocol.OpenGroupCount == 0)
             Complete();
     }
 
     /// <inheritdoc />
-    public void BeginRepeated()
-    {
-        _repeatedNames.Pop();
-        _repeatedNames.Push(_pendingName);
-        _pendingName = null;
-    }
+    public void BeginRepeated() => _protocol.BeginRepeated();
 
     /// <inheritdoc />
-    public void EndRepeated()
-    {
-        _repeatedNames.Pop();
-        _repeatedNames.Push(null);
-    }
-
-    private string TakeName()
-    {
-        if (_repeatedNames.TryPeek(out string? repeatedName) && repeatedName is not null)
-            return repeatedName;
-
-        string name = _pendingName ?? throw new InvalidOperationException("No name is pending.");
-        _pendingName = null;
-        return name;
-    }
+    public void EndRepeated() => _protocol.EndRepeated();
 
     private void Complete()
     {

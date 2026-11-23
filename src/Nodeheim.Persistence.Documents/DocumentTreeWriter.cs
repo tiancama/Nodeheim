@@ -10,23 +10,28 @@
 /// </remarks>
 public sealed class DocumentTreeWriter : IDocumentWriter
 {
+    private readonly DocumentWriterProtocol _protocol = new();
     private readonly Stack<Frame> _frames = new();
-    private string? _pendingName;
     private DocumentEntry? _root;
 
     /// <inheritdoc />
-    public void Name(string name) => _pendingName = name;
+    public void Name(string name) => _protocol.Name(name);
 
     /// <inheritdoc />
-    public void Text(string text) =>
-        _frames.Peek().Children.Add(DocumentEntry.CreateLeaf(TakeName(), text));
+    public void Text(string text)
+    {
+        string name = _protocol.Text();
+        _frames.Peek().Children.Add(DocumentEntry.CreateLeaf(name, text));
+    }
 
     /// <inheritdoc />
-    public void BeginGroup() => _frames.Push(new Frame(TakeName()));
+    public void BeginGroup() => _frames.Push(new Frame(_protocol.BeginGroup()));
 
     /// <inheritdoc />
     public void EndGroup()
     {
+        _protocol.EndGroup();
+
         Frame frame = _frames.Pop();
         DocumentEntry entry = DocumentEntry.CreateBranchOrEmpty(frame.Name, frame.Children);
 
@@ -41,14 +46,10 @@ public sealed class DocumentTreeWriter : IDocumentWriter
     }
 
     /// <inheritdoc />
-    public void BeginRepeated()
-    {
-        _frames.Peek().RepeatedName = _pendingName;
-        _pendingName = null;
-    }
+    public void BeginRepeated() => _protocol.BeginRepeated();
 
     /// <inheritdoc />
-    public void EndRepeated() => _frames.Peek().RepeatedName = null;
+    public void EndRepeated() => _protocol.EndRepeated();
 
     /// <summary>
     /// Returns the root entry.
@@ -57,16 +58,6 @@ public sealed class DocumentTreeWriter : IDocumentWriter
     /// <exception cref="InvalidOperationException">The document tree is not complete.</exception>
     public DocumentEntry GetResult() =>
         _root ?? throw new InvalidOperationException("The document tree is not complete.");
-
-    private string TakeName()
-    {
-        if (_frames.TryPeek(out Frame? frame) && frame.RepeatedName is not null)
-            return frame.RepeatedName;
-
-        string name = _pendingName ?? throw new InvalidOperationException("No name is pending.");
-        _pendingName = null;
-        return name;
-    }
 
     private sealed class Frame
     {
@@ -78,7 +69,5 @@ public sealed class DocumentTreeWriter : IDocumentWriter
         public List<DocumentEntry> Children { get; } = new();
 
         public string Name { get; }
-
-        public string? RepeatedName { get; set; }
     }
 }

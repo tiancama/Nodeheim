@@ -213,7 +213,7 @@ internal static class GraphMapper
 
     private static Graph? Reject(IIssueCollector issues, string message)
     {
-        issues.Add(new Issue(EngineIssues.InvalidItem, message, null));
+        issues.Add(new Issue(EngineIssues.InvalidStructure, message, null));
         return null;
     }
 }

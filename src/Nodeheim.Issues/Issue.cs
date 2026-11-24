@@ -24,7 +24,7 @@ public sealed record Issue
 
     /// <summary>
     /// Gets the code that identifies the issue, in the form <c>owner.name</c>, such as
-    /// <c>core.graph.duplicateNode</c>.
+    /// <c>engine.graph.duplicateNode</c>.
     /// </summary>
     public string Code { get; }
 
@@ -44,7 +44,7 @@ public sealed record Issue
     /// </summary>
     /// <remarks>
     /// The location refers to the value, not to the text of the input, such as
-    /// <c>/sections/core.graph/content/nodes/3</c>. The exact rules are defined in <c>Specification.md</c>.
+    /// <c>/sections/engine.graph/content/nodes/3</c>. The exact rules are defined in <c>Specification.md</c>.
     /// </remarks>
     public string? Path { get; }
 }

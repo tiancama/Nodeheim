@@ -11,12 +11,6 @@ internal static class GraphMapper
     private const string ConnectionName = "connection";
     private const string IdName = "id";
 
-    private static readonly IssueDefinition InvalidStructureIssue =
-        new("core.graph.invalidStructure", IssueKind.Rejection);
-
-    private static readonly IssueDefinition InvalidItemIssue =
-        new("core.graph.invalidItem", IssueKind.Discrepancy);
-
     /// <summary>
     /// Reads a graph from the content of a section.
     /// </summary>
@@ -33,8 +27,8 @@ internal static class GraphMapper
     /// <c>id</c> is a leaf with a GUID in any format that <see cref="Guid.TryParse(string, out Guid)"/> accepts.
     /// Each <c>connection</c> has exactly two children named <c>id</c> with different IDs from <c>nodes</c>;
     /// <c>a, b</c> and <c>b, a</c> are the same connection. An invalid or duplicate item is skipped and reported
-    /// as <c>core.graph.invalidItem</c>; any other deviation rejects the content with
-    /// <c>core.graph.invalidStructure</c>.
+    /// as <c>engine.graph.invalidItem</c>; any other deviation rejects the content with
+    /// <c>engine.graph.invalidStructure</c>.
     /// </remarks>
     internal static Graph? Read(DocumentEntry content, IIssueCollector issues)
     {
@@ -68,7 +62,7 @@ internal static class GraphMapper
         {
             if (!TryReadId(ids[i], out Guid id))
             {
-                issues.Add(new Issue(InvalidItemIssue,
+                issues.Add(new Issue(EngineIssues.InvalidItem,
                     $"Invalid item: 'nodes' item {i} is not a GUID.", null));
                 continue;
             }
@@ -76,7 +70,7 @@ internal static class GraphMapper
             Node node = new() { Id = id };
             if (!nodesById.TryAdd(id, node))
             {
-                issues.Add(new Issue(InvalidItemIssue,
+                issues.Add(new Issue(EngineIssues.InvalidItem,
                     $"Invalid item: 'nodes' item {i} duplicates an earlier item.", null));
                 continue;
             }
@@ -89,35 +83,35 @@ internal static class GraphMapper
             IReadOnlyList<DocumentEntry>? pair = GetItems(connections[i], IdName);
             if (pair is null || pair.Count != 2)
             {
-                issues.Add(new Issue(InvalidItemIssue,
+                issues.Add(new Issue(EngineIssues.InvalidItem,
                     $"Invalid item: 'connections' item {i} does not consist of exactly two 'id' entries.", null));
                 continue;
             }
 
             if (!TryReadId(pair[0], out Guid idA) || !TryReadId(pair[1], out Guid idB))
             {
-                issues.Add(new Issue(InvalidItemIssue,
+                issues.Add(new Issue(EngineIssues.InvalidItem,
                     $"Invalid item: 'connections' item {i} has an invalid ID.", null));
                 continue;
             }
 
             if (!nodesById.TryGetValue(idA, out Node? nodeA) || !nodesById.TryGetValue(idB, out Node? nodeB))
             {
-                issues.Add(new Issue(InvalidItemIssue,
+                issues.Add(new Issue(EngineIssues.InvalidItem,
                     $"Invalid item: 'connections' item {i} refers to a node that is not in 'nodes'.", null));
                 continue;
             }
 
             if (nodeA.Id == nodeB.Id)
             {
-                issues.Add(new Issue(InvalidItemIssue,
+                issues.Add(new Issue(EngineIssues.InvalidItem,
                     $"Invalid item: 'connections' item {i} connects a node to itself.", null));
                 continue;
             }
 
             if (!graph.Connect(nodeA, nodeB))
             {
-                issues.Add(new Issue(InvalidItemIssue,
+                issues.Add(new Issue(EngineIssues.InvalidItem,
                     $"Invalid item: 'connections' item {i} duplicates an earlier item.", null));
             }
         }
@@ -126,7 +120,7 @@ internal static class GraphMapper
     }
 
     /// <summary>
-    /// Writes the content of the <c>core.graph</c> section.
+    /// Writes the content of the <c>engine.graph</c> section.
     /// </summary>
     /// <param name="graph">The graph to write.</param>
     /// <param name="writer">The writer that receives the content as the value of <c>content</c>.</param>
@@ -219,7 +213,7 @@ internal static class GraphMapper
 
     private static Graph? Reject(IIssueCollector issues, string message)
     {
-        issues.Add(new Issue(InvalidStructureIssue, message, null));
+        issues.Add(new Issue(EngineIssues.InvalidItem, message, null));
         return null;
     }
 }

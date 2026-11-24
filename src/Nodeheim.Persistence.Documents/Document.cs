@@ -6,7 +6,7 @@ namespace Nodeheim.Persistence.Documents;
 /// Represents a document with its state id and its sections.
 /// </summary>
 /// <remarks>
-/// Format contract: Sections are keyed by name, such as <c>core.graph</c>. Names are compared ordinally.
+/// Format contract: Sections are keyed by name, such as <c>engine.graph</c>. Names are compared ordinally.
 /// </remarks>
 public sealed class Document
 {

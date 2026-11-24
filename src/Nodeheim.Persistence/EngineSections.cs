@@ -5,30 +5,27 @@ using Nodeheim.Persistence.Documents;
 namespace Nodeheim.Persistence;
 
 /// <summary>
-/// Represents the section mapper of the owner <c>core</c>, which maps the section <c>core.graph</c> to a
+/// Represents the section mapper of the owner <c>engine</c>, which maps the section <c>engine.graph</c> to a
 /// <see cref="Graph"/>.
 /// </summary>
 /// <remarks>
-/// Format contract: The content version of <c>core.graph</c> is <c>0.2</c>; another version rejects the section
-/// with <c>core.graph.unsupportedContentVersion</c>. Without <c>core.graph</c>, the model is an empty graph.
+/// Format contract: The content version of <c>engine.graph</c> is <c>0.2</c>; another version rejects the section
+/// with <c>engine.graph.unsupportedContentVersion</c>. Without <c>engine.graph</c>, the model is an empty graph.
 /// </remarks>
-public sealed class CoreSectionMapper : ISectionMapper<Graph>
+public sealed class EngineSections : ISectionMapper<Graph>
 {
-    private const string GraphSectionType = "core.graph";
+    private const string GraphSectionType = "engine.graph";
 
     private const string SupportedContentVersion = "0.2";
-
-    private static readonly IssueDefinition UnsupportedContentVersionIssue =
-        new("core.graph.unsupportedContentVersion", IssueKind.Rejection);
 
     private static readonly IReadOnlyList<SectionTypeDescriptor> GraphSectionTypes =
         [new SectionTypeDescriptor(GraphSectionType, "Graph")];
 
     /// <inheritdoc />
-    public string OwnerName => "core";
+    public string OwnerName => "engine";
 
     /// <inheritdoc />
-    public string DisplayName => "Core";
+    public string DisplayName => "Engine";
 
     /// <inheritdoc />
     public IReadOnlyList<SectionTypeDescriptor> SectionTypes => GraphSectionTypes;
@@ -44,7 +41,7 @@ public sealed class CoreSectionMapper : ISectionMapper<Graph>
 
         if (section.ContentVersion != SupportedContentVersion)
         {
-            issues.Add(new Issue(UnsupportedContentVersionIssue, "Unsupported content version.", null));
+            issues.Add(new Issue(EngineIssues.UnsupportedContentVersion, "Unsupported content version.", null));
             return null;
         }
 

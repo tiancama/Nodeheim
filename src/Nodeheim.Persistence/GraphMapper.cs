@@ -1,6 +1,7 @@
 ﻿using Nodeheim.Domain;
 using Nodeheim.Issues;
 using Nodeheim.Persistence.Documents;
+using Nodeheim.Persistence.Documents.Owners.Engine;
 
 namespace Nodeheim.Persistence;
 
@@ -20,16 +21,6 @@ internal static class GraphMapper
     /// The graph, or <see langword="null"/> if the content is rejected; the rejection is added to
     /// <paramref name="issues"/>.
     /// </returns>
-    /// <remarks>
-    /// Format contract: The content has exactly one child each named <c>nodes</c> and <c>connections</c>, and
-    /// no other children. All children of <c>nodes</c> are named <c>id</c>; all children of <c>connections</c>
-    /// are named <c>connection</c>. A leaf whose text is empty or only whitespace counts as no children. Each
-    /// <c>id</c> is a leaf with a GUID in any format that <see cref="Guid.TryParse(string, out Guid)"/> accepts.
-    /// Each <c>connection</c> has exactly two children named <c>id</c> with different IDs from <c>nodes</c>;
-    /// <c>a, b</c> and <c>b, a</c> are the same connection. An invalid or duplicate item is skipped and reported
-    /// as <c>engine.graph.invalidItem</c>; any other deviation rejects the content with
-    /// <c>engine.graph.invalidStructure</c>.
-    /// </remarks>
     internal static Graph? Read(DocumentEntry content, IIssueCollector issues)
     {
         DocumentEntry? nodesEntry = content.GetSingleChild(NodesName);
@@ -201,15 +192,8 @@ internal static class GraphMapper
         return items;
     }
 
-    private static bool TryReadId(DocumentEntry entry, out Guid id)
-    {
-        string? text = entry.GetLeafText();
-        if (text is not null && Guid.TryParse(text, out id))
-            return true;
-
-        id = Guid.Empty;
-        return false;
-    }
+    private static bool TryReadId(DocumentEntry entry, out Guid id) =>
+        NodeIdText.TryParse(entry.GetLeafText(), out id);
 
     private static Graph? Reject(IIssueCollector issues, string message)
     {

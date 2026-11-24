@@ -21,7 +21,7 @@ public partial class App : Application
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             SectionMapperRegistry sectionMappers = new();
-            sectionMappers.Register(new EngineSections());
+            sectionMappers.Register(EngineSections.Owner).AddSection(EngineSections.Graph);
 
             DocumentRepository documentRepository = new(
                 [

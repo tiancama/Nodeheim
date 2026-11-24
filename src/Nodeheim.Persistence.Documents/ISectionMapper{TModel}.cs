@@ -3,49 +3,47 @@
 namespace Nodeheim.Persistence.Documents;
 
 /// <summary>
-/// Defines a section mapper, which maps the sections of one owner to a model and the model back to sections.
+/// Defines a section mapper, which maps one section to a model and the model back to that section.
 /// </summary>
 /// <typeparam name="TModel">The type of the model.</typeparam>
 /// <remarks>
-/// A section mapper holds no state between calls; one registered instance serves every document.
+/// A section mapper holds no state between calls; one registered instance serves every document. A new section
+/// requires a new section mapper.
 /// </remarks>
 public interface ISectionMapper<TModel>
     where TModel : class
 {
     /// <summary>
-    /// Gets the name of the owner; each of its section types starts with this name and a dot.
+    /// Gets the section type that this mapper maps.
     /// </summary>
-    string OwnerName { get; }
+    SectionTypeDescriptor SectionType { get; }
 
     /// <summary>
-    /// Gets the name of the owner shown to the user.
+    /// Reads the model from the section.
     /// </summary>
-    string DisplayName { get; }
-
-    /// <summary>
-    /// Gets the section types of the owner.
-    /// </summary>
-    IReadOnlyList<SectionTypeDescriptor> SectionTypes { get; }
-
-    /// <summary>
-    /// Reads the model from the sections of the owner.
-    /// </summary>
-    /// <param name="sections">The sections of the owner found in the document, by section type; possibly none.</param>
+    /// <param name="section">
+    /// The section of <see cref="SectionType"/> found in the document, or <see langword="null"/> if the document
+    /// does not contain it.
+    /// </param>
     /// <param name="issues">The collector that receives the issues of reading.</param>
     /// <returns>
-    /// The model, an empty model if <paramref name="sections"/> is empty; or <see langword="null"/> if the sections
-    /// cannot be read.
+    /// The model; an empty model if <paramref name="section"/> is <see langword="null"/>; or
+    /// <see langword="null"/> if the section cannot be read.
     /// </returns>
     /// <remarks>
     /// <see langword="null"/> means only that reading failed; the reason is reported to <paramref name="issues"/>
     /// with a code of the owner.
+    /// Provisional: The empty model for a missing section is under trial. It may be replaced by not calling the
+    /// mapper at all, so that the application decides whether to start empty; this method then remains unchanged.
     /// </remarks>
-    TModel? Read(IReadOnlyDictionary<string, DocumentSection> sections, IIssueCollector issues);
+    TModel? Read(DocumentSection? section, IIssueCollector issues);
 
     /// <summary>
-    /// Returns the contributions of the model to a document that is being written, one per section.
+    /// Returns the contribution of the model to a document that is being written.
     /// </summary>
     /// <param name="model">The model.</param>
-    /// <returns>The contributions; each with a section type from <see cref="SectionTypes"/>.</returns>
-    IReadOnlyList<DocumentSectionContribution> Contribute(TModel model);
+    /// <returns>
+    /// The contribution; its section type is the <see cref="SectionTypeDescriptor.Name"/> of <see cref="SectionType"/>.
+    /// </returns>
+    DocumentSectionContribution Contribute(TModel model);
 }

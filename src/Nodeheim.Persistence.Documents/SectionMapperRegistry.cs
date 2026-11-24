@@ -1,16 +1,17 @@
 ﻿namespace Nodeheim.Persistence.Documents;
 
 /// <summary>
-/// Represents the registration of the section mappers.
+/// Represents the registration of the owners and their section mappers.
 /// </summary>
 /// <remarks>
-/// Each registration is checked at once, so that a conflict surfaces at startup. A section type belongs to at most
-/// one section mapper, a model type occurs at most once, and each section type is a valid entry name that starts
-/// with the name of its owner and a dot.
+/// Each registration is checked at once, so that a conflict surfaces at startup. An owner name is a valid entry
+/// name and is registered at most once. A section type belongs to at most one section mapper, a model type occurs
+/// at most once, and each section type is a valid entry name that starts with the name of its owner and a dot.
 /// </remarks>
 public sealed class SectionMapperRegistry
 {
     private readonly List<ISectionMapper> _mappers = new();
+    private readonly HashSet<string> _ownerNames = new(StringComparer.Ordinal);
     private readonly HashSet<string> _sectionTypes = new(StringComparer.Ordinal);
     private readonly HashSet<Type> _modelTypes = new();
 
@@ -21,44 +22,47 @@ public sealed class SectionMapperRegistry
     public IReadOnlyList<ISectionMapper> Mappers => _mappers;
 
     /// <summary>
-    /// Registers a section mapper.
+    /// Registers an owner.
     /// </summary>
-    /// <typeparam name="TModel">The type of the model.</typeparam>
-    /// <param name="mapper">The section mapper.</param>
-    /// <exception cref="ArgumentNullException"><paramref name="mapper"/> is <see langword="null"/>.</exception>
+    /// <param name="owner">The description of the owner.</param>
+    /// <returns>The registration of the owner, to which its sections are added.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="owner"/> is <see langword="null"/>.</exception>
     /// <exception cref="ArgumentException">
-    /// The model type is already registered, or a section type is not a valid entry name, does not start with the
-    /// name of the owner and a dot, or is already registered.
+    /// The name of <paramref name="owner"/> is not a valid entry name or is already registered.
     /// </exception>
-    public void Register<TModel>(ISectionMapper<TModel> mapper)
+    public OwnerRegistration Register(OwnerDescriptor owner)
+    {
+        ArgumentNullException.ThrowIfNull(owner);
+
+        if (!DocumentEntry.IsValidName(owner.Name) || !_ownerNames.Add(owner.Name))
+            throw new ArgumentException(
+                $"Owner '{owner.Name}': it is not a valid entry name or is already registered.", nameof(owner));
+
+        return new OwnerRegistration(this, owner);
+    }
+
+    internal void Add<TModel>(OwnerDescriptor owner, ISectionMapper<TModel> mapper)
         where TModel : class
     {
         ArgumentNullException.ThrowIfNull(mapper);
 
         SectionMapperWrapper<TModel> wrapper = new(mapper);
-        string owner = wrapper.OwnerName;
+        string sectionType = wrapper.SectionType.Name;
 
         if (_modelTypes.Contains(wrapper.ModelType))
             throw new ArgumentException(
-                $"Owner '{owner}': the model type '{wrapper.ModelType}' is already registered.", nameof(mapper));
+                $"Owner '{owner.Name}': the model type '{wrapper.ModelType}' is already registered.", nameof(mapper));
 
-        HashSet<string> ownSectionTypes = new(StringComparer.Ordinal);
-        foreach (SectionTypeDescriptor descriptor in wrapper.SectionTypes)
-        {
-            string sectionType = descriptor.SectionType;
+        if (!DocumentEntry.IsValidName(sectionType))
+            throw Conflict(owner.Name, sectionType, "it is not a valid entry name", nameof(mapper));
 
-            if (!DocumentEntry.IsValidName(sectionType))
-                throw Conflict(owner, sectionType, "it is not a valid entry name", nameof(mapper));
+        if (!sectionType.StartsWith(owner.Name + ".", StringComparison.Ordinal))
+            throw Conflict(owner.Name, sectionType, "it does not start with the owner name and a dot", nameof(mapper));
 
-            if (!sectionType.StartsWith(owner + ".", StringComparison.Ordinal))
-                throw Conflict(owner, sectionType, "it does not start with the owner name and a dot", nameof(mapper));
-
-            if (_sectionTypes.Contains(sectionType) || !ownSectionTypes.Add(sectionType))
-                throw Conflict(owner, sectionType, "it is already registered", nameof(mapper));
-        }
+        if (!_sectionTypes.Add(sectionType))
+            throw Conflict(owner.Name, sectionType, "it is already registered", nameof(mapper));
 
         _modelTypes.Add(wrapper.ModelType);
-        _sectionTypes.UnionWith(ownSectionTypes);
         _mappers.Add(wrapper);
     }
 

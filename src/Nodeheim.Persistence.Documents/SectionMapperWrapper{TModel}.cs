@@ -16,31 +16,30 @@ internal sealed class SectionMapperWrapper<TModel> : ISectionMapper
     public SectionMapperWrapper(ISectionMapper<TModel> mapper)
     {
         _mapper = mapper;
-        OwnerName = mapper.OwnerName;
-        DisplayName = mapper.DisplayName;
-        SectionTypes = Array.AsReadOnly(mapper.SectionTypes.ToArray());
+        SectionType = mapper.SectionType;
     }
 
-    public string OwnerName { get; }
-
-    public string DisplayName { get; }
-
-    public IReadOnlyList<SectionTypeDescriptor> SectionTypes { get; }
+    public SectionTypeDescriptor SectionType { get; }
 
     public Type ModelType => typeof(TModel);
 
-    public object? Read(IReadOnlyDictionary<string, DocumentSection> sections, IIssueCollector issues) =>
-        _mapper.Read(sections, issues);
+    public object? Read(DocumentSection? section, IIssueCollector issues) =>
+        _mapper.Read(section, issues);
 
-    public IReadOnlyList<DocumentSectionContribution> Contribute(object model)
+    public DocumentSectionContribution Contribute(object model)
     {
         ArgumentNullException.ThrowIfNull(model);
 
         if (model is not TModel typedModel)
             throw new ArgumentException(
-                $"Owner '{OwnerName}': the model is of type '{model.GetType()}', not '{typeof(TModel)}'.",
+                $"Section '{SectionType.Name}': the model is of type '{model.GetType()}', not '{typeof(TModel)}'.",
                 nameof(model));
 
-        return _mapper.Contribute(typedModel);
+        DocumentSectionContribution contribution = _mapper.Contribute(typedModel);
+        if (contribution.SectionType != SectionType.Name)
+            throw new InvalidOperationException(
+                $"Section '{SectionType.Name}': the mapper contributed the section type '{contribution.SectionType}'.");
+
+        return contribution;
     }
 }

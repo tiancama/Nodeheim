@@ -31,7 +31,7 @@ public sealed class DocumentRepository : IDocumentRepository
         _storageFactory = storageFactory;
         _mappers = [.. sectionMappers.Mappers];
         _knownSectionTypes = new HashSet<string>(
-            _mappers.SelectMany(mapper => mapper.SectionTypes).Select(descriptor => descriptor.SectionType),
+            _mappers.Select(mapper => mapper.SectionType.Name),
             StringComparer.Ordinal);
         StorageDescriptors = [.. descriptors];
     }
@@ -64,14 +64,8 @@ public sealed class DocumentRepository : IDocumentRepository
 
         foreach (ISectionMapper mapper in _mappers)
         {
-            Dictionary<string, DocumentSection> sections = new(StringComparer.Ordinal);
-            foreach (SectionTypeDescriptor descriptor in mapper.SectionTypes)
-            {
-                if (document.Sections.TryGetValue(descriptor.SectionType, out DocumentSection? section))
-                    sections.Add(descriptor.SectionType, section);
-            }
-
-            object? model = mapper.Read(sections, issues);
+            DocumentSection? section = document.Sections.GetValueOrDefault(mapper.SectionType.Name);
+            object? model = mapper.Read(section, issues);
 
             // Provisional until the memento keeps the sections of a mapper that fails.
             if (model is null)
@@ -99,7 +93,7 @@ public sealed class DocumentRepository : IDocumentRepository
         {
             object? model = document.Models.Get(mapper.ModelType);
             if (model is not null)
-                contributions.AddRange(mapper.Contribute(model));
+                contributions.Add(mapper.Contribute(model));
         }
 
         IDocumentStorage storage = _storageFactory(location);

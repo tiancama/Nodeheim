@@ -8,21 +8,29 @@ namespace Nodeheim.Editor;
 /// Represents the state of the editor: the nodes and connections on the surface
 /// and the current selection.
 /// </summary>
+/// <remarks>
+/// The surface view model is the only writer of the <see cref="Graph"/> and the <see cref="Surface"/> it
+/// projects: after each change it updates the affected view models itself. With undo/redo, both models are
+/// planned to raise change events instead, which the view models then follow.
+/// </remarks>
 public class SurfaceViewModel : ISurfaceOperations
 {
     private readonly Graph _graph;
+    private readonly Surface _surface;
     private readonly ObservableCollection<NodeViewModel> _selectedNodes = new();
 
     /// <summary>
     /// Initializes a new instance of the <see cref="SurfaceViewModel"/> class.
     /// </summary>
     /// <param name="graph">The graph to project onto the surface.</param>
-    public SurfaceViewModel(Graph graph)
+    /// <param name="surface">The surface model with an entry for each node of the graph.</param>
+    public SurfaceViewModel(Graph graph, Surface surface)
     {
         _graph = graph;
+        _surface = surface;
         foreach (Node node in graph.Nodes)
         {
-            Nodes.Add(new NodeViewModel(node));
+            Nodes.Add(new NodeViewModel(node, surface, this));
         }
 
         var viewModelByNode = Nodes.ToDictionary(n => n.Model);
@@ -106,8 +114,8 @@ public class SurfaceViewModel : ISurfaceOperations
     /// <inheritdoc />
     public void MoveNode(NodeViewModel node, SurfacePosition position)
     {
-        node.X = position.X;
-        node.Y = position.Y;
+        _surface.SetNode(node.Id, node.Entry with { Position = position });
+        node.NotifySurfaceNodeChanged();
     }
 
     /// <inheritdoc />
@@ -115,7 +123,8 @@ public class SurfaceViewModel : ISurfaceOperations
     {
         var node = new Node();
         _graph.AddNode(node);
-        NodeViewModel nodeViewModel = new(node) { X = position.X, Y = position.Y };
+        _surface.SetNode(node.Id, new SurfaceNode(position));
+        NodeViewModel nodeViewModel = new(node, _surface, this);
         Nodes.Add(nodeViewModel);
         SelectOnly(nodeViewModel);
     }
@@ -130,6 +139,7 @@ public class SurfaceViewModel : ISurfaceOperations
             RemoveConnectionsOf(node);
             _graph.RemoveNode(node.Model);
             Nodes.Remove(node);
+            _surface.RemoveNode(node.Id);
         }
     }
 

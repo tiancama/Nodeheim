@@ -1,24 +1,30 @@
 ﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using Nodeheim.Domain;
+using Nodeheim.Editor.Domain;
 
 namespace Nodeheim.Editor;
 
 /// <summary>
-/// Represents a node on the editor surface, wrapping a domain <see cref="Node"/>.
+/// Represents a node on the editor surface, wrapping a domain <see cref="Node"/> and projecting its entry in the
+/// <see cref="Surface"/>.
 /// </summary>
 public class NodeViewModel : INotifyPropertyChanged
 {
-    private const double DefaultRadius = 13;
+    private readonly Surface _surface;
+    private readonly ISurfaceOperations _operations;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="NodeViewModel"/> class.
     /// </summary>
     /// <param name="model">The domain node to wrap.</param>
-    public NodeViewModel(Node model)
+    /// <param name="surface">The surface that holds the node's entry.</param>
+    /// <param name="operations">The operations through which the node's position is changed.</param>
+    public NodeViewModel(Node model, Surface surface, ISurfaceOperations operations)
     {
         Model = model;
-        Radius = DefaultRadius;
+        _surface = surface;
+        _operations = operations;
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -31,17 +37,33 @@ public class NodeViewModel : INotifyPropertyChanged
     /// <summary>
     /// Gets or sets the horizontal coordinate of the node's center.
     /// </summary>
-    public double X { get; set => SetProperty(ref field, value); }
+    /// <remarks>
+    /// The setter does not store the value; it moves the node through
+    /// <see cref="ISurfaceOperations.MoveNode"/>, which changes the surface and notifies this view model.
+    /// </remarks>
+    public double X
+    {
+        get => Entry.Position.X;
+        set => _operations.MoveNode(this, new SurfacePosition(value, Y));
+    }
 
     /// <summary>
     /// Gets or sets the vertical coordinate of the node's center.
     /// </summary>
-    public double Y { get; set => SetProperty(ref field, value); }
+    /// <remarks>
+    /// The setter does not store the value; it moves the node through
+    /// <see cref="ISurfaceOperations.MoveNode"/>, which changes the surface and notifies this view model.
+    /// </remarks>
+    public double Y
+    {
+        get => Entry.Position.Y;
+        set => _operations.MoveNode(this, new SurfacePosition(X, value));
+    }
 
     /// <summary>
-    /// Gets or sets the radius of the node.
+    /// Gets the radius of the node: its own radius if it has one; otherwise, the surface's default.
     /// </summary>
-    public double Radius { get; set => SetProperty(ref field, value); }
+    public double Radius => Entry.Radius ?? _surface.DefaultNodeRadius;
 
     /// <summary>
     /// Gets or sets a value indicating whether the node is selected.
@@ -52,6 +74,28 @@ public class NodeViewModel : INotifyPropertyChanged
     public bool IsSelected { get; set => SetProperty(ref field, value); }
 
     internal Node Model { get; }
+
+    /// <summary>
+    /// Gets the node's entry in the surface.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">The surface has no entry for the node.</exception>
+    internal SurfaceNode Entry =>
+        _surface.TryGetNode(Id, out SurfaceNode entry)
+            ? entry
+            : throw new InvalidOperationException($"The surface has no entry for node '{Id}'.");
+
+    /// <summary>
+    /// Raises <see cref="PropertyChanged"/> for the values read from the node's entry in the surface.
+    /// </summary>
+    /// <remarks>
+    /// Called by whoever changed the entry.
+    /// </remarks>
+    internal void NotifySurfaceNodeChanged()
+    {
+        OnPropertyChanged(nameof(X));
+        OnPropertyChanged(nameof(Y));
+        OnPropertyChanged(nameof(Radius));
+    }
 
     private void OnPropertyChanged([CallerMemberName] string? name = null) =>
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));

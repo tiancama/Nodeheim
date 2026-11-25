@@ -3,10 +3,11 @@
 namespace Nodeheim.Editor;
 
 /// <summary>
-/// Defines the editor operations that the interaction states use.
+/// Defines the editor operations that the interaction states and the node view models use.
 /// </summary>
 /// <remarks>
-/// Separates the framework-free interaction layer from the view model.
+/// Keeps the framework-free interaction layer and the node view models independent of the view model that
+/// implements the operations.
 /// </remarks>
 public interface ISurfaceOperations
 {

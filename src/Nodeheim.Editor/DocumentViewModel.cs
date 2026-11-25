@@ -26,7 +26,7 @@ public class DocumentViewModel
         document.Models.Set(Surface);
         ReconcileSurface();
 
-        SurfaceViewModel = new(Graph);
+        SurfaceViewModel = new(Graph, Surface);
         InteractionController = new(SurfaceViewModel);
     }
 
@@ -46,7 +46,7 @@ public class DocumentViewModel
     internal LoadedDocument LoadedDocument { get; }
 
     /// <summary>
-    /// Gets the graph that the document represents and the surface edits.
+    /// Gets the graph that the document represents and the surface view model edits.
     /// </summary>
     internal Graph Graph { get; }
 

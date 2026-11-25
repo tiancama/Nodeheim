@@ -12,7 +12,7 @@
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
-        <ItemsControl Grid.Column="0" ItemsSource="{Binding Surface.Connections}">
+        <ItemsControl Grid.Column="0" ItemsSource="{Binding SurfaceViewModel.Connections}">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
                     <Canvas Background="#FF9DC782" Focusable="True" PointerPressed="OnCanvasPointerPressed"
@@ -50,7 +50,7 @@
             </ItemsControl.Styles>
         </ItemsControl>
 
-        <ItemsControl Grid.Column="0" ItemsSource="{Binding Surface.Nodes}">
+        <ItemsControl Grid.Column="0" ItemsSource="{Binding SurfaceViewModel.Nodes}">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
                     <Canvas Focusable="True" PointerPressed="OnCanvasPointerPressed"
@@ -97,7 +97,7 @@
         </ItemsControl>
 
         <ScrollViewer Grid.Column="1" Focusable="True">
-            <ItemsControl ItemsSource="{Binding Surface.SelectedNodes}">
+            <ItemsControl ItemsSource="{Binding SurfaceViewModel.SelectedNodes}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate x:DataType="vm:NodeViewModel">
                         <Border BorderBrush="Gray" BorderThickness="1" Padding="6" Margin="4">

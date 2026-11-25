@@ -21,14 +21,14 @@ public class DocumentViewModel
         Graph = document.Models.Get<Graph>() ?? new Graph();
         document.Models.Set(Graph);
 
-        Surface = new(Graph);
-        InteractionController = new(Surface);
+        SurfaceViewModel = new(Graph);
+        InteractionController = new(SurfaceViewModel);
     }
 
     /// <summary>
     /// Gets the surface that projects the graph for display and editing.
     /// </summary>
-    public SurfaceViewModel Surface { get; }
+    public SurfaceViewModel SurfaceViewModel { get; }
 
     /// <summary>
     /// Gets the controller that interprets pointer input on the surface.

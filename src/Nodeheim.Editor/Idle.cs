@@ -1,4 +1,6 @@
-﻿namespace Nodeheim.Editor;
+﻿using Nodeheim.Editor.Domain;
+
+namespace Nodeheim.Editor;
 
 /// <summary>
 /// Represents the resting state of the interaction.

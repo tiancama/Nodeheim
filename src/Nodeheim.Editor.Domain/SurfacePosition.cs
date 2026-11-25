@@ -1,4 +1,4 @@
-﻿namespace Nodeheim.Editor;
+﻿namespace Nodeheim.Editor.Domain;
 
 /// <summary>
 /// Represents a position on the editor surface, independent of any UI framework.

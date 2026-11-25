@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using Nodeheim.Domain;
+using Nodeheim.Editor.Domain;
 
 namespace Nodeheim.Editor;
 

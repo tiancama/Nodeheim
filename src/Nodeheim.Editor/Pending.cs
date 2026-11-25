@@ -1,4 +1,6 @@
-﻿namespace Nodeheim.Editor;
+﻿using Nodeheim.Editor.Domain;
+
+namespace Nodeheim.Editor;
 
 /// <summary>
 /// Represents the state after a grab on an already selected target, before it is

@@ -1,4 +1,5 @@
 ﻿using Nodeheim.Domain;
+using Nodeheim.Editor.Domain;
 
 namespace Nodeheim.Editor.Tests;
 

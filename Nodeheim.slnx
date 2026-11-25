@@ -2,6 +2,7 @@
   <Folder Name="/src/">
     <Project Path="src/Nodeheim.Domain/Nodeheim.Domain.csproj" />
     <Project Path="src/Nodeheim.Editor.Desktop/Nodeheim.Editor.Desktop.csproj" />
+    <Project Path="src/Nodeheim.Editor.Domain/Nodeheim.Editor.Domain.csproj" />
     <Project Path="src/Nodeheim.Editor/Nodeheim.Editor.csproj" />
     <Project Path="src/Nodeheim.Issues/Nodeheim.Issues.csproj" />
     <Project Path="src/Nodeheim.Persistence.Documents/Nodeheim.Persistence.Documents.csproj" />

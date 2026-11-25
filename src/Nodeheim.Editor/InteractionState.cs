@@ -1,4 +1,6 @@
-﻿namespace Nodeheim.Editor;
+﻿using Nodeheim.Editor.Domain;
+
+namespace Nodeheim.Editor;
 
 /// <summary>
 /// Represents a state of the pointer interaction on the editor surface.

@@ -1,4 +1,6 @@
-﻿namespace Nodeheim.Editor;
+﻿using Nodeheim.Editor.Domain;
+
+namespace Nodeheim.Editor;
 
 /// <summary>
 /// Represents the context of the interaction state machine: holds the current state

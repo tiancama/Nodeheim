@@ -1,4 +1,6 @@
-﻿namespace Nodeheim.Editor;
+﻿using Nodeheim.Editor.Domain;
+
+namespace Nodeheim.Editor;
 
 /// <summary>
 /// Defines the editor operations that the interaction states use.

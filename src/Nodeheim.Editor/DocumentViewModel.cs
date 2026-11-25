@@ -1,4 +1,5 @@
 ﻿using Nodeheim.Domain;
+using Nodeheim.Editor.Domain;
 using Nodeheim.Persistence;
 
 namespace Nodeheim.Editor;
@@ -12,7 +13,7 @@ public class DocumentViewModel
     /// Initializes a new instance of the <see cref="DocumentViewModel"/> class.
     /// </summary>
     /// <param name="document">
-    /// The document to edit; if it holds no graph, an empty graph is added to it.
+    /// The document to edit; if it holds no graph or no surface, an empty one is added to it. // geändert
     /// </param>
     public DocumentViewModel(LoadedDocument document)
     {
@@ -20,6 +21,10 @@ public class DocumentViewModel
 
         Graph = document.Models.Get<Graph>() ?? new Graph();
         document.Models.Set(Graph);
+
+        Surface = document.Models.Get<Surface>() ?? new Surface();
+        document.Models.Set(Surface);
+        ReconcileSurface();
 
         SurfaceViewModel = new(Graph);
         InteractionController = new(SurfaceViewModel);
@@ -44,4 +49,34 @@ public class DocumentViewModel
     /// Gets the graph that the document represents and the surface edits.
     /// </summary>
     internal Graph Graph { get; }
+
+    /// <summary>
+    /// Gets the editor's model of the surface, with an entry for each node of the graph.
+    /// </summary>
+    internal Surface Surface { get; }
+
+    /// <summary>
+    /// Brings the surface in line with the graph: adds an entry at the origin for each node without one and
+    /// removes entries whose node is not in the graph.
+    /// </summary>
+    private void ReconcileSurface()
+    {
+        HashSet<Guid> nodeIds = new();
+        foreach (Node node in Graph.Nodes)
+        {
+            nodeIds.Add(node.Id);
+            if (!Surface.TryGetNode(node.Id, out _))
+            {
+                Surface.SetNode(node.Id, new SurfaceNode(new SurfacePosition(0, 0)));
+            }
+        }
+
+        foreach (Guid nodeId in Surface.Nodes.Keys.ToList())
+        {
+            if (!nodeIds.Contains(nodeId))
+            {
+                Surface.RemoveNode(nodeId);
+            }
+        }
+    }
 }

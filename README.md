@@ -11,22 +11,20 @@ A pure, platform-agnostic graph engine. A network of **nodes** that **agents** t
 
 Nodeheim is an **engine**, not an application. Its heart is a clean domain core: a graph of nodes, where each node holds references to its neighbors, traversed by agents that move across it. The project follows hexagonal architecture / ports & adapters.
 
-Because the core is domain-agnostic, a logistics simulation, a game world, or a story-driven engine are all just applications built on the same foundation.
+Because the core is domain-agnostic, a logistics simulation, a game world, or a story-driven engine are all just applications built on the same foundation. Applications, such as an editor, live in their own repositories.
 
 ## Architecture
 
-All dependencies point inward (the dependency rule). The domain core references nothing; every other project depends on it, never the reverse.
+All dependencies point inward (the dependency rule). The domain core and the persistence contract reference nothing.
 
 ```mermaid
 flowchart LR
-    Root["composition root<br/>Editor.Desktop"] --> Frontend["frontend<br/>Editor"]
-    Root --> Adapter["adapters<br/>Persistence.Json · .Xml · .Files"]
-    Frontend --> App["application service<br/>Persistence"]
-    Frontend --> Domain["domain<br/>Domain"]
-    App --> Domain
-    App --> Contract["persistence contract<br/>Persistence.Documents"]
-    Adapter --> Contract
+    Adapter["adapters<br/>Persistence.Json · .Xml · .Files"] --> Contract["persistence contract<br/>Persistence.Documents"]
+    App["application service<br/>Persistence"] --> Domain["domain<br/>Domain"]
+    App --> Contract
 ```
+
+Applications add a frontend and a composition root on top and reference the engine projects they need.
 
 `Nodeheim.Issues` is a cross-cutting library of domain-free types that every role may use.
 
@@ -34,16 +32,16 @@ flowchart LR
 
 ```
 Nodeheim/
-└── src/
-    ├── Nodeheim.Domain/                 # domain: pure core, references nothing
-    ├── Nodeheim.Issues/                 # cross-cutting: issues reported by any stage
-    ├── Nodeheim.Persistence.Documents/  # persistence contract: document tree, ports
-    ├── Nodeheim.Persistence/            # application service: loading and saving documents
-    ├── Nodeheim.Persistence.Files/      # adapter: file storage
-    ├── Nodeheim.Persistence.Json/       # adapter: JSON syntax
-    ├── Nodeheim.Persistence.Xml/        # adapter: XML syntax
-    ├── Nodeheim.Editor/                 # frontend: framework-free view models
-    └── Nodeheim.Editor.Desktop/         # composition root and Avalonia views
+├── src/
+│   ├── Nodeheim.Domain/                 # domain: pure core, references nothing
+│   ├── Nodeheim.Issues/                 # cross-cutting: issues reported by any stage
+│   ├── Nodeheim.Persistence.Documents/  # persistence contract: document tree, ports
+│   ├── Nodeheim.Persistence/            # application service: loading and saving documents
+│   ├── Nodeheim.Persistence.Files/      # adapter: file storage
+│   ├── Nodeheim.Persistence.Json/       # adapter: JSON syntax
+│   └── Nodeheim.Persistence.Xml/        # adapter: XML syntax
+└── tests/
+    └── Nodeheim.Domain.Tests/
 ```
 
 ## Getting started
@@ -58,40 +56,19 @@ cd Nodeheim
 # build the solution
 dotnet build
 
-# run the editor
-dotnet run --project src/Nodeheim.Editor.Desktop
-
 # run the tests
 dotnet test
 ```
 
-## Using the editor
-
-| Action | Input |
-|---|---|
-| Create a node | Double-click on the canvas |
-| Select a node or connection | Click |
-| Add to or remove from selection | Ctrl+Click |
-| Clear selection | Click on empty canvas |
-| Move selection | Drag |
-| Connect selected nodes | `C` |
-| Disconnect selected nodes | `D` |
-| Delete selected nodes | `Delete` |
-
-Clicking a connection selects both of its endpoints; dragging it moves both.
-
 ## Tech stack
 
 - **Language / runtime:** C# 14 on .NET 10 (LTS)
-- **UI:** Avalonia (MVVM), cross-platform
 - **Tests:** xUnit v3
 - **Persistence:** JSON and XML documents; database support planned (SQLite, PostgreSQL)
 
 ## Status
 
-Early development. The domain core (nodes, neighbors, and the `Graph` manager) and an Avalonia editor exist. The editor supports creating, selecting, moving, connecting, disconnecting, and deleting nodes.
-
-Documents can be loaded and saved as JSON and XML. **Next milestone:** saving node positions and sizes from the editor. The API is expected to change.
+Early development. The domain core (nodes, neighbors, and the `Graph` manager) exists. Documents can be loaded and saved as JSON and XML; applications can store their own data in documents alongside the graph. The API is expected to change.
 
 This is primarily a personal learning project; issues and feedback are welcome.
 

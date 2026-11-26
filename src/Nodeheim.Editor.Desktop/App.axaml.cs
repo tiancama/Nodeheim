@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using Nodeheim.Editor.Persistence;
 using Nodeheim.Persistence;
 using Nodeheim.Persistence.Files;
 using Nodeheim.Persistence.Documents;
@@ -22,6 +23,7 @@ public partial class App : Application
         {
             SectionMapperRegistry sectionMappers = new();
             sectionMappers.Register(EngineSections.Owner).AddSection(EngineSections.Graph);
+            sectionMappers.Register(EditorSections.Owner).AddSection(EditorSections.Surface);
 
             DocumentRepository documentRepository = new(
                 [

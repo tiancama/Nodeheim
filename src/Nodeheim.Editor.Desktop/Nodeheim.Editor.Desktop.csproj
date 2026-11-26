@@ -22,6 +22,7 @@
       <ProjectReference Include="..\Nodeheim.Persistence.Json\Nodeheim.Persistence.Json.csproj" />
       <ProjectReference Include="..\Nodeheim.Persistence.Xml\Nodeheim.Persistence.Xml.csproj" />
     <ProjectReference Include="..\Nodeheim.Persistence\Nodeheim.Persistence.csproj" />
+    <ProjectReference Include="..\Nodeheim.Editor.Persistence\Nodeheim.Editor.Persistence.csproj" />
   </ItemGroup>
 
 </Project>

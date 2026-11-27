@@ -1,20 +1,12 @@
 ﻿using Nodeheim.Issues;
 
-namespace Nodeheim.Persistence.Documents;
+namespace Nodeheim.Persistence.Documents.Adapters;
 
 /// <summary>
 /// Provides the definitions of the issues that concern the format itself rather than the content of a section.
 /// </summary>
 public static class FormatIssues
 {
-    /// <summary>
-    /// Represents the discrepancy that a document contains a section of an unknown section type.
-    /// </summary>
-    /// <remarks>
-    /// The section is skipped; the rest of the document is still loaded.
-    /// </remarks>
-    public static readonly IssueDefinition UnknownSection = new("format.unknownSection", IssueKind.Discrepancy);
-
     /// <summary>
     /// Represents the rejection that the input does not conform to the syntax of its format, such as JSON or XML.
     /// </summary>
@@ -67,19 +59,6 @@ public static class FormatIssues
     /// names an encoding other than UTF-8.
     /// </summary>
     public static readonly IssueDefinition InvalidEncoding = new("format.invalidEncoding", IssueKind.Rejection);
-
-    /// <summary>
-    /// Represents the rejection that the document has a format version that is not supported.
-    /// </summary>
-    public static readonly IssueDefinition UnsupportedFormatVersion =
-        new("format.unsupportedFormatVersion", IssueKind.Rejection);
-
-    /// <summary>
-    /// Represents the rejection that the structure of the document does not match the format, such as a missing,
-    /// repeated, or unexpected entry, or a branch where a text is expected.
-    /// </summary>
-    public static readonly IssueDefinition InvalidStructure =
-        new("format.invalidStructure", IssueKind.Rejection);
 
     /// <summary>
     /// Represents the rejection that the name of an entry is not permitted.

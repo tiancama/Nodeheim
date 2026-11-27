@@ -56,7 +56,7 @@ public sealed class DocumentRepository : IDocumentRepository
         foreach (string sectionType in document.Sections.Keys)
         {
             if (!_knownSectionTypes.Contains(sectionType))
-                issues.Add(new Issue(FormatIssues.UnknownSection,
+                issues.Add(new Issue(EnvelopeIssues.UnknownSection,
                     $"Unknown section '{sectionType}' is skipped.", $"/sections/{sectionType}"));
         }
 

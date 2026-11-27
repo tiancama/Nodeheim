@@ -1,5 +1,6 @@
 ﻿using Nodeheim.Issues;
 using Nodeheim.Persistence.Documents;
+using Nodeheim.Persistence.Documents.Adapters;
 
 namespace Nodeheim.Persistence;
 
@@ -33,7 +34,7 @@ internal static class DocumentMapper
     /// <para>
     /// Reading stops at the first rejection, so <see langword="null"/> comes with exactly one rejection in
     /// <paramref name="issues"/>: <see cref="FormatIssues.NotNodeheimDocument"/>,
-    /// <see cref="FormatIssues.UnsupportedFormatVersion"/>, or <see cref="FormatIssues.InvalidStructure"/>. A
+    /// <see cref="EnvelopeIssues.UnsupportedFormatVersion"/>, or <see cref="EnvelopeIssues.InvalidStructure"/>. A
     /// returned document comes without any issue. Section types, content versions, and the content of the sections
     /// are not checked; that is up to the caller.
     /// </para>
@@ -63,32 +64,32 @@ internal static class DocumentMapper
 
         string? formatText = format.GetLeafText();
         if (formatText is null)
-            return Reject(issues, FormatIssues.InvalidStructure,
+            return Reject(issues, EnvelopeIssues.InvalidStructure,
                 "Invalid structure: 'nodeheimFormat' is not a text.", "/nodeheimFormat");
 
         if (formatText != SupportedFormat)
-            return Reject(issues, FormatIssues.UnsupportedFormatVersion,
+            return Reject(issues, EnvelopeIssues.UnsupportedFormatVersion,
                 "Unsupported format version.", "/nodeheimFormat");
 
         string? stateId = root.GetSingleChild(StateIdName)?.GetLeafText();
         if (stateId is null)
-            return Reject(issues, FormatIssues.InvalidStructure,
+            return Reject(issues, EnvelopeIssues.InvalidStructure,
                 "Invalid structure: 'stateId' is missing, occurs more than once, or is not a text.", "/stateId");
 
         DocumentEntry? sectionsEntry = root.GetSingleChild(SectionsName);
         if (sectionsEntry is null)
-            return Reject(issues, FormatIssues.InvalidStructure,
+            return Reject(issues, EnvelopeIssues.InvalidStructure,
                 "Invalid structure: 'sections' is missing or occurs more than once.", "/sections");
 
         foreach (DocumentEntry child in root.Children)
         {
             if (child.Name is not (FormatName or StateIdName or SectionsName))
-                return Reject(issues, FormatIssues.InvalidStructure,
+                return Reject(issues, EnvelopeIssues.InvalidStructure,
                     $"Invalid structure: unexpected entry '{child.Name}'.", $"/{child.Name}");
         }
 
         if (sectionsEntry.Children.Count == 0)
-            return Reject(issues, FormatIssues.InvalidStructure,
+            return Reject(issues, EnvelopeIssues.InvalidStructure,
                 "Invalid structure: 'sections' has no sections.", "/sections");
 
         Dictionary<string, DocumentSection> sections = new(StringComparer.Ordinal);
@@ -100,25 +101,25 @@ internal static class DocumentMapper
 
             string? contentVersion = sectionEntry.GetSingleChild(ContentVersionName)?.GetLeafText();
             if (contentVersion is null)
-                return Reject(issues, FormatIssues.InvalidStructure,
+                return Reject(issues, EnvelopeIssues.InvalidStructure,
                     $"Invalid structure: 'contentVersion' in section '{name}' is missing, occurs more than once, " +
                     "or is not a text.", path);
 
             DocumentEntry? content = DocumentEntryExtensions.GetSingleChild(sectionEntry, ContentName);
             if (content is null)
-                return Reject(issues, FormatIssues.InvalidStructure,
+                return Reject(issues, EnvelopeIssues.InvalidStructure,
                     $"Invalid structure: 'content' in section '{name}' is missing or occurs more than once.", path);
 
             foreach (DocumentEntry child in sectionEntry.Children)
             {
                 if (child.Name is not (ContentVersionName or ContentName))
-                    return Reject(issues, FormatIssues.InvalidStructure,
+                    return Reject(issues, EnvelopeIssues.InvalidStructure,
                         $"Invalid structure: unexpected entry '{child.Name}' in section '{name}'.",
                         $"{path}/{child.Name}");
             }
 
             if (!sections.TryAdd(name, new DocumentSection(contentVersion, content)))
-                return Reject(issues, FormatIssues.InvalidStructure,
+                return Reject(issues, EnvelopeIssues.InvalidStructure,
                     $"Invalid structure: section '{name}' occurs more than once.", path);
         }
 

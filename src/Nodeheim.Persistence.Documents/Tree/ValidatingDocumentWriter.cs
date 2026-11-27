@@ -1,4 +1,6 @@
-﻿namespace Nodeheim.Persistence.Documents;
+﻿using Nodeheim.Persistence.Documents.Adapters;
+
+namespace Nodeheim.Persistence.Documents;
 
 /// <summary>
 /// Represents a writer that checks each write call and forwards it to another writer.

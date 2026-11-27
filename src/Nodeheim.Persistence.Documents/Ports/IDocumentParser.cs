@@ -1,6 +1,6 @@
 ﻿using Nodeheim.Issues;
 
-namespace Nodeheim.Persistence.Documents;
+namespace Nodeheim.Persistence.Documents.Adapters;
 
 /// <summary>
 /// Defines a port that converts the bytes of a document into a document tree.

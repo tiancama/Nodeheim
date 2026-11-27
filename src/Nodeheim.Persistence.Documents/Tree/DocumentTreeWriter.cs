@@ -1,4 +1,6 @@
-﻿namespace Nodeheim.Persistence.Documents;
+﻿using Nodeheim.Persistence.Documents.Adapters;
+
+namespace Nodeheim.Persistence.Documents;
 
 /// <summary>
 /// Represents a writer that builds a document tree from the write calls.

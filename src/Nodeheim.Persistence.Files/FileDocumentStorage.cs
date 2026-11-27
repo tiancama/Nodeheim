@@ -1,5 +1,6 @@
 ﻿using Nodeheim.Issues;
 using Nodeheim.Persistence.Documents;
+using Nodeheim.Persistence.Documents.Adapters;
 
 namespace Nodeheim.Persistence.Files;
 

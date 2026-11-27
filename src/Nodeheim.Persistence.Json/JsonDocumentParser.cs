@@ -4,6 +4,7 @@ using System.Text.Json;
 using System.Text.Unicode;
 using Nodeheim.Issues;
 using Nodeheim.Persistence.Documents;
+using Nodeheim.Persistence.Documents.Adapters;
 
 namespace Nodeheim.Persistence.Json;
 

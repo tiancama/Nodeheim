@@ -1,6 +1,6 @@
 ﻿using Nodeheim.Issues;
 
-namespace Nodeheim.Persistence.Documents;
+namespace Nodeheim.Persistence.Documents.Adapters;
 
 /// <summary>
 /// Represents a receiver that builds a document tree from the reported entries.

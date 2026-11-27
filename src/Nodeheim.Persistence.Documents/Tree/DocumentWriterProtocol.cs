@@ -1,4 +1,4 @@
-﻿namespace Nodeheim.Persistence.Documents;
+﻿namespace Nodeheim.Persistence.Documents.Adapters;
 
 /// <summary>
 /// Represents the protocol of <see cref="IDocumentWriter"/>: it tracks the write calls, determines the name

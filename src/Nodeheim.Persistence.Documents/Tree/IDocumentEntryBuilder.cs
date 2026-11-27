@@ -1,4 +1,4 @@
-﻿namespace Nodeheim.Persistence.Documents;
+﻿namespace Nodeheim.Persistence.Documents.Adapters;
 
 /// <summary>
 /// Defines a receiver for the entries of a document tree, reported in document order.

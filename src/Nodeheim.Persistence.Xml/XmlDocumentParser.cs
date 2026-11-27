@@ -3,6 +3,7 @@ using System.Text;
 using System.Xml;
 using Nodeheim.Issues;
 using Nodeheim.Persistence.Documents;
+using Nodeheim.Persistence.Documents.Adapters;
 
 namespace Nodeheim.Persistence.Xml;
 

@@ -14,6 +14,11 @@ public sealed class DocumentEntry
     /// </summary>
     public const int MaxLevels = 32;
 
+    /// <summary>
+    /// Represents the name of the root entry of every document.
+    /// </summary>
+    public const string RootName = "nodeheim";
+
     private static readonly SearchValues<char> NameCharacters =
         SearchValues.Create("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.-_");
 

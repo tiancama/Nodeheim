@@ -21,7 +21,7 @@ public interface IDocumentStorage
     /// <remarks>
     /// An implementation checks the syntax of its format and the rules of the document tree, not the structure of
     /// the document. Format contract: An implementation whose syntax carries no name at the root uses
-    /// <see cref="DocumentMapper.RootName"/>.
+    /// <see cref="DocumentEntry.RootName"/>.
     /// </remarks>
     DocumentEntry? Load(IIssueCollector issues);
 

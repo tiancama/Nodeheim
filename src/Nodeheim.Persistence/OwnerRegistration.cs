@@ -1,4 +1,6 @@
-﻿namespace Nodeheim.Persistence.Documents;
+﻿using Nodeheim.Persistence.Documents;
+
+namespace Nodeheim.Persistence;
 
 /// <summary>
 /// Represents the registration of one owner, to which its sections are added.

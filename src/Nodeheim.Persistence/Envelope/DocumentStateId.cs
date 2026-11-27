@@ -1,8 +1,9 @@
 ﻿using System.Buffers.Binary;
 using System.Security.Cryptography;
 using System.Text;
+using Nodeheim.Persistence.Documents;
 
-namespace Nodeheim.Persistence.Documents;
+namespace Nodeheim.Persistence;
 
 /// <summary>
 /// Represents the computation of the state ID of a document.

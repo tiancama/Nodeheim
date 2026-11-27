@@ -1,19 +1,13 @@
 ﻿using Nodeheim.Issues;
+using Nodeheim.Persistence.Documents;
 
-namespace Nodeheim.Persistence.Documents;
+namespace Nodeheim.Persistence;
 
 /// <summary>
 /// Provides the mapping from the root entry of a document to a <see cref="Document"/>.
 /// </summary>
-public static class DocumentMapper
+internal static class DocumentMapper
 {
-    /// <summary>
-    /// Represents the name of the root entry of every document.
-    /// </summary>
-    /// <remarks>
-    /// Format contract: An adapter whose syntax carries no name at the root uses this name.
-    /// </remarks>
-    public const string RootName = "nodeheim";
     internal const string StateIdName = "stateId";
 
     private const string FormatName = "nodeheimFormat";
@@ -58,9 +52,9 @@ public static class DocumentMapper
         ArgumentNullException.ThrowIfNull(root);
         ArgumentNullException.ThrowIfNull(issues);
 
-        if (root.Name != RootName)
+        if (root.Name != DocumentEntry.RootName)
             return Reject(issues, FormatIssues.NotNodeheimDocument,
-                $"Not a Nodeheim document: the root entry is not named '{RootName}'.", "");
+                $"Not a Nodeheim document: the root entry is not named '{DocumentEntry.RootName}'.", "");
 
         DocumentEntry? format = root.GetSingleChild(FormatName);
         if (format is null)
@@ -131,7 +125,7 @@ public static class DocumentMapper
         return new Document(stateId, sections);
     }
 
-        /// <summary>
+    /// <summary>
     /// Writes a document with the given contributions.
     /// </summary>
     /// <param name="writer">The writer that receives the document.</param>
@@ -181,7 +175,7 @@ public static class DocumentMapper
     private static void WritePass(IDocumentWriter writer,
         IReadOnlyList<DocumentSectionContribution> contributions, string? stateId)
     {
-        writer.Name(RootName);
+        writer.Name(DocumentEntry.RootName);
         writer.BeginGroup();
 
         writer.Name(FormatName);

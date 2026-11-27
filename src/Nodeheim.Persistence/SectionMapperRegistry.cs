@@ -1,4 +1,6 @@
-﻿namespace Nodeheim.Persistence.Documents;
+﻿using Nodeheim.Persistence.Documents;
+
+namespace Nodeheim.Persistence;
 
 /// <summary>
 /// Represents the registration of the owners and their section mappers.
@@ -19,7 +21,7 @@ public sealed class SectionMapperRegistry
     /// Gets the registered section mappers, in the order of registration, each as the wrapper created at
     /// registration rather than the registered instance itself.
     /// </summary>
-    public IReadOnlyList<ISectionMapper> Mappers => _mappers;
+    internal IReadOnlyList<ISectionMapper> Mappers => _mappers;
 
     /// <summary>
     /// Registers an owner.

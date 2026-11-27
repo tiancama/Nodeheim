@@ -1,6 +1,7 @@
 ﻿using Nodeheim.Issues;
+using Nodeheim.Persistence.Documents;
 
-namespace Nodeheim.Persistence.Documents;
+namespace Nodeheim.Persistence;
 
 /// <summary>
 /// Defines a registered section mapper whose model type is known only at run time.
@@ -8,7 +9,7 @@ namespace Nodeheim.Persistence.Documents;
 /// <remarks>
 /// Instances are created by <see cref="SectionMapperRegistry"/> around an <see cref="ISectionMapper{TModel}"/>.
 /// </remarks>
-public interface ISectionMapper
+internal interface ISectionMapper
 {
     /// <inheritdoc cref="ISectionMapper{TModel}.SectionType" />
     SectionTypeDescriptor SectionType { get; }

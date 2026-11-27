@@ -1,6 +1,7 @@
 ﻿using Nodeheim.Issues;
+using Nodeheim.Persistence.Documents;
 
-namespace Nodeheim.Persistence.Documents;
+namespace Nodeheim.Persistence;
 
 /// <summary>
 /// Represents the registered form of an <see cref="ISectionMapper{TModel}"/>.

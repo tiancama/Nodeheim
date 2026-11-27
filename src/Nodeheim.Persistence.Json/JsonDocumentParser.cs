@@ -40,7 +40,7 @@ public sealed class JsonDocumentParser : IDocumentParser
         try
         {
             reader.Read();
-            if (!ReadValue(ref reader, DocumentMapper.RootName, entryBuilder, issues))
+            if (!ReadValue(ref reader, DocumentEntry.RootName, entryBuilder, issues))
                 return null;
 
             // Rejects any content after the root value.

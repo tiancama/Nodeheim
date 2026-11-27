@@ -1,4 +1,4 @@
-﻿namespace Nodeheim.Persistence.Documents.Owners.Engine;
+﻿namespace Nodeheim.Persistence.Documents;
 
 /// <summary>
 /// Represents the text form of node IDs in a document.

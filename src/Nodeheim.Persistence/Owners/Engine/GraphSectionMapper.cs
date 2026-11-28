@@ -15,7 +15,7 @@ internal sealed class GraphSectionMapper : ISectionMapper<Graph>
 {
     private const string SupportedContentVersion = "0.2";
 
-    public SectionTypeDescriptor SectionType { get; } = new("engine.graph", "Graph");
+    public SectionTypeDescriptor SectionType { get; } = new("engine.graph");
 
     public Graph? Read(DocumentSection? section, IIssueCollector issues)
     {

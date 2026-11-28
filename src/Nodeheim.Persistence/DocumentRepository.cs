@@ -43,6 +43,24 @@ internal sealed class DocumentRepository : IDocumentRepository
     public IReadOnlyList<DocumentFormatDescriptor> Formats { get; }
 
     /// <inheritdoc />
+    public LoadedDocument Create()
+    {
+        LoadedDocument document = new();
+        IssueCollector issues = new();
+
+        foreach (ISectionMapper mapper in _mappers)
+        {
+            object model = mapper.Read(null, issues)
+                ?? throw new InvalidOperationException(
+                    $"Section '{mapper.SectionType.Name}': the mapper returned no model for a missing section.");
+
+            document.Set(mapper.ModelType, model);
+        }
+
+        return document;
+    }
+
+    /// <inheritdoc />
     /// <remarks>
     /// <inheritdoc path="/remarks/node()" />
     /// Errors of the environment, such as I/O errors, are not yet reported as issues and cause exceptions.
@@ -78,7 +96,7 @@ internal sealed class DocumentRepository : IDocumentRepository
             if (model is null)
                 return null;
 
-            loaded.Models.Set(mapper.ModelType, model);
+            loaded.Set(mapper.ModelType, model);
         }
 
         return loaded;
@@ -100,9 +118,7 @@ internal sealed class DocumentRepository : IDocumentRepository
         List<DocumentSectionContribution> contributions = [];
         foreach (ISectionMapper mapper in _mappers)
         {
-            object? model = document.Models.Get(mapper.ModelType);
-            if (model is not null)
-                contributions.Add(mapper.Contribute(model));
+            contributions.Add(mapper.Contribute(document.Get(mapper.ModelType)));
         }
 
         using MemoryStream buffer = new();

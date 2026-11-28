@@ -33,8 +33,8 @@ public interface ISectionMapper<TModel>
     /// <remarks>
     /// <see langword="null"/> means only that reading failed; the reason is reported to <paramref name="issues"/>
     /// with a code of the owner.
-    /// Provisional: The empty model for a missing section is under trial. It may be replaced by not calling the
-    /// mapper at all, so that the application decides whether to start empty; this method then remains unchanged.
+    /// If the section is missing, the mapper always returns an empty model and reports nothing; creating new
+    /// documents relies on this.
     /// </remarks>
     TModel? Read(DocumentSection? section, IIssueCollector issues);
 

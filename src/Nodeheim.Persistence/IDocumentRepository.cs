@@ -13,6 +13,15 @@ public interface IDocumentRepository
     IReadOnlyList<DocumentFormatDescriptor> Formats { get; }
 
     /// <summary>
+    /// Creates a new document with an empty model for each registered section mapper.
+    /// </summary>
+    /// <returns>The new document.</returns>
+    /// <exception cref="InvalidOperationException">
+    /// A section mapper returns no model for a missing section.
+    /// </exception>
+    LoadedDocument Create();
+
+    /// <summary>
     /// Loads the document at the specified location.
     /// </summary>
     /// <param name="location">The storage location of the document, such as a file path.</param>
@@ -45,9 +54,9 @@ public interface IDocumentRepository
     /// No document format is registered for the file extension of <paramref name="location"/>.
     /// </exception>
     /// <remarks>
-    /// Each registered owner whose model is in <paramref name="document"/> contributes its sections. The document
-    /// format is chosen by the file extension of <paramref name="location"/>, ignoring case. The document replaces
-    /// the document stored there.
+    /// Each registered section mapper contributes the section of its model. The document format is chosen by the
+    /// file extension of <paramref name="location"/>, ignoring case. The document replaces the document stored
+    /// there.
     /// </remarks>
     void Save(string location, LoadedDocument document, IIssueCollector issues);
 }

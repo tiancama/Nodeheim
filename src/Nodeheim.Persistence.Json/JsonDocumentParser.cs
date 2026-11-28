@@ -11,7 +11,7 @@ namespace Nodeheim.Persistence.Json;
 /// <summary>
 /// Represents a parser for documents in JSON.
 /// </summary>
-public sealed class JsonDocumentParser : IDocumentParser
+internal sealed class JsonDocumentParser : IDocumentParser
 {
     // An entry in a repetition needs two levels of syntax, so the builder always reports a document tree that is
     // too deep before the reader does.

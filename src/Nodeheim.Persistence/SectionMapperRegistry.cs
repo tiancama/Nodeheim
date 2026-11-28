@@ -10,7 +10,7 @@ namespace Nodeheim.Persistence;
 /// name and is registered at most once. A section type belongs to at most one section mapper, a model type occurs
 /// at most once, and each section type is a valid entry name that starts with the name of its owner and a dot.
 /// </remarks>
-public sealed class SectionMapperRegistry
+internal sealed class SectionMapperRegistry
 {
     private readonly List<ISectionMapper> _mappers = new();
     private readonly HashSet<string> _ownerNames = new(StringComparer.Ordinal);
@@ -26,24 +26,24 @@ public sealed class SectionMapperRegistry
     /// <summary>
     /// Registers an owner.
     /// </summary>
-    /// <param name="owner">The description of the owner.</param>
+    /// <param name="owner">The name of the owner; each of its section types starts with this name and a dot.</param>
     /// <returns>The registration of the owner, to which its sections are added.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="owner"/> is <see langword="null"/>.</exception>
     /// <exception cref="ArgumentException">
-    /// The name of <paramref name="owner"/> is not a valid entry name or is already registered.
+    /// <paramref name="owner"/> is not a valid entry name or is already registered.
     /// </exception>
-    public OwnerRegistration Register(OwnerDescriptor owner)
+    public OwnerRegistration Register(string owner)
     {
         ArgumentNullException.ThrowIfNull(owner);
 
-        if (!DocumentEntry.IsValidName(owner.Name) || !_ownerNames.Add(owner.Name))
+        if (!DocumentEntry.IsValidName(owner) || !_ownerNames.Add(owner))
             throw new ArgumentException(
-                $"Owner '{owner.Name}': it is not a valid entry name or is already registered.", nameof(owner));
+                $"Owner '{owner}': it is not a valid entry name or is already registered.", nameof(owner));
 
         return new OwnerRegistration(this, owner);
     }
 
-    internal void Add<TModel>(OwnerDescriptor owner, ISectionMapper<TModel> mapper)
+    internal void Add<TModel>(string owner, ISectionMapper<TModel> mapper)
         where TModel : class
     {
         ArgumentNullException.ThrowIfNull(mapper);
@@ -53,16 +53,16 @@ public sealed class SectionMapperRegistry
 
         if (_modelTypes.Contains(wrapper.ModelType))
             throw new ArgumentException(
-                $"Owner '{owner.Name}': the model type '{wrapper.ModelType}' is already registered.", nameof(mapper));
+                $"Owner '{owner}': the model type '{wrapper.ModelType}' is already registered.", nameof(mapper));
 
         if (!DocumentEntry.IsValidName(sectionType))
-            throw Conflict(owner.Name, sectionType, "it is not a valid entry name", nameof(mapper));
+            throw Conflict(owner, sectionType, "it is not a valid entry name", nameof(mapper));
 
-        if (!sectionType.StartsWith(owner.Name + ".", StringComparison.Ordinal))
-            throw Conflict(owner.Name, sectionType, "it does not start with the owner name and a dot", nameof(mapper));
+        if (!sectionType.StartsWith(owner + ".", StringComparison.Ordinal))
+            throw Conflict(owner, sectionType, "it does not start with the owner name and a dot", nameof(mapper));
 
         if (!_sectionTypes.Add(sectionType))
-            throw Conflict(owner.Name, sectionType, "it is already registered", nameof(mapper));
+            throw Conflict(owner, sectionType, "it is already registered", nameof(mapper));
 
         _modelTypes.Add(wrapper.ModelType);
         _mappers.Add(wrapper);

@@ -22,7 +22,7 @@ namespace Nodeheim.Persistence.Xml;
 /// <see cref="XmlWriter"/>, which flushes the output, and writes the final LF; it does not close the stream.
 /// </para>
 /// </remarks>
-public sealed class XmlDocumentWriter : IDocumentWriter
+internal sealed class XmlDocumentWriter : IDocumentWriter
 {
     private static readonly XmlWriterSettings WriterSettings = new()
     {

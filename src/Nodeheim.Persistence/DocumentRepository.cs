@@ -9,7 +9,7 @@ namespace Nodeheim.Persistence;
 /// Represents the coordinator that loads and saves documents through a document storage and the registered
 /// section mappers.
 /// </summary>
-public sealed class DocumentRepository : IDocumentRepository
+internal sealed class DocumentRepository : IDocumentRepository
 {
     private readonly IReadOnlyList<DocumentFormat> _formats;
     private readonly IDocumentStorage _storage;

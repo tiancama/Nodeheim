@@ -10,7 +10,7 @@ namespace Nodeheim.Persistence.Xml;
 /// <summary>
 /// Represents a parser for documents in XML.
 /// </summary>
-public sealed class XmlDocumentParser : IDocumentParser
+internal sealed class XmlDocumentParser : IDocumentParser
 {
     private static readonly SearchValues<char> XmlWhitespace = SearchValues.Create(" \t\n\r");
 

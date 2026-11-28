@@ -6,14 +6,14 @@ namespace Nodeheim.Persistence;
 /// Represents the registration of one owner, to which its sections are added.
 /// </summary>
 /// <remarks>
-/// Instances are created by <see cref="SectionMapperRegistry.Register(OwnerDescriptor)"/>.
+/// Instances are created by <see cref="SectionMapperRegistry.Register(string)"/>.
 /// </remarks>
-public sealed class OwnerRegistration
+internal sealed class OwnerRegistration
 {
     private readonly SectionMapperRegistry _registry;
-    private readonly OwnerDescriptor _owner;
+    private readonly string _owner;
 
-    internal OwnerRegistration(SectionMapperRegistry registry, OwnerDescriptor owner)
+    internal OwnerRegistration(SectionMapperRegistry registry, string owner)
     {
         _registry = registry;
         _owner = owner;

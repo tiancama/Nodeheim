@@ -18,7 +18,7 @@ namespace Nodeheim.Persistence.Json;
 /// writes the final LF, and releases its resources; it does not close the stream.
 /// </para>
 /// </remarks>
-public sealed class JsonDocumentWriter : IDocumentWriter
+internal sealed class JsonDocumentWriter : IDocumentWriter
 {
     private static readonly JsonWriterOptions WriterOptions = new()
     {

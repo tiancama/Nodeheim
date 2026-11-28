@@ -1,6 +1,7 @@
 ﻿using Nodeheim.Domain;
 using Nodeheim.Issues;
 using Nodeheim.Persistence.Documents;
+using Nodeheim.Persistence.Documents.Adapters;
 
 namespace Nodeheim.Persistence;
 
@@ -10,34 +11,36 @@ namespace Nodeheim.Persistence;
 /// </summary>
 public sealed class DocumentRepository : IDocumentRepository
 {
-    private readonly Func<string, IDocumentStorage> _storageFactory;
+    private readonly IReadOnlyList<DocumentFormat> _formats;
+    private readonly IDocumentStorage _storage;
     private readonly IReadOnlyList<ISectionMapper> _mappers;
     private readonly HashSet<string> _knownSectionTypes;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="DocumentRepository"/> class.
     /// </summary>
-    /// <param name="descriptors">The descriptions of the supported kinds of document storage.</param>
-    /// <param name="storageFactory">The function that creates the document storage for a location.</param>
+    /// <param name="formats">The document formats, in the order of registration.</param>
+    /// <param name="storage">The storage that reads and writes the bytes of documents.</param>
     /// <param name="sectionMappers">
     /// The registered section mappers; later registrations are not taken into account.
     /// </param>
     /// <exception cref="ArgumentNullException"><paramref name="sectionMappers"/> is <see langword="null"/>.</exception>
-    public DocumentRepository(IReadOnlyList<DocumentStorageDescriptor> descriptors,
-        Func<string, IDocumentStorage> storageFactory, SectionMapperRegistry sectionMappers)
+    public DocumentRepository(IReadOnlyList<DocumentFormat> formats, IDocumentStorage storage,
+        SectionMapperRegistry sectionMappers)
     {
         ArgumentNullException.ThrowIfNull(sectionMappers);
 
-        _storageFactory = storageFactory;
+        _formats = [.. formats];
+        _storage = storage;
         _mappers = [.. sectionMappers.Mappers];
         _knownSectionTypes = new HashSet<string>(
             _mappers.Select(mapper => mapper.SectionType.Name),
             StringComparer.Ordinal);
-        StorageDescriptors = [.. descriptors];
+        Formats = [.. _formats.Select(format => new DocumentFormatDescriptor(format.Name, format.FileExtensions))];
     }
 
     /// <inheritdoc />
-    public IReadOnlyList<DocumentStorageDescriptor> StorageDescriptors { get; }
+    public IReadOnlyList<DocumentFormatDescriptor> Formats { get; }
 
     /// <inheritdoc />
     /// <remarks>
@@ -46,8 +49,12 @@ public sealed class DocumentRepository : IDocumentRepository
     /// </remarks>
     public LoadedDocument? Load(string location, IIssueCollector issues)
     {
-        IDocumentStorage storage = _storageFactory(location);
-        DocumentEntry? root = storage.Load(issues);
+        DocumentFormat format = GetFormat(location);
+
+        byte[]? bytes = _storage.Read(location, issues);
+        if (bytes is null) return null;
+
+        DocumentEntry? root = format.Parser.Parse(bytes, issues);
         if (root is null) return null;
 
         Document? document = DocumentMapper.Read(root, issues);
@@ -88,6 +95,8 @@ public sealed class DocumentRepository : IDocumentRepository
         ArgumentNullException.ThrowIfNull(document);
         ArgumentNullException.ThrowIfNull(issues);
 
+        DocumentFormat format = GetFormat(location);
+
         List<DocumentSectionContribution> contributions = [];
         foreach (ISectionMapper mapper in _mappers)
         {
@@ -96,7 +105,18 @@ public sealed class DocumentRepository : IDocumentRepository
                 contributions.Add(mapper.Contribute(model));
         }
 
-        IDocumentStorage storage = _storageFactory(location);
-        storage.Save(writer => DocumentMapper.Write(writer, contributions), issues);
+        using MemoryStream buffer = new();
+        DocumentMapper.Write(format.CreateWriter(buffer), contributions);
+        _storage.Write(location, buffer.ToArray(), issues);
+    }
+
+    private DocumentFormat GetFormat(string location)
+    {
+        string extension = Path.GetExtension(location);
+
+        return _formats.FirstOrDefault(format =>
+                format.FileExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase))
+            ?? throw new ArgumentException(
+                $"No document format is registered for the file extension '{extension}'.", nameof(location));
     }
 }

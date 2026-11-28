@@ -8,9 +8,9 @@ namespace Nodeheim.Persistence;
 public interface IDocumentRepository
 {
     /// <summary>
-    /// Gets the descriptions of the supported kinds of document storage.
+    /// Gets the descriptions of the registered document formats, in the order of registration.
     /// </summary>
-    IReadOnlyList<DocumentStorageDescriptor> StorageDescriptors { get; }
+    IReadOnlyList<DocumentFormatDescriptor> Formats { get; }
 
     /// <summary>
     /// Loads the document at the specified location.
@@ -20,10 +20,14 @@ public interface IDocumentRepository
     /// <returns>
     /// The loaded document, or <see langword="null"/> if the document or one of its sections is rejected.
     /// </returns>
+    /// <exception cref="ArgumentException">
+    /// No document format is registered for the file extension of <paramref name="location"/>.
+    /// </exception>
     /// <remarks>
-    /// Sections of an unknown section type are skipped and reported as discrepancies. Each registered owner
-    /// contributes a model, an empty one if the document has none of its sections. <see langword="null"/> comes
-    /// with a rejection in <paramref name="issues"/>; a document never does.
+    /// The document format is chosen by the file extension of <paramref name="location"/>, ignoring case. Sections
+    /// of an unknown section type are skipped and reported as discrepancies. Each registered owner contributes a
+    /// model, an empty one if the document has none of its sections. <see langword="null"/> comes with a rejection
+    /// in <paramref name="issues"/>; a document never does.
     /// </remarks>
     LoadedDocument? Load(string location, IIssueCollector issues);
 
@@ -37,10 +41,13 @@ public interface IDocumentRepository
     /// <paramref name="location"/>, <paramref name="document"/>, or <paramref name="issues"/> is
     /// <see langword="null"/>.
     /// </exception>
+    /// <exception cref="ArgumentException">
+    /// No document format is registered for the file extension of <paramref name="location"/>.
+    /// </exception>
     /// <remarks>
     /// Each registered owner whose model is in <paramref name="document"/> contributes its sections. The document
-    /// is written in the format of the storage at <paramref name="location"/> and replaces the document stored
-    /// there.
+    /// format is chosen by the file extension of <paramref name="location"/>, ignoring case. The document replaces
+    /// the document stored there.
     /// </remarks>
     void Save(string location, LoadedDocument document, IIssueCollector issues);
 }

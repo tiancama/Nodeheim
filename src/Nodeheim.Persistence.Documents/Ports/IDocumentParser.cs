@@ -16,5 +16,10 @@ public interface IDocumentParser
     /// The root entry, or <see langword="null"/> if the document is rejected; the rejection is added to
     /// <paramref name="issues"/>.
     /// </returns>
+    /// <remarks>
+    /// An implementation checks the syntax of its document format and the rules of the document tree, not the
+    /// structure of the document. Format contract: An implementation whose syntax carries no name at the root uses
+    /// <see cref="DocumentEntry.RootName"/>.
+    /// </remarks>
     DocumentEntry? Parse(ReadOnlyMemory<byte> bytes, IIssueCollector issues);
 }
